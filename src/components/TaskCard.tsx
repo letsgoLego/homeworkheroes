@@ -1,9 +1,8 @@
 import { motion } from 'framer-motion';
-import { Check, Clock } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StudyTask, Homework } from '@/types/homework';
 import { SubjectBadge } from './ui/SubjectBadge';
-import { useHomeworkStore } from '@/stores/homeworkStore';
 import { celebrateTask, celebrateAssignment } from '@/lib/confetti';
 import { useState } from 'react';
 import { CompletionModal } from './CompletionModal';
@@ -11,27 +10,25 @@ import { CompletionModal } from './CompletionModal';
 interface TaskCardProps {
   task: StudyTask;
   homework: Homework;
+  onToggle: (taskId: string, completed: boolean) => Promise<{ allCompleted: boolean; homework: any }>;
 }
 
-export function TaskCard({ task, homework }: TaskCardProps) {
-  const { toggleTask } = useHomeworkStore();
+export function TaskCard({ task, homework, onToggle }: TaskCardProps) {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedHomework, setCompletedHomework] = useState<Homework | null>(null);
   
-  const handleToggle = () => {
-    if (task.completed) {
-      toggleTask(task.id);
-      return;
-    }
+  const handleToggle = async () => {
+    const newCompleted = !task.completed;
+    const result = await onToggle(task.id, newCompleted);
     
-    const result = toggleTask(task.id);
-    
-    if (result.allCompleted && result.homework) {
-      celebrateAssignment();
-      setCompletedHomework(result.homework);
-      setShowCompletionModal(true);
-    } else {
-      celebrateTask();
+    if (newCompleted) {
+      if (result.allCompleted && result.homework) {
+        celebrateAssignment();
+        setCompletedHomework(homework);
+        setShowCompletionModal(true);
+      } else {
+        celebrateTask();
+      }
     }
   };
   

@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Navigation } from '@/components/Navigation';
-import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
-import { useHomeworkStore } from '@/stores/homeworkStore';
-import { Users, Download, Smartphone } from 'lucide-react';
+import { useFamily } from '@/hooks/useFamily';
+import { useAuth } from '@/contexts/AuthContext';
+import { Users, Download, Smartphone, LogOut, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 export default function FamilyPage() {
   const [showAddChild, setShowAddChild] = useState(false);
-  const { children, homework } = useHomeworkStore();
+  const [copied, setCopied] = useState(false);
+  const { children, homework, family, loading } = useFamily();
+  const { signOut, user } = useAuth();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
   // Listen for install prompt
@@ -34,19 +37,66 @@ export default function FamilyPage() {
     }
   };
   
+  const handleCopyInviteCode = () => {
+    if (family?.invite_code) {
+      navigator.clipboard.writeText(family.invite_code);
+      setCopied(true);
+      toast.success('Invite code copied!');
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+  
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success('Signed out');
+  };
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+  
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Users className="w-6 h-6" />
-            Family
+            {family?.name || 'Family'}
           </h1>
+          <Button variant="ghost" size="icon" onClick={handleSignOut}>
+            <LogOut className="w-5 h-5" />
+          </Button>
         </div>
       </header>
       
       <main className="px-4 py-4 space-y-6">
+        {/* Invite Code */}
+        {family?.invite_code && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-2xl bg-secondary"
+          >
+            <p className="text-sm text-muted-foreground mb-2">Family Invite Code</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-2xl font-mono font-bold tracking-widest">
+                {family.invite_code.toUpperCase()}
+              </code>
+              <Button variant="outline" size="icon" onClick={handleCopyInviteCode}>
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Share this code with family members to join
+            </p>
+          </motion.div>
+        )}
+        
         {/* Install App Card */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -85,13 +135,12 @@ export default function FamilyPage() {
           
           <div className="space-y-3">
             {children.map((child) => {
-              const childHomework = homework.filter((hw) => hw.childId === child.id);
+              const childHomework = homework.filter((hw) => hw.child_id === child.id);
               const activeCount = childHomework.filter((hw) => !hw.completed).length;
+              const today = format(new Date(), 'yyyy-MM-dd');
               const todayTasks = childHomework.flatMap((hw) =>
                 hw.tasks.filter(
-                  (t) =>
-                    t.date === new Date().toISOString().split('T')[0] &&
-                    !t.completed
+                  (t) => t.task_date === today && !t.completed
                 )
               );
               
@@ -136,15 +185,18 @@ export default function FamilyPage() {
           </div>
         </section>
         
-        {/* Sync info */}
+        {/* Account info */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="p-4 rounded-2xl bg-muted text-center"
+          className="p-4 rounded-2xl bg-muted"
         >
           <p className="text-sm text-muted-foreground">
-            💡 To sync between devices, connect Lovable Cloud
+            Signed in as <span className="font-medium text-foreground">{user?.email}</span>
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            ✨ Data syncs automatically across all devices
           </p>
         </motion.div>
       </main>

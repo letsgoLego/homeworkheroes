@@ -1,30 +1,37 @@
 import { motion } from 'framer-motion';
 import { format, startOfWeek, addDays, isSameDay, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useHomeworkStore } from '@/stores/homeworkStore';
-import { StudyTask, Homework } from '@/types/homework';
 import { SubjectBadge } from './ui/SubjectBadge';
+import type { Tables } from '@/integrations/supabase/types';
+import { Subject } from '@/types/homework';
+
+type Homework = Tables<'homework'>;
+type StudyTask = Tables<'study_tasks'>;
+
+interface HomeworkWithTasks extends Homework {
+  tasks: StudyTask[];
+}
 
 interface WeekViewProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
+  homework: HomeworkWithTasks[];
+  activeChildId: string | null;
 }
 
-export function WeekView({ selectedDate, onSelectDate }: WeekViewProps) {
-  const { homework, activeChildId } = useHomeworkStore();
-  
+export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }: WeekViewProps) {
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   
-  const getTasksForDay = (date: Date): { task: StudyTask; homework: Homework }[] => {
+  const getTasksForDay = (date: Date): { task: StudyTask; homework: HomeworkWithTasks }[] => {
     if (!activeChildId) return [];
     const dateStr = format(date, 'yyyy-MM-dd');
     
     return homework
-      .filter((hw) => hw.childId === activeChildId)
+      .filter((hw) => hw.child_id === activeChildId)
       .flatMap((hw) =>
         hw.tasks
-          .filter((t) => t.date === dateStr)
+          .filter((t) => t.task_date === dateStr)
           .map((task) => ({ task, homework: hw }))
       );
   };
@@ -116,7 +123,7 @@ export function WeekView({ selectedDate, onSelectDate }: WeekViewProps) {
                   : 'bg-card shadow-soft'
               )}
             >
-              <SubjectBadge subject={hw.subject} size="sm" showLabel={false} />
+              <SubjectBadge subject={hw.subject as Subject} size="sm" showLabel={false} />
               <div className="flex-1 min-w-0">
                 <p
                   className={cn(

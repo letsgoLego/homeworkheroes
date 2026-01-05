@@ -4,20 +4,29 @@ import { Navigation } from '@/components/Navigation';
 import { AddHomework } from '@/components/AddHomework';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
-import { useHomeworkStore } from '@/stores/homeworkStore';
+import { useFamily } from '@/hooks/useFamily';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
 import { Plus, Calendar, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { Subject } from '@/types/homework';
 
 export default function AddPage() {
   const [showAddHomework, setShowAddHomework] = useState(false);
   const [showAddChild, setShowAddChild] = useState(false);
-  const { homework, activeChildId, deleteHomework } = useHomeworkStore();
+  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading } = useFamily();
   
-  const childHomework = homework.filter((hw) => hw.childId === activeChildId);
+  const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
   const activeHomework = childHomework.filter((hw) => !hw.completed);
   const completedHomework = childHomework.filter((hw) => hw.completed);
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -29,7 +38,12 @@ export default function AddPage() {
         
         {/* Child switcher */}
         <div className="px-4 pb-3">
-          <ChildSwitcher onAddChild={() => setShowAddChild(true)} />
+          <ChildSwitcher 
+            children={children}
+            activeChildId={activeChildId}
+            onSelectChild={setActiveChildId}
+            onAddChild={() => setShowAddChild(true)} 
+          />
         </div>
       </header>
       
@@ -66,7 +80,7 @@ export default function AddPage() {
                   className="p-4 rounded-2xl bg-card shadow-card"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <SubjectBadge subject={hw.subject} size="sm" />
+                    <SubjectBadge subject={hw.subject as Subject} size="sm" />
                     <button
                       onClick={() => deleteHomework(hw.id)}
                       className="p-1 text-muted-foreground hover:text-destructive transition-colors"
@@ -79,7 +93,7 @@ export default function AddPage() {
                   
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                     <Calendar className="w-4 h-4" />
-                    <span>Due {format(parseISO(hw.dueDate), 'EEE, MMM d')}</span>
+                    <span>Due {format(new Date(hw.due_date), 'EEE, MMM d')}</span>
                   </div>
                   
                   {hw.description && (
@@ -105,9 +119,9 @@ export default function AddPage() {
                       </span>
                     </div>
                     
-                    {hw.bringToSchool && hw.bringToSchool.length > 0 && (
+                    {hw.bring_to_school && hw.bring_to_school.length > 0 && (
                       <span className="text-xs text-accent">
-                        🎒 {hw.bringToSchool.length} items
+                        🎒 {hw.bring_to_school.length} items
                       </span>
                     )}
                   </div>
@@ -132,10 +146,10 @@ export default function AddPage() {
                   animate={{ opacity: 1 }}
                   className="p-3 rounded-xl bg-success/10 flex items-center gap-3"
                 >
-                  <SubjectBadge subject={hw.subject} size="sm" showLabel={false} />
+                  <SubjectBadge subject={hw.subject as Subject} size="sm" showLabel={false} />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{hw.title}</p>
-                    {hw.needsMorePractice && (
+                    {hw.needs_more_practice && (
                       <p className="text-xs text-accent">📖 Practice scheduled</p>
                     )}
                   </div>
