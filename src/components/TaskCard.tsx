@@ -1,0 +1,109 @@
+import { motion } from 'framer-motion';
+import { Check, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { StudyTask, Homework } from '@/types/homework';
+import { SubjectBadge } from './ui/SubjectBadge';
+import { useHomeworkStore } from '@/stores/homeworkStore';
+import { celebrateTask, celebrateAssignment } from '@/lib/confetti';
+import { useState } from 'react';
+import { CompletionModal } from './CompletionModal';
+
+interface TaskCardProps {
+  task: StudyTask;
+  homework: Homework;
+}
+
+export function TaskCard({ task, homework }: TaskCardProps) {
+  const { toggleTask } = useHomeworkStore();
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [completedHomework, setCompletedHomework] = useState<Homework | null>(null);
+  
+  const handleToggle = () => {
+    if (task.completed) {
+      toggleTask(task.id);
+      return;
+    }
+    
+    const result = toggleTask(task.id);
+    
+    if (result.allCompleted && result.homework) {
+      celebrateAssignment();
+      setCompletedHomework(result.homework);
+      setShowCompletionModal(true);
+    } else {
+      celebrateTask();
+    }
+  };
+  
+  return (
+    <>
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        whileTap={{ scale: 0.98 }}
+        className={cn(
+          'group relative overflow-hidden rounded-2xl p-4 shadow-card transition-all duration-200',
+          task.completed
+            ? 'bg-success/10 border-2 border-success/30'
+            : 'bg-card border-2 border-transparent hover:border-primary/20'
+        )}
+      >
+        <div className="flex items-start gap-4">
+          <button
+            onClick={handleToggle}
+            className={cn(
+              'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200',
+              task.completed
+                ? 'bg-success border-success text-success-foreground'
+                : 'border-muted-foreground/30 hover:border-primary hover:bg-primary/10'
+            )}
+          >
+            {task.completed && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              >
+                <Check className="h-5 w-5" />
+              </motion.div>
+            )}
+          </button>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <SubjectBadge subject={homework.subject} size="sm" />
+            </div>
+            <h3
+              className={cn(
+                'font-semibold text-lg transition-all',
+                task.completed && 'line-through text-muted-foreground'
+              )}
+            >
+              {task.title}
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {homework.title}
+            </p>
+          </div>
+        </div>
+        
+        {/* Completion glow effect */}
+        {task.completed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-gradient-to-r from-success/5 to-transparent pointer-events-none"
+          />
+        )}
+      </motion.div>
+      
+      <CompletionModal
+        open={showCompletionModal}
+        onClose={() => setShowCompletionModal(false)}
+        homework={completedHomework}
+      />
+    </>
+  );
+}
