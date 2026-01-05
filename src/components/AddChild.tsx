@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useHomeworkStore } from '@/stores/homeworkStore';
+import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -25,21 +25,26 @@ const colors = [
 ];
 
 export function AddChild({ open, onClose }: AddChildProps) {
-  const { addChild } = useHomeworkStore();
+  const { addChild } = useFamily();
   const [name, setName] = useState('');
   const [color, setColor] = useState(colors[0]);
+  const [loading, setLoading] = useState(false);
   
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!name.trim()) {
       toast.error("Please enter a name");
       return;
     }
     
-    addChild({ name: name.trim(), color });
-    toast.success(`Welcome, ${name}! 👋`);
-    setName('');
-    setColor(colors[0]);
-    onClose();
+    setLoading(true);
+    const result = await addChild(name.trim(), color);
+    setLoading(false);
+    
+    if (result) {
+      setName('');
+      setColor(colors[0]);
+      onClose();
+    }
   };
   
   return (
@@ -87,11 +92,11 @@ export function AddChild({ open, onClose }: AddChildProps) {
           
           <Button
             onClick={handleSubmit}
-            disabled={!name.trim()}
+            disabled={!name.trim() || loading}
             className="w-full"
             size="lg"
           >
-            Add Child
+            {loading ? 'Adding...' : 'Add Child'}
           </Button>
         </motion.div>
       </DialogContent>

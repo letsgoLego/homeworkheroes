@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Homework } from '@/types/homework';
 import { Trophy, Calendar, ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
-import { useHomeworkStore } from '@/stores/homeworkStore';
-import { addDays, format } from 'date-fns';
+import { useFamily } from '@/hooks/useFamily';
 
 interface CompletionModalProps {
   open: boolean;
@@ -15,7 +14,7 @@ interface CompletionModalProps {
 
 export function CompletionModal({ open, onClose, homework }: CompletionModalProps) {
   const [showScheduler, setShowScheduler] = useState(false);
-  const { scheduleMorePractice } = useHomeworkStore();
+  const { scheduleMorePractice } = useFamily();
   
   if (!homework) return null;
   
@@ -28,10 +27,8 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
     setShowScheduler(true);
   };
   
-  const handleSchedulePractice = (days: number[]) => {
-    const today = new Date();
-    const dates = days.map(d => format(addDays(today, d), 'yyyy-MM-dd'));
-    scheduleMorePractice(homework.id, dates);
+  const handleSchedulePractice = async (days: number[]) => {
+    await scheduleMorePractice(homework.id, days);
     onClose();
     setShowScheduler(false);
   };

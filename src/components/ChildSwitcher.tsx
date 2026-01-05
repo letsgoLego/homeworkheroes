@@ -1,22 +1,25 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { useHomeworkStore } from '@/stores/homeworkStore';
 import { Plus } from 'lucide-react';
+import type { Tables } from '@/integrations/supabase/types';
+
+type Child = Tables<'children'>;
 
 interface ChildSwitcherProps {
+  children: Child[];
+  activeChildId: string | null;
+  onSelectChild: (childId: string) => void;
   onAddChild: () => void;
 }
 
-export function ChildSwitcher({ onAddChild }: ChildSwitcherProps) {
-  const { children, activeChildId, setActiveChild } = useHomeworkStore();
-  
+export function ChildSwitcher({ children, activeChildId, onSelectChild, onAddChild }: ChildSwitcherProps) {
   return (
     <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4">
       {children.map((child) => (
         <motion.button
           key={child.id}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setActiveChild(child.id)}
+          onClick={() => onSelectChild(child.id)}
           className={cn(
             'flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all',
             activeChildId === child.id

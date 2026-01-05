@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS } from '@/types/homework';
-import { useHomeworkStore } from '@/stores/homeworkStore';
+import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, isBefore, parseISO, startOfDay, isSameDay } from 'date-fns';
 import { Plus, X, Calendar, ArrowRight } from 'lucide-react';
@@ -20,8 +20,9 @@ interface AddHomeworkProps {
 const subjects: Subject[] = ['math', 'science', 'language', 'history', 'art', 'music', 'sports', 'other'];
 
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
-  const { addHomework, addTask, activeChildId } = useHomeworkStore();
+  const { addHomework, addTask, activeChildId } = useFamily();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState<Subject>('other');
@@ -92,7 +93,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setTasks(tasks.filter((_, i) => i !== index));
   };
   
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!activeChildId) {
       toast.error("Please select a child first");
       return;
@@ -103,7 +104,9 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       return;
     }
     
-    const homework = addHomework({
+    setLoading(true);
+    
+    const homework = await addHomework({
       title: title.trim(),
       subject,
       description: description.trim() || undefined,
@@ -112,14 +115,14 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       bringToSchool: bringItems.length > 0 ? bringItems : undefined,
     });
     
-    tasks.forEach((task) => {
-      addTask(homework.id, {
-        title: task.title,
-        date: task.date,
-      });
-    });
+    if (homework) {
+      // Add tasks
+      for (const task of tasks) {
+        await addTask(homework.id, task.title, task.date);
+      }
+    }
     
-    toast.success("Homework added! 📚");
+    setLoading(false);
     handleClose();
   };
   
@@ -332,9 +335,10 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 </Button>
                 <Button
                   onClick={handleSubmit}
+                  disabled={loading}
                   className="flex-1"
                 >
-                  {tasks.length > 0 ? 'Save Homework' : 'Save Without Tasks'}
+                  {loading ? 'Saving...' : tasks.length > 0 ? 'Save Homework' : 'Save Without Tasks'}
                 </Button>
               </div>
             </motion.div>

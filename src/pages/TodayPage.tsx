@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
-import { useHomeworkStore } from '@/stores/homeworkStore';
+import { useFamily } from '@/hooks/useFamily';
+import { useAuth } from '@/contexts/AuthContext';
 import { TaskCard } from '@/components/TaskCard';
 import { BringToSchool } from '@/components/BringToSchool';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
@@ -9,41 +10,50 @@ import { AddChild } from '@/components/AddChild';
 import { Navigation } from '@/components/Navigation';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
 import { CalendarClock, Sun } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Subject } from '@/types/homework';
 
 export default function TodayPage() {
+  const navigate = useNavigate();
   const [showAddChild, setShowAddChild] = useState(false);
   const {
     homework,
-    activeChildId,
     children,
+    activeChildId,
+    setActiveChildId,
+    loading,
     getTasksForDate,
     getItemsToBringForDate,
-    getUpcomingDueDates,
-  } = useHomeworkStore();
+    toggleTask,
+  } = useFamily();
   
   const today = new Date();
   const activeChild = children.find((c) => c.id === activeChildId);
   
-  const todayTasks = activeChildId
-    ? homework
-        .filter((hw) => hw.childId === activeChildId)
-        .flatMap((hw) =>
-          hw.tasks
-            .filter((t) => t.date === format(today, 'yyyy-MM-dd'))
-            .map((task) => ({ task, homework: hw }))
-        )
-    : [];
+  // Redirect to onboarding if no family
+  if (!loading && children.length === 0) {
+    navigate('/onboarding');
+    return null;
+  }
   
-  const itemsToBring = activeChildId
-    ? getItemsToBringForDate(activeChildId, today)
-    : [];
+  const todayTasks = activeChildId ? getTasksForDate(activeChildId, today) : [];
+  const itemsToBring = activeChildId ? getItemsToBringForDate(activeChildId, today) : [];
   
-  const upcomingHomework = activeChildId
-    ? getUpcomingDueDates(activeChildId).slice(0, 3)
-    : [];
+  const upcomingHomework = homework
+    .filter(hw => hw.child_id === activeChildId && !hw.completed)
+    .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
+    .slice(0, 3);
   
   const incompleteTasks = todayTasks.filter((t) => !t.task.completed);
   const completedTasks = todayTasks.filter((t) => t.task.completed);
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -63,13 +73,31 @@ export default function TodayPage() {
         
         {/* Child switcher */}
         <div className="px-4 pb-3">
-          <ChildSwitcher onAddChild={() => setShowAddChild(true)} />
+          <ChildSwitcher 
+            children={children}
+            activeChildId={activeChildId}
+            onSelectChild={setActiveChildId}
+            onAddChild={() => setShowAddChild(true)} 
+          />
         </div>
       </header>
       
       <main className="px-4 py-4 space-y-6">
         {/* Items to bring */}
-        <BringToSchool items={itemsToBring} />
+        <BringToSchool items={itemsToBring.map(item => ({
+          homework: {
+            ...item.homework,
+            id: item.homework.id,
+            title: item.homework.title,
+            subject: item.homework.subject as Subject,
+            dueDate: item.homework.due_date,
+            childId: item.homework.child_id,
+            createdAt: item.homework.created_at,
+            tasks: [],
+            completed: item.homework.completed,
+          },
+          items: item.items as string[],
+        }))} />
         
         {/* Today's tasks */}
         <section>
@@ -105,7 +133,34 @@ export default function TodayPage() {
             ) : (
               <div className="space-y-3">
                 {incompleteTasks.map(({ task, homework: hw }) => (
-                  <TaskCard key={task.id} task={task} homework={hw} />
+                  <TaskCard 
+                    key={task.id} 
+                    task={{
+                      id: task.id,
+                      homeworkId: task.homework_id,
+                      title: task.title,
+                      date: task.task_date,
+                      completed: task.completed,
+                      completedAt: task.completed_at || undefined,
+                    }}
+                    homework={{
+                      id: hw.id,
+                      title: hw.title,
+                      subject: hw.subject as Subject,
+                      dueDate: hw.due_date,
+                      childId: hw.child_id,
+                      createdAt: hw.created_at,
+                      tasks: hw.tasks.map(t => ({
+                        id: t.id,
+                        homeworkId: t.homework_id,
+                        title: t.title,
+                        date: t.task_date,
+                        completed: t.completed,
+                      })),
+                      completed: hw.completed,
+                    }}
+                    onToggle={toggleTask}
+                  />
                 ))}
                 
                 {completedTasks.length > 0 && (
@@ -118,7 +173,34 @@ export default function TodayPage() {
                       <div className="h-px flex-1 bg-border" />
                     </div>
                     {completedTasks.map(({ task, homework: hw }) => (
-                      <TaskCard key={task.id} task={task} homework={hw} />
+                      <TaskCard 
+                        key={task.id} 
+                        task={{
+                          id: task.id,
+                          homeworkId: task.homework_id,
+                          title: task.title,
+                          date: task.task_date,
+                          completed: task.completed,
+                          completedAt: task.completed_at || undefined,
+                        }}
+                        homework={{
+                          id: hw.id,
+                          title: hw.title,
+                          subject: hw.subject as Subject,
+                          dueDate: hw.due_date,
+                          childId: hw.child_id,
+                          createdAt: hw.created_at,
+                          tasks: hw.tasks.map(t => ({
+                            id: t.id,
+                            homeworkId: t.homework_id,
+                            title: t.title,
+                            date: t.task_date,
+                            completed: t.completed,
+                          })),
+                          completed: hw.completed,
+                        }}
+                        onToggle={toggleTask}
+                      />
                     ))}
                   </>
                 )}
@@ -145,11 +227,11 @@ export default function TodayPage() {
                   animate={{ opacity: 1, x: 0 }}
                   className="flex items-center gap-3 p-3 rounded-xl bg-card shadow-soft"
                 >
-                  <SubjectBadge subject={hw.subject} size="sm" showLabel={false} />
+                  <SubjectBadge subject={hw.subject as Subject} size="sm" showLabel={false} />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{hw.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      Due {format(new Date(hw.dueDate), 'EEE, MMM d')}
+                      Due {format(new Date(hw.due_date), 'EEE, MMM d')}
                     </p>
                   </div>
                   <div className="text-xs text-muted-foreground">

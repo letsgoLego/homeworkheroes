@@ -7,10 +7,12 @@ import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
+import { useFamily } from '@/hooks/useFamily';
 
 export default function WeekPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const { children, activeChildId, setActiveChildId, homework, loading } = useFamily();
   
   const handlePrevWeek = () => {
     setSelectedDate(subWeeks(selectedDate, 1));
@@ -23,6 +25,14 @@ export default function WeekPage() {
   const handleToday = () => {
     setSelectedDate(new Date());
   };
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -57,12 +67,22 @@ export default function WeekPage() {
         
         {/* Child switcher */}
         <div className="px-4 pb-3">
-          <ChildSwitcher onAddChild={() => setShowAddChild(true)} />
+          <ChildSwitcher 
+            children={children}
+            activeChildId={activeChildId}
+            onSelectChild={setActiveChildId}
+            onAddChild={() => setShowAddChild(true)} 
+          />
         </div>
       </header>
       
       <main className="px-4 py-4">
-        <WeekView selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+        <WeekView 
+          selectedDate={selectedDate} 
+          onSelectDate={setSelectedDate}
+          homework={homework}
+          activeChildId={activeChildId}
+        />
       </main>
       
       <Navigation />
