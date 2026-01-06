@@ -31,13 +31,20 @@ export function useFamily() {
     
     try {
       // Get user's family via user_roles
-      const { data: roles } = await supabase
+      const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('family_id')
         .eq('user_id', user.id)
+        .not('family_id', 'is', null)
         .limit(1);
       
-      if (!roles || roles.length === 0) {
+      if (rolesError) {
+        console.error('Error fetching roles:', rolesError);
+        setLoading(false);
+        return;
+      }
+      
+      if (!roles || roles.length === 0 || !roles[0].family_id) {
         setLoading(false);
         return;
       }
@@ -45,20 +52,28 @@ export function useFamily() {
       const familyId = roles[0].family_id;
       
       // Get family
-      const { data: familyData } = await supabase
+      const { data: familyData, error: familyError } = await supabase
         .from('families')
         .select('*')
         .eq('id', familyId)
-        .single();
+        .maybeSingle();
+      
+      if (familyError) {
+        console.error('Error fetching family:', familyError);
+      }
       
       if (familyData) setFamily(familyData);
       
       // Get children
-      const { data: childrenData } = await supabase
+      const { data: childrenData, error: childrenError } = await supabase
         .from('children')
         .select('*')
         .eq('family_id', familyId)
         .order('created_at');
+      
+      if (childrenError) {
+        console.error('Error fetching children:', childrenError);
+      }
       
       if (childrenData) {
         setChildren(childrenData);
@@ -68,24 +83,37 @@ export function useFamily() {
       }
       
       // Get homework with tasks
-      const { data: homeworkData } = await supabase
-        .from('homework')
-        .select('*')
-        .in('child_id', childrenData?.map(c => c.id) || []);
-      
-      if (homeworkData) {
-        // Get all tasks for these homework items
-        const { data: tasksData } = await supabase
-          .from('study_tasks')
+      const childIds = childrenData?.map(c => c.id) || [];
+      if (childIds.length > 0) {
+        const { data: homeworkData, error: homeworkError } = await supabase
+          .from('homework')
           .select('*')
-          .in('homework_id', homeworkData.map(h => h.id));
+          .in('child_id', childIds);
         
-        const homeworkWithTasks: HomeworkWithTasks[] = homeworkData.map(hw => ({
-          ...hw,
-          tasks: tasksData?.filter(t => t.homework_id === hw.id) || [],
-        }));
+        if (homeworkError) {
+          console.error('Error fetching homework:', homeworkError);
+        }
         
-        setHomework(homeworkWithTasks);
+        if (homeworkData && homeworkData.length > 0) {
+          // Get all tasks for these homework items
+          const { data: tasksData, error: tasksError } = await supabase
+            .from('study_tasks')
+            .select('*')
+            .in('homework_id', homeworkData.map(h => h.id));
+          
+          if (tasksError) {
+            console.error('Error fetching tasks:', tasksError);
+          }
+          
+          const homeworkWithTasks: HomeworkWithTasks[] = homeworkData.map(hw => ({
+            ...hw,
+            tasks: tasksData?.filter(t => t.homework_id === hw.id) || [],
+          }));
+          
+          setHomework(homeworkWithTasks);
+        } else {
+          setHomework([]);
+        }
       }
     } catch (err) {
       console.error('Error fetching family data:', err);
@@ -137,11 +165,11 @@ export function useFamily() {
       .single();
     
     if (error) {
-      toast.error('Failed to add child');
+      toast.error('Kunde inte lägga till barn');
       return null;
     }
     
-    toast.success(`${name} added! 👋`);
+    toast.success(`${name} tillagt! 👋`);
     return data;
   };
   
@@ -168,11 +196,11 @@ export function useFamily() {
       .single();
     
     if (error) {
-      toast.error('Failed to add homework');
+      toast.error('Kunde inte lägga till läxa');
       return null;
     }
     
-    toast.success('Homework added! 📚');
+    toast.success('Läxa tillagd! 📚');
     return data;
   };
   
@@ -187,7 +215,7 @@ export function useFamily() {
       });
     
     if (error) {
-      toast.error('Failed to add task');
+      toast.error('Kunde inte lägga till uppgift');
       return false;
     }
     
@@ -207,7 +235,7 @@ export function useFamily() {
       .single();
     
     if (error) {
-      toast.error('Failed to update task');
+      toast.error('Kunde inte uppdatera uppgift');
       return { allCompleted: false, homework: null };
     }
     
@@ -238,11 +266,11 @@ export function useFamily() {
       .eq('id', id);
     
     if (error) {
-      toast.error('Failed to delete homework');
+      toast.error('Kunde inte ta bort läxa');
       return false;
     }
     
-    toast.success('Homework deleted');
+    toast.success('Läxa borttagen');
     return true;
   };
   
@@ -251,7 +279,7 @@ export function useFamily() {
     const today = new Date();
     const tasks = days.map((d, index) => ({
       homework_id: homeworkId,
-      title: `Practice session ${index + 1}`,
+      title: `Övningspass ${index + 1}`,
       task_date: format(addDays(today, d), 'yyyy-MM-dd'),
     }));
     
@@ -260,7 +288,7 @@ export function useFamily() {
       .insert(tasks);
     
     if (tasksError) {
-      toast.error('Failed to schedule practice');
+      toast.error('Kunde inte schemalägga övning');
       return false;
     }
     
@@ -273,7 +301,7 @@ export function useFamily() {
       })
       .eq('id', homeworkId);
     
-    toast.success('Practice sessions scheduled! 📖');
+    toast.success('Övningspass schemalagda! 📖');
     return true;
   };
   

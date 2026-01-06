@@ -29,7 +29,7 @@ export default function OnboardingPage() {
   
   const handleCreateFamily = async () => {
     if (!familyName.trim()) {
-      toast.error('Please enter a family name');
+      toast.error('Ange ett familjenamn');
       return;
     }
     
@@ -38,7 +38,7 @@ export default function OnboardingPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error('Please log in first');
+        toast.error('Logga in först');
         navigate('/auth');
         return;
       }
@@ -65,9 +65,10 @@ export default function OnboardingPage() {
       
       setFamilyId(family.id);
       setStep('children');
-      toast.success('Family created! Now add your children.');
+      toast.success('Familj skapad! Lägg nu till dina barn.');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to create family');
+      console.error('Error creating family:', err);
+      toast.error(err.message || 'Kunde inte skapa familj');
     } finally {
       setLoading(false);
     }
@@ -75,12 +76,12 @@ export default function OnboardingPage() {
   
   const handleAddChild = async () => {
     if (!childName.trim()) {
-      toast.error('Please enter a name');
+      toast.error('Ange ett namn');
       return;
     }
     
     if (!familyId) {
-      toast.error('Family not found');
+      toast.error('Familj hittades inte');
       return;
     }
     
@@ -100,9 +101,10 @@ export default function OnboardingPage() {
       setAddedChildren([...addedChildren, { name: childName.trim(), color: childColor }]);
       setChildName('');
       setChildColor(colors[(addedChildren.length + 1) % colors.length]);
-      toast.success(`${childName} added! 🎉`);
+      toast.success(`${childName} tillagt! 🎉`);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to add child');
+      console.error('Error adding child:', err);
+      toast.error(err.message || 'Kunde inte lägga till barn');
     } finally {
       setLoading(false);
     }
@@ -110,10 +112,10 @@ export default function OnboardingPage() {
   
   const handleFinish = () => {
     if (addedChildren.length === 0) {
-      toast.error('Please add at least one child');
+      toast.error('Lägg till minst ett barn');
       return;
     }
-    toast.success('All set! Let\'s start tracking homework! 📚');
+    toast.success('Allt klart! Nu börjar vi hålla koll på läxorna! 📚');
     navigate('/');
   };
   
@@ -132,9 +134,9 @@ export default function OnboardingPage() {
               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold mb-2">Create Your Family</h1>
+              <h1 className="text-2xl font-bold mb-2">Skapa din familj</h1>
               <p className="text-muted-foreground">
-                Give your family a fun name!
+                Ge din familj ett roligt namn!
               </p>
             </div>
             
@@ -142,7 +144,7 @@ export default function OnboardingPage() {
               <Input
                 value={familyName}
                 onChange={(e) => setFamilyName(e.target.value)}
-                placeholder="e.g., The Johnsons"
+                placeholder="t.ex. Familjen Svensson"
                 className="text-center text-lg h-14"
               />
               
@@ -151,7 +153,7 @@ export default function OnboardingPage() {
                 disabled={loading || !familyName.trim()}
                 className="w-full h-12 text-lg shadow-glow-primary"
               >
-                Continue
+                Fortsätt
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
@@ -159,9 +161,9 @@ export default function OnboardingPage() {
         ) : (
           <>
             <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold mb-2">Add Children</h1>
+              <h1 className="text-2xl font-bold mb-2">Lägg till barn</h1>
               <p className="text-muted-foreground">
-                Who's doing homework?
+                Vilka ska göra läxor?
               </p>
             </div>
             
@@ -185,7 +187,7 @@ export default function OnboardingPage() {
               <Input
                 value={childName}
                 onChange={(e) => setChildName(e.target.value)}
-                placeholder="Child's name"
+                placeholder="Barnets namn"
                 className="text-center"
               />
               
@@ -210,7 +212,7 @@ export default function OnboardingPage() {
                 className="w-full"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Child
+                Lägg till barn
               </Button>
             </div>
             
@@ -219,7 +221,7 @@ export default function OnboardingPage() {
               disabled={addedChildren.length === 0}
               className="w-full h-12 text-lg shadow-glow-primary"
             >
-              Start Using HomeWork Hero
+              Börja använda Läxhjälpen
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </>

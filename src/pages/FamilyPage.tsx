@@ -29,11 +29,11 @@ export default function FamilyPage() {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        toast.success('App installed! 🎉');
+        toast.success('Appen installerad! 🎉');
       }
       setDeferredPrompt(null);
     } else {
-      toast.info('To install: tap the share button and "Add to Home Screen"');
+      toast.info('För att installera: tryck på delningsknappen och "Lägg till på hemskärmen"');
     }
   };
   
@@ -41,14 +41,14 @@ export default function FamilyPage() {
     if (family?.invite_code) {
       navigator.clipboard.writeText(family.invite_code);
       setCopied(true);
-      toast.success('Invite code copied!');
+      toast.success('Inbjudningskod kopierad!');
       setTimeout(() => setCopied(false), 2000);
     }
   };
   
   const handleSignOut = async () => {
     await signOut();
-    toast.success('Signed out');
+    toast.success('Utloggad');
   };
   
   if (loading) {
@@ -66,7 +66,7 @@ export default function FamilyPage() {
         <div className="px-4 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Users className="w-6 h-6" />
-            {family?.name || 'Family'}
+            {family?.name || 'Familj'}
           </h1>
           <Button variant="ghost" size="icon" onClick={handleSignOut}>
             <LogOut className="w-5 h-5" />
@@ -82,7 +82,7 @@ export default function FamilyPage() {
             animate={{ opacity: 1, y: 0 }}
             className="p-4 rounded-2xl bg-secondary"
           >
-            <p className="text-sm text-muted-foreground mb-2">Family Invite Code</p>
+            <p className="text-sm text-muted-foreground mb-2">Familjens inbjudningskod</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 text-2xl font-mono font-bold tracking-widest">
                 {family.invite_code.toUpperCase()}
@@ -92,7 +92,7 @@ export default function FamilyPage() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Share this code with family members to join
+              Dela denna kod med familjemedlemmar för att bjuda in dem
             </p>
           </motion.div>
         )}
@@ -108,28 +108,28 @@ export default function FamilyPage() {
               <Smartphone className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-bold">Install HomeWork Hero</h3>
+              <h3 className="font-bold">Installera Läxhjälpen</h3>
               <p className="text-sm text-muted-foreground">
-                Add to your home screen for quick access
+                Lägg till på hemskärmen för snabb åtkomst
               </p>
             </div>
           </div>
           <Button onClick={handleInstall} className="w-full" variant="outline">
             <Download className="w-4 h-4 mr-2" />
-            Install App
+            Installera app
           </Button>
         </motion.div>
         
         {/* Children list */}
         <section>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold">Children</h2>
+            <h2 className="text-lg font-bold">Barn</h2>
             <Button
               onClick={() => setShowAddChild(true)}
               variant="ghost"
               size="sm"
             >
-              + Add
+              + Lägg till
             </Button>
           </div>
           
@@ -161,7 +161,7 @@ export default function FamilyPage() {
                     <div className="flex-1">
                       <h3 className="font-bold text-lg">{child.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {activeCount} active homework
+                        {activeCount} aktiva läxor
                       </p>
                     </div>
                   </div>
@@ -169,13 +169,13 @@ export default function FamilyPage() {
                   {todayTasks.length > 0 ? (
                     <div className="p-3 rounded-xl bg-accent/20">
                       <p className="text-sm font-medium">
-                        📝 {todayTasks.length} tasks for today
+                        📝 {todayTasks.length} uppgifter idag
                       </p>
                     </div>
                   ) : (
                     <div className="p-3 rounded-xl bg-success/10">
                       <p className="text-sm font-medium text-success">
-                        ✓ All done for today!
+                        ✓ Allt klart för idag!
                       </p>
                     </div>
                   )}
@@ -193,10 +193,10 @@ export default function FamilyPage() {
           className="p-4 rounded-2xl bg-muted"
         >
           <p className="text-sm text-muted-foreground">
-            Signed in as <span className="font-medium text-foreground">{user?.email}</span>
+            Inloggad som <span className="font-medium text-foreground">{user?.email}</span>
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            ✨ Data syncs automatically across all devices
+            ✨ Data synkas automatiskt mellan alla enheter
           </p>
         </motion.div>
       </main>

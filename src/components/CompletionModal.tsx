@@ -64,7 +64,7 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
                 transition={{ delay: 0.3 }}
                 className="text-2xl font-bold mb-2"
               >
-                Amazing Job! 🎉
+                Fantastiskt! 🎉
               </motion.h2>
               
               <motion.p
@@ -73,7 +73,7 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
                 transition={{ delay: 0.4 }}
                 className="text-muted-foreground mb-6"
               >
-                You completed <span className="font-semibold text-foreground">{homework.title}</span>!
+                Du har gjort klart <span className="font-semibold text-foreground">{homework.title}</span>!
               </motion.p>
               
               <motion.p
@@ -82,7 +82,7 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
                 transition={{ delay: 0.5 }}
                 className="text-lg font-medium mb-6"
               >
-                Do you know it all, or should we practice more?
+                Kan du allt, eller ska vi öva mer?
               </motion.p>
               
               <motion.div
@@ -97,7 +97,7 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
                   size="lg"
                 >
                   <ThumbsUp className="w-5 h-5 mr-2" />
-                  I Know It All!
+                  Jag kan allt!
                 </Button>
                 <Button
                   onClick={handleNeedPractice}
@@ -106,7 +106,7 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
                   size="lg"
                 >
                   <Calendar className="w-5 h-5 mr-2" />
-                  Practice More
+                  Öva mer
                 </Button>
               </motion.div>
             </motion.div>
@@ -119,10 +119,10 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
               className="py-6"
             >
               <h2 className="text-xl font-bold mb-4 text-center">
-                Schedule Practice Sessions
+                Schemalägg övning
               </h2>
               <p className="text-muted-foreground text-center mb-6">
-                When would you like to practice again?
+                När vill du öva igen?
               </p>
               
               <div className="flex flex-col gap-3">
@@ -133,8 +133,8 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
                 >
                   <Calendar className="w-5 h-5 mr-3" />
                   <div>
-                    <div className="font-medium">Tomorrow</div>
-                    <div className="text-xs text-muted-foreground">Quick review</div>
+                    <div className="font-medium">Imorgon</div>
+                    <div className="text-xs text-muted-foreground">Snabb repetition</div>
                   </div>
                 </Button>
                 
@@ -145,8 +145,8 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
                 >
                   <Calendar className="w-5 h-5 mr-3" />
                   <div>
-                    <div className="font-medium">In 2 and 5 days</div>
-                    <div className="text-xs text-muted-foreground">Spaced repetition</div>
+                    <div className="font-medium">Om 2 och 5 dagar</div>
+                    <div className="text-xs text-muted-foreground">Fördelad repetition</div>
                   </div>
                 </Button>
                 
@@ -157,8 +157,8 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
                 >
                   <Calendar className="w-5 h-5 mr-3" />
                   <div>
-                    <div className="font-medium">1, 3, and 7 days</div>
-                    <div className="text-xs text-muted-foreground">Best for memorization</div>
+                    <div className="font-medium">1, 3 och 7 dagar</div>
+                    <div className="text-xs text-muted-foreground">Bäst för att memorera</div>
                   </div>
                 </Button>
               </div>
@@ -168,7 +168,7 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
                 variant="ghost"
                 className="w-full mt-4"
               >
-                Go Back
+                Gå tillbaka
               </Button>
             </motion.div>
           )}

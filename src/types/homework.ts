@@ -56,14 +56,14 @@ export interface Family {
 }
 
 export const SUBJECT_LABELS: Record<Subject, string> = {
-  math: 'Math',
-  science: 'Science',
-  language: 'Language',
-  history: 'History',
-  art: 'Art',
-  music: 'Music',
-  sports: 'Sports',
-  other: 'Other',
+  math: 'Matte',
+  science: 'NO',
+  language: 'Svenska',
+  history: 'SO',
+  art: 'Bild',
+  music: 'Musik',
+  sports: 'Idrott',
+  other: 'Övrigt',
 };
 
 export const SUBJECT_ICONS: Record<Subject, string> = {
