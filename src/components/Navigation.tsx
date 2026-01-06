@@ -4,10 +4,10 @@ import { Home, Calendar, Plus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { path: '/', icon: Home, label: 'Today' },
-  { path: '/week', icon: Calendar, label: 'Week' },
-  { path: '/add', icon: Plus, label: 'Add', isAction: true },
-  { path: '/family', icon: Users, label: 'Family' },
+  { path: '/', icon: Home, label: 'Idag' },
+  { path: '/week', icon: Calendar, label: 'Vecka' },
+  { path: '/add', icon: Plus, label: 'Lägg till', isAction: true },
+  { path: '/family', icon: Users, label: 'Familj' },
 ];
 
 export function Navigation() {

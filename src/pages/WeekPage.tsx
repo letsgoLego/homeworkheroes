@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { format, addWeeks, subWeeks } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { WeekView } from '@/components/WeekView';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
@@ -40,9 +41,9 @@ export default function WeekPage() {
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">Week View 📅</h1>
+            <h1 className="text-2xl font-bold">Veckoöversikt 📅</h1>
             <Button variant="outline" size="sm" onClick={handleToday}>
-              Today
+              Idag
             </Button>
           </div>
           
@@ -54,7 +55,7 @@ export default function WeekPage() {
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="font-medium">
-              {format(selectedDate, 'MMMM yyyy')}
+              {format(selectedDate, 'MMMM yyyy', { locale: sv })}
             </span>
             <button
               onClick={handleNextWeek}

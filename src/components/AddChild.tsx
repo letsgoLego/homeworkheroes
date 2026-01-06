@@ -32,7 +32,7 @@ export function AddChild({ open, onClose }: AddChildProps) {
   
   const handleSubmit = async () => {
     if (!name.trim()) {
-      toast.error("Please enter a name");
+      toast.error("Ange ett namn");
       return;
     }
     
@@ -51,7 +51,7 @@ export function AddChild({ open, onClose }: AddChildProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-sm border-0 shadow-elevated">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Add a Child</DialogTitle>
+          <DialogTitle className="text-xl font-bold">Lägg till ett barn</DialogTitle>
         </DialogHeader>
         
         <motion.div
@@ -61,20 +61,20 @@ export function AddChild({ open, onClose }: AddChildProps) {
         >
           <div>
             <Label htmlFor="childName" className="text-sm font-medium">
-              What's their name?
+              Vad heter barnet?
             </Label>
             <Input
               id="childName"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Emma"
+              placeholder="t.ex. Emma"
               className="mt-1.5"
               autoFocus
             />
           </div>
           
           <div>
-            <Label className="text-sm font-medium">Pick a color</Label>
+            <Label className="text-sm font-medium">Välj en färg</Label>
             <div className="flex flex-wrap gap-2 mt-1.5">
               {colors.map((c) => (
                 <button
@@ -96,7 +96,7 @@ export function AddChild({ open, onClose }: AddChildProps) {
             className="w-full"
             size="lg"
           >
-            {loading ? 'Adding...' : 'Add Child'}
+            {loading ? 'Lägger till...' : 'Lägg till barn'}
           </Button>
         </motion.div>
       </DialogContent>

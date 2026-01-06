@@ -19,12 +19,12 @@ export default function AuthPage() {
     e.preventDefault();
     
     if (!email || !password) {
-      toast.error('Please fill in all fields');
+      toast.error('Fyll i alla fält');
       return;
     }
     
     if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error('Lösenordet måste vara minst 6 tecken');
       return;
     }
     
@@ -39,14 +39,14 @@ export default function AuthPage() {
         
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            toast.error('Invalid email or password');
+            toast.error('Fel e-post eller lösenord');
           } else {
             toast.error(error.message);
           }
           return;
         }
         
-        toast.success('Welcome back! 👋');
+        toast.success('Välkommen tillbaka! 👋');
         navigate('/');
       } else {
         const { error } = await supabase.auth.signUp({
@@ -59,18 +59,18 @@ export default function AuthPage() {
         
         if (error) {
           if (error.message.includes('already registered')) {
-            toast.error('This email is already registered. Try logging in!');
+            toast.error('Den här e-posten är redan registrerad. Prova att logga in!');
           } else {
             toast.error(error.message);
           }
           return;
         }
         
-        toast.success('Account created! Welcome to HomeWork Hero! 🎉');
+        toast.success('Konto skapat! Välkommen till Läxhjälpen! 🎉');
         navigate('/onboarding');
       }
     } catch (err) {
-      toast.error('Something went wrong. Please try again.');
+      toast.error('Något gick fel. Försök igen.');
     } finally {
       setLoading(false);
     }
@@ -88,9 +88,9 @@ export default function AuthPage() {
           <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 shadow-glow-primary">
             <BookOpen className="w-10 h-10 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">HomeWork Hero</h1>
+          <h1 className="text-3xl font-bold mb-2">Läxhjälpen</h1>
           <p className="text-muted-foreground">
-            Track homework together as a family
+            Håll koll på läxorna tillsammans
           </p>
         </motion.div>
         
@@ -110,7 +110,7 @@ export default function AuthPage() {
                   : 'text-muted-foreground'
               }`}
             >
-              Log In
+              Logga in
             </button>
             <button
               onClick={() => setIsLogin(false)}
@@ -120,7 +120,7 @@ export default function AuthPage() {
                   : 'text-muted-foreground'
               }`}
             >
-              Sign Up
+              Skapa konto
             </button>
           </div>
           
@@ -128,7 +128,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email" className="text-sm font-medium">
-                Email
+                E-post
               </Label>
               <div className="relative mt-1.5">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -137,7 +137,7 @@ export default function AuthPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="du@exempel.se"
                   className="pl-10"
                 />
               </div>
@@ -145,7 +145,7 @@ export default function AuthPage() {
             
             <div>
               <Label htmlFor="password" className="text-sm font-medium">
-                Password
+                Lösenord
               </Label>
               <div className="relative mt-1.5">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -173,7 +173,7 @@ export default function AuthPage() {
                 />
               ) : (
                 <>
-                  {isLogin ? 'Log In' : 'Create Account'}
+                  {isLogin ? 'Logga in' : 'Skapa konto'}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
@@ -184,7 +184,7 @@ export default function AuthPage() {
       
       {/* Footer */}
       <div className="text-center pb-8 text-sm text-muted-foreground">
-        <p>Simple homework tracking for the whole family</p>
+        <p>Enkel läxhantering för hela familjen</p>
       </div>
     </div>
   );

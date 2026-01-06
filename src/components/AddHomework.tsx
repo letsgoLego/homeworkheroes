@@ -9,6 +9,7 @@ import { Subject, SUBJECT_LABELS, SUBJECT_ICONS } from '@/types/homework';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, isBefore, parseISO, startOfDay, isSameDay } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import { Plus, X, Calendar, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -74,13 +75,13 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     
     // Can't create tasks on due date
     if (isSameDay(taskDate, dueDateParsed)) {
-      toast.error("Can't schedule tasks on the due date!");
+      toast.error("Kan inte schemalägga uppgifter på inlämningsdagen!");
       return;
     }
     
     // Can't create tasks after due date
     if (isBefore(dueDateParsed, taskDate)) {
-      toast.error("Tasks must be before the due date!");
+      toast.error("Uppgifter måste vara före inlämningsdagen!");
       return;
     }
     
@@ -95,12 +96,12 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   
   const handleSubmit = async () => {
     if (!activeChildId) {
-      toast.error("Please select a child first");
+      toast.error("Välj ett barn först");
       return;
     }
     
     if (!title.trim() || !dueDate) {
-      toast.error("Please fill in all required fields");
+      toast.error("Fyll i alla obligatoriska fält");
       return;
     }
     
@@ -134,7 +135,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            {step === 1 ? 'New Homework' : 'Add Study Tasks'}
+            {step === 1 ? 'Ny läxa' : 'Lägg till uppgifter'}
           </DialogTitle>
         </DialogHeader>
         
@@ -150,20 +151,20 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               {/* Title */}
               <div>
                 <Label htmlFor="title" className="text-sm font-medium">
-                  What's the homework?
+                  Vad är läxan?
                 </Label>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Math Chapter 5"
+                  placeholder="t.ex. Matte kapitel 5"
                   className="mt-1.5"
                 />
               </div>
               
               {/* Subject */}
               <div>
-                <Label className="text-sm font-medium">Subject</Label>
+                <Label className="text-sm font-medium">Ämne</Label>
                 <div className="grid grid-cols-4 gap-2 mt-1.5">
                   {subjects.map((s) => (
                     <button
@@ -186,7 +187,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               {/* Due Date */}
               <div>
                 <Label htmlFor="dueDate" className="text-sm font-medium">
-                  When is it due?
+                  När ska den lämnas in?
                 </Label>
                 <Input
                   id="dueDate"
@@ -201,13 +202,13 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               {/* Description */}
               <div>
                 <Label htmlFor="description" className="text-sm font-medium">
-                  Notes (optional)
+                  Anteckningar (valfritt)
                 </Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Any extra details..."
+                  placeholder="Extra detaljer..."
                   className="mt-1.5 resize-none"
                   rows={2}
                 />
@@ -216,13 +217,13 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               {/* Bring to school */}
               <div>
                 <Label className="text-sm font-medium">
-                  What to bring to school?
+                  Vad ska tas med till skolan?
                 </Label>
                 <div className="flex gap-2 mt-1.5">
                   <Input
                     value={newItem}
                     onChange={(e) => setNewItem(e.target.value)}
-                    placeholder="e.g., Workbook"
+                    placeholder="t.ex. Arbetsbok"
                     onKeyDown={(e) => e.key === 'Enter' && addBringItem()}
                   />
                   <Button onClick={addBringItem} size="icon" variant="secondary">
@@ -252,7 +253,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 className="w-full"
                 size="lg"
               >
-                Next: Add Study Tasks
+                Nästa: Lägg till uppgifter
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </motion.div>
@@ -265,7 +266,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               className="space-y-4"
             >
               <p className="text-sm text-muted-foreground">
-                Break down your homework into smaller tasks. When do you want to work on it?
+                Dela upp din läxa i mindre uppgifter. När vill du jobba med den?
               </p>
               
               {/* Add task form */}
@@ -273,7 +274,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 <Input
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder="What will you do?"
+                  placeholder="Vad ska du göra?"
                 />
                 <div className="flex gap-2">
                   <Input
@@ -293,7 +294,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  📝 Tasks must be scheduled before the due date ({dueDate ? format(parseISO(dueDate), 'MMM d') : '...'})
+                  📝 Uppgifter måste schemaläggas före inlämningsdagen ({dueDate ? format(parseISO(dueDate), 'd MMM', { locale: sv }) : '...'})
                 </p>
               </div>
               
@@ -311,7 +312,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                         <p className="font-medium">{task.title}</p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {format(parseISO(task.date), 'EEE, MMM d')}
+                          {format(parseISO(task.date), 'EEE d MMM', { locale: sv })}
                         </p>
                       </div>
                       <button
@@ -331,14 +332,14 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   variant="outline"
                   className="flex-1"
                 >
-                  Back
+                  Tillbaka
                 </Button>
                 <Button
                   onClick={handleSubmit}
                   disabled={loading}
                   className="flex-1"
                 >
-                  {loading ? 'Saving...' : tasks.length > 0 ? 'Save Homework' : 'Save Without Tasks'}
+                  {loading ? 'Sparar...' : tasks.length > 0 ? 'Spara läxa' : 'Spara utan uppgifter'}
                 </Button>
               </div>
             </motion.div>

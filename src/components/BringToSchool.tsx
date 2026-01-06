@@ -20,7 +20,7 @@ export function BringToSchool({ items }: BringToSchoolProps) {
         <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
           <Backpack className="w-5 h-5 text-accent-foreground" />
         </div>
-        <h3 className="font-bold text-lg">Bring to School</h3>
+        <h3 className="font-bold text-lg">Ta med till skolan</h3>
       </div>
       
       <div className="space-y-3">

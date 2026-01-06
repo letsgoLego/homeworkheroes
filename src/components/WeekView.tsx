@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { format, startOfWeek, addDays, isSameDay, isToday } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { SubjectBadge } from './ui/SubjectBadge';
 import type { Tables } from '@/integrations/supabase/types';
@@ -62,7 +63,7 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
               )}
             >
               <span className="text-xs font-medium opacity-70">
-                {format(day, 'EEE')}
+                {format(day, 'EEE', { locale: sv })}
               </span>
               <span className="text-xl font-bold">
                 {format(day, 'd')}
@@ -106,8 +107,8 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
             animate={{ opacity: 1 }}
             className="text-center py-8 text-muted-foreground"
           >
-            <p className="text-lg">No tasks for this day! 🎉</p>
-            <p className="text-sm">Enjoy your free time!</p>
+            <p className="text-lg">Inga uppgifter den här dagen! 🎉</p>
+            <p className="text-sm">Njut av din lediga tid!</p>
           </motion.div>
         ) : (
           getTasksForDay(selectedDate).map(({ task, homework: hw }, index) => (

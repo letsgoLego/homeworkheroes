@@ -44,7 +44,7 @@ export function ChildSwitcher({ children, activeChildId, onSelectChild, onAddChi
         className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 whitespace-nowrap"
       >
         <Plus className="w-4 h-4" />
-        <span className="font-medium">Add Child</span>
+        <span className="font-medium">Lägg till barn</span>
       </motion.button>
     </div>
   );

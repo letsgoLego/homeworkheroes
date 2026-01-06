@@ -9,6 +9,7 @@ import { SubjectBadge } from '@/components/ui/SubjectBadge';
 import { Plus, Calendar, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import { Subject } from '@/types/homework';
 
 export default function AddPage() {
@@ -33,7 +34,7 @@ export default function AddPage() {
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
         <div className="px-4 py-4">
-          <h1 className="text-2xl font-bold mb-4">Homework 📚</h1>
+          <h1 className="text-2xl font-bold mb-4">Läxor 📚</h1>
         </div>
         
         {/* Child switcher */}
@@ -55,12 +56,12 @@ export default function AddPage() {
           size="lg"
         >
           <Plus className="w-5 h-5 mr-2" />
-          Add New Homework
+          Lägg till ny läxa
         </Button>
         
         {/* Active homework */}
         <section>
-          <h2 className="text-lg font-bold mb-3">Active ({activeHomework.length})</h2>
+          <h2 className="text-lg font-bold mb-3">Aktiva ({activeHomework.length})</h2>
           
           {activeHomework.length === 0 ? (
             <motion.div
@@ -68,7 +69,7 @@ export default function AddPage() {
               animate={{ opacity: 1 }}
               className="text-center py-8 text-muted-foreground"
             >
-              <p>No active homework! 🎉</p>
+              <p>Inga aktiva läxor! 🎉</p>
             </motion.div>
           ) : (
             <div className="space-y-3">
@@ -93,7 +94,7 @@ export default function AddPage() {
                   
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                     <Calendar className="w-4 h-4" />
-                    <span>Due {format(new Date(hw.due_date), 'EEE, MMM d')}</span>
+                    <span>Inlämning {format(new Date(hw.due_date), 'EEE d MMM', { locale: sv })}</span>
                   </div>
                   
                   {hw.description && (
@@ -115,13 +116,13 @@ export default function AddPage() {
                         />
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {hw.tasks.filter((t) => t.completed).length}/{hw.tasks.length} tasks
+                        {hw.tasks.filter((t) => t.completed).length}/{hw.tasks.length} uppgifter
                       </span>
                     </div>
                     
                     {hw.bring_to_school && hw.bring_to_school.length > 0 && (
                       <span className="text-xs text-accent">
-                        🎒 {hw.bring_to_school.length} items
+                        🎒 {hw.bring_to_school.length} saker
                       </span>
                     )}
                   </div>
@@ -135,7 +136,7 @@ export default function AddPage() {
         {completedHomework.length > 0 && (
           <section>
             <h2 className="text-lg font-bold mb-3 text-muted-foreground">
-              Completed ({completedHomework.length})
+              Klara ({completedHomework.length})
             </h2>
             
             <div className="space-y-2">
@@ -150,7 +151,7 @@ export default function AddPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{hw.title}</p>
                     {hw.needs_more_practice && (
-                      <p className="text-xs text-accent">📖 Practice scheduled</p>
+                      <p className="text-xs text-accent">📖 Övning schemalagd</p>
                     )}
                   </div>
                   <span className="text-success text-lg">✓</span>
