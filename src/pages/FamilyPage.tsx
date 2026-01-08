@@ -2,17 +2,22 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Navigation } from '@/components/Navigation';
 import { AddChild } from '@/components/AddChild';
+import { ManageChildAccount } from '@/components/ManageChildAccount';
 import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
-import { Users, Download, Smartphone, LogOut, Copy, Check } from 'lucide-react';
+import { Users, Download, Smartphone, LogOut, Copy, Check, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import type { Tables } from '@/integrations/supabase/types';
+
+type Child = Tables<'children'>;
 
 export default function FamilyPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [copied, setCopied] = useState(false);
-  const { children, homework, family, loading } = useFamily();
+  const [selectedChild, setSelectedChild] = useState<Child | null>(null);
+  const { children, homework, family, loading, refetch } = useFamily();
   const { signOut, user } = useAuth();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
@@ -162,8 +167,20 @@ export default function FamilyPage() {
                       <h3 className="font-bold text-lg">{child.name}</h3>
                       <p className="text-sm text-muted-foreground">
                         {activeCount} aktiva läxor
+                        {child.has_account && (
+                          <span className="ml-2 text-xs bg-success/20 text-success px-2 py-0.5 rounded-full">
+                            Har konto
+                          </span>
+                        )}
                       </p>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setSelectedChild(child)}
+                    >
+                      <Settings className="w-5 h-5" />
+                    </Button>
                   </div>
                   
                   {todayTasks.length > 0 ? (
@@ -203,6 +220,14 @@ export default function FamilyPage() {
       
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
+      {selectedChild && (
+        <ManageChildAccount
+          child={selectedChild}
+          open={!!selectedChild}
+          onClose={() => setSelectedChild(null)}
+          onUpdate={refetch}
+        />
+      )}
     </div>
   );
 }

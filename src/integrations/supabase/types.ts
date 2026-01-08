@@ -20,24 +20,30 @@ export type Database = {
           color: string
           created_at: string
           family_id: string
+          has_account: boolean | null
           id: string
           name: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
           color?: string
           created_at?: string
           family_id: string
+          has_account?: boolean | null
           id?: string
           name: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
           color?: string
           created_at?: string
           family_id?: string
+          has_account?: boolean | null
           id?: string
           name?: string
+          username?: string | null
         }
         Relationships: [
           {
