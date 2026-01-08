@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { BookOpen, Mail, Lock, ArrowRight } from 'lucide-react';
+import { BookOpen, Mail, Lock, ArrowRight, Users, User } from 'lucide-react';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -179,6 +179,39 @@ export default function AuthPage() {
               )}
             </Button>
           </form>
+
+          {/* Alternative actions */}
+          <div className="mt-6 space-y-3">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">eller</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/join-family')}
+                className="h-12"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Gå med i familj
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/child-login')}
+                className="h-12"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Barnkonto
+              </Button>
+            </div>
+          </div>
         </motion.div>
       </div>
       

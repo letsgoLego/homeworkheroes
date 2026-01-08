@@ -10,6 +10,8 @@ import AddPage from "./pages/AddPage";
 import FamilyPage from "./pages/FamilyPage";
 import AuthPage from "./pages/AuthPage";
 import OnboardingPage from "./pages/OnboardingPage";
+import JoinFamilyPage from "./pages/JoinFamilyPage";
+import ChildLoginPage from "./pages/ChildLoginPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +56,8 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
+      <Route path="/child-login" element={<PublicRoute><ChildLoginPage /></PublicRoute>} />
+      <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
       <Route path="/" element={<ProtectedRoute><TodayPage /></ProtectedRoute>} />
       <Route path="/week" element={<ProtectedRoute><WeekPage /></ProtectedRoute>} />
