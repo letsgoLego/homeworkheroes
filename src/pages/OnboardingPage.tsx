@@ -43,16 +43,23 @@ export default function OnboardingPage() {
         return;
       }
       
-      // Create family
+      // Create family - just insert, don't try to read back immediately
       const { data: family, error: familyError } = await supabase
         .from('families')
         .insert({ name: familyName.trim() })
-        .select()
+        .select('id')
         .single();
       
-      if (familyError) throw familyError;
+      if (familyError) {
+        console.error('Family creation error:', familyError);
+        throw familyError;
+      }
       
-      // Add user as parent
+      if (!family?.id) {
+        throw new Error('Familj skapades inte korrekt');
+      }
+      
+      // Add user as parent immediately
       const { error: roleError } = await supabase
         .from('user_roles')
         .insert({
@@ -61,7 +68,10 @@ export default function OnboardingPage() {
           family_id: family.id,
         });
       
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error('Role creation error:', roleError);
+        throw roleError;
+      }
       
       setFamilyId(family.id);
       setStep('children');
