@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,9 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS } from '@/types/homework';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
-import { format, addDays, isBefore, parseISO, startOfDay, isSameDay } from 'date-fns';
+import { format, addDays, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, Calendar, ArrowRight } from 'lucide-react';
+import { Plus, X, ArrowRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AddHomeworkProps {
@@ -31,12 +31,19 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [dueDate, setDueDate] = useState('');
   const [bringItems, setBringItems] = useState<string[]>([]);
   const [newItem, setNewItem] = useState('');
-  const [tasks, setTasks] = useState<{ title: string; date: string }[]>([]);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskDate, setNewTaskDate] = useState('');
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [taskTitle, setTaskTitle] = useState('Plugga');
   
   const today = startOfDay(new Date());
   const minDate = format(today, 'yyyy-MM-dd');
+  
+  // Generate available days between today and due date
+  const availableDays = useMemo(() => {
+    if (!dueDate) return [];
+    const dueDateParsed = parseISO(dueDate);
+    const days = eachDayOfInterval({ start: today, end: addDays(dueDateParsed, -1) });
+    return days.filter(day => !isWeekend(day)); // Exclude weekends by default
+  }, [dueDate, today]);
   
   const resetForm = () => {
     setStep(1);
@@ -46,9 +53,8 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setDueDate('');
     setBringItems([]);
     setNewItem('');
-    setTasks([]);
-    setNewTaskTitle('');
-    setNewTaskDate('');
+    setSelectedDays([]);
+    setTaskTitle('Plugga');
   };
   
   const handleClose = () => {
@@ -67,31 +73,24 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setBringItems(bringItems.filter((_, i) => i !== index));
   };
   
-  const addNewTask = () => {
-    if (!newTaskTitle.trim() || !newTaskDate) return;
-    
-    const taskDate = parseISO(newTaskDate);
-    const dueDateParsed = parseISO(dueDate);
-    
-    // Can't create tasks on due date
-    if (isSameDay(taskDate, dueDateParsed)) {
-      toast.error("Kan inte schemalägga uppgifter på inlämningsdagen!");
-      return;
-    }
-    
-    // Can't create tasks after due date
-    if (isBefore(dueDateParsed, taskDate)) {
-      toast.error("Uppgifter måste vara före inlämningsdagen!");
-      return;
-    }
-    
-    setTasks([...tasks, { title: newTaskTitle.trim(), date: newTaskDate }]);
-    setNewTaskTitle('');
-    setNewTaskDate('');
+  const toggleDay = (dateStr: string) => {
+    setSelectedDays(prev => 
+      prev.includes(dateStr) 
+        ? prev.filter(d => d !== dateStr)
+        : [...prev, dateStr]
+    );
   };
   
-  const removeTask = (index: number) => {
-    setTasks(tasks.filter((_, i) => i !== index));
+  const selectAllWeekdays = () => {
+    const weekdayDates = availableDays.map(d => format(d, 'yyyy-MM-dd'));
+    setSelectedDays(weekdayDates);
+  };
+  
+  const selectEveryOtherDay = () => {
+    const everyOther = availableDays
+      .filter((_, i) => i % 2 === 0)
+      .map(d => format(d, 'yyyy-MM-dd'));
+    setSelectedDays(everyOther);
   };
   
   const handleSubmit = async () => {
@@ -117,9 +116,9 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     });
     
     if (homework) {
-      // Add tasks
-      for (const task of tasks) {
-        await addTask(homework.id, task.title, task.date);
+      // Add tasks for selected days
+      for (const dateStr of selectedDays.sort()) {
+        await addTask(homework.id, taskTitle || 'Plugga', dateStr);
       }
     }
     
@@ -128,14 +127,13 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   };
   
   const canProceedStep1 = title.trim() && dueDate;
-  const maxTaskDate = dueDate ? format(addDays(parseISO(dueDate), -1), 'yyyy-MM-dd') : '';
   
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            {step === 1 ? 'Ny läxa' : 'Lägg till uppgifter'}
+            {step === 1 ? 'Ny läxa' : 'När ska du plugga?'}
           </DialogTitle>
         </DialogHeader>
         
@@ -193,7 +191,10 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   id="dueDate"
                   type="date"
                   value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
+                  onChange={(e) => {
+                    setDueDate(e.target.value);
+                    setSelectedDays([]); // Reset selected days when due date changes
+                  }}
                   min={minDate}
                   className="mt-1.5"
                 />
@@ -253,7 +254,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 className="w-full"
                 size="lg"
               >
-                Nästa: Lägg till uppgifter
+                Nästa: Välj pluggdagar
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </motion.div>
@@ -266,65 +267,101 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               className="space-y-4"
             >
               <p className="text-sm text-muted-foreground">
-                Dela upp din läxa i mindre uppgifter. När vill du jobba med den?
+                Välj vilka dagar du vill plugga på läxan. Inlämning: {dueDate ? format(parseISO(dueDate), 'd MMMM', { locale: sv }) : ''}
               </p>
               
-              {/* Add task form */}
-              <div className="p-3 rounded-xl bg-muted/50 space-y-3">
+              {/* Task title */}
+              <div>
+                <Label className="text-sm font-medium">Vad ska du göra?</Label>
                 <Input
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder="Vad ska du göra?"
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                  placeholder="t.ex. Plugga, Läs, Öva"
+                  className="mt-1.5"
                 />
-                <div className="flex gap-2">
-                  <Input
-                    type="date"
-                    value={newTaskDate}
-                    onChange={(e) => setNewTaskDate(e.target.value)}
-                    min={minDate}
-                    max={maxTaskDate}
-                    className="flex-1"
-                  />
-                  <Button
-                    onClick={addNewTask}
-                    disabled={!newTaskTitle.trim() || !newTaskDate}
-                    size="icon"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  📝 Uppgifter måste schemaläggas före inlämningsdagen ({dueDate ? format(parseISO(dueDate), 'd MMM', { locale: sv }) : '...'})
-                </p>
               </div>
               
-              {/* Task list */}
-              {tasks.length > 0 && (
-                <div className="space-y-2">
-                  {tasks.map((task, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center justify-between p-3 rounded-xl bg-card shadow-soft"
+              {/* Quick select buttons */}
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={selectAllWeekdays}
+                  className="flex-1"
+                >
+                  Alla vardagar
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={selectEveryOtherDay}
+                  className="flex-1"
+                >
+                  Varannan dag
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setSelectedDays([])}
+                  className="flex-1"
+                >
+                  Rensa
+                </Button>
+              </div>
+              
+              {/* Day picker */}
+              <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
+                {availableDays.map((day) => {
+                  const dateStr = format(day, 'yyyy-MM-dd');
+                  const isSelected = selectedDays.includes(dateStr);
+                  const isToday = isSameDay(day, today);
+                  
+                  return (
+                    <button
+                      key={dateStr}
+                      onClick={() => toggleDay(dateStr)}
+                      className={cn(
+                        'relative p-3 rounded-xl text-center transition-all',
+                        isSelected 
+                          ? 'bg-primary text-primary-foreground shadow-glow-primary' 
+                          : 'bg-muted hover:bg-muted/80',
+                        isToday && !isSelected && 'ring-2 ring-primary/50'
+                      )}
                     >
-                      <div>
-                        <p className="font-medium">{task.title}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {format(parseISO(task.date), 'EEE d MMM', { locale: sv })}
-                        </p>
+                      <div className="text-xs font-medium capitalize">
+                        {format(day, 'EEE', { locale: sv })}
                       </div>
-                      <button
-                        onClick={() => removeTask(i)}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </motion.div>
-                  ))}
-                </div>
+                      <div className="text-lg font-bold">
+                        {format(day, 'd')}
+                      </div>
+                      <div className="text-xs opacity-70">
+                        {format(day, 'MMM', { locale: sv })}
+                      </div>
+                      {isSelected && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute top-1 right-1 w-4 h-4 bg-primary-foreground/20 rounded-full flex items-center justify-center"
+                        >
+                          <Check className="w-3 h-3" />
+                        </motion.div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {availableDays.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Inga vardagar före inlämningsdagen
+                </p>
               )}
+              
+              <div className="text-center text-sm text-muted-foreground">
+                {selectedDays.length > 0 
+                  ? `${selectedDays.length} pluggdag${selectedDays.length > 1 ? 'ar' : ''} vald${selectedDays.length > 1 ? 'a' : ''}`
+                  : 'Inga dagar valda (valfritt)'}
+              </div>
               
               <div className="flex gap-2 pt-2">
                 <Button
@@ -339,7 +376,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   disabled={loading}
                   className="flex-1"
                 >
-                  {loading ? 'Sparar...' : tasks.length > 0 ? 'Spara läxa' : 'Spara utan uppgifter'}
+                  {loading ? 'Sparar...' : 'Spara läxa'}
                 </Button>
               </div>
             </motion.div>

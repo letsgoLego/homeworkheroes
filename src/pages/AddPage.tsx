@@ -2,19 +2,29 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Navigation } from '@/components/Navigation';
 import { AddHomework } from '@/components/AddHomework';
+import { EditHomework } from '@/components/EditHomework';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { useFamily } from '@/hooks/useFamily';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
-import { Plus, Calendar, Trash2 } from 'lucide-react';
+import { Plus, Calendar, Trash2, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { Subject } from '@/types/homework';
+import type { Tables } from '@/integrations/supabase/types';
+
+type Homework = Tables<'homework'>;
+type StudyTask = Tables<'study_tasks'>;
+
+interface HomeworkWithTasks extends Homework {
+  tasks: StudyTask[];
+}
 
 export default function AddPage() {
   const [showAddHomework, setShowAddHomework] = useState(false);
   const [showAddChild, setShowAddChild] = useState(false);
+  const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
   const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading } = useFamily();
   
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
@@ -82,12 +92,21 @@ export default function AddPage() {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <SubjectBadge subject={hw.subject as Subject} size="sm" />
-                    <button
-                      onClick={() => deleteHomework(hw.id)}
-                      className="p-1 text-muted-foreground hover:text-destructive transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditingHomework(hw)}
+                        className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                        title="Redigera uppgifter"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteHomework(hw.id)}
+                        className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   
                   <h3 className="font-bold text-lg mb-1">{hw.title}</h3>
@@ -165,6 +184,13 @@ export default function AddPage() {
       <Navigation />
       <AddHomework open={showAddHomework} onClose={() => setShowAddHomework(false)} />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
+      {editingHomework && (
+        <EditHomework 
+          open={true} 
+          onClose={() => setEditingHomework(null)} 
+          homework={editingHomework}
+        />
+      )}
     </div>
   );
 }
