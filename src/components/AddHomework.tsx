@@ -10,7 +10,7 @@ import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, ArrowRight, Check } from 'lucide-react';
+import { Plus, X, ArrowRight, Check, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AddHomeworkProps {
@@ -21,9 +21,14 @@ interface AddHomeworkProps {
 const subjects: Subject[] = ['math', 'science', 'language', 'history', 'art', 'music', 'sports', 'other'];
 
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
-  const { addHomework, addTask, activeChildId } = useFamily();
+  const { addHomework, addTask, activeChildId, children, setActiveChildId } = useFamily();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  
+  // Use selected child or fallback to active child
+  const targetChildId = selectedChildId || activeChildId;
+  const targetChild = children.find(c => c.id === targetChildId);
   
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState<Subject>('other');
@@ -55,6 +60,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setNewItem('');
     setSelectedDays([]);
     setTaskTitle('Plugga');
+    setSelectedChildId(null);
   };
   
   const handleClose = () => {
@@ -94,7 +100,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   };
   
   const handleSubmit = async () => {
-    if (!activeChildId) {
+    if (!targetChildId) {
       toast.error("Välj ett barn först");
       return;
     }
@@ -111,7 +117,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       subject,
       description: description.trim() || undefined,
       dueDate,
-      childId: activeChildId,
+      childId: targetChildId,
       bringToSchool: bringItems.length > 0 ? bringItems : undefined,
     });
     
@@ -119,6 +125,11 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       // Add tasks for selected days
       for (const dateStr of selectedDays.sort()) {
         await addTask(homework.id, taskTitle || 'Plugga', dateStr);
+      }
+      
+      // Update active child to match the one we just added homework for
+      if (targetChildId !== activeChildId) {
+        setActiveChildId(targetChildId);
       }
     }
     
@@ -146,6 +157,48 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               exit={{ opacity: 0, x: -20 }}
               className="space-y-4"
             >
+              {/* Child selector */}
+              {children.length > 1 && (
+                <div>
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Läxa för
+                  </Label>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
+                    {children.map((child) => (
+                      <button
+                        key={child.id}
+                        onClick={() => setSelectedChildId(child.id)}
+                        className={cn(
+                          'px-4 py-2 rounded-full text-sm font-medium transition-all',
+                          (selectedChildId || activeChildId) === child.id
+                            ? 'text-primary-foreground shadow-md'
+                            : 'bg-muted hover:bg-muted/80'
+                        )}
+                        style={{
+                          backgroundColor: (selectedChildId || activeChildId) === child.id ? child.color : undefined,
+                        }}
+                      >
+                        {child.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Show single child info */}
+              {children.length === 1 && targetChild && (
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: targetChild.color }}
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    Läxa för <span className="font-medium text-foreground">{targetChild.name}</span>
+                  </span>
+                </div>
+              )}
+              
               {/* Title */}
               <div>
                 <Label htmlFor="title" className="text-sm font-medium">
