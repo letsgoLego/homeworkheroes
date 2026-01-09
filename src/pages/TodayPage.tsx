@@ -8,6 +8,7 @@ import { BringToSchool } from '@/components/BringToSchool';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { Navigation } from '@/components/Navigation';
+import { WeatherWidget } from '@/components/WeatherWidget';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarClock, Sun, Backpack } from 'lucide-react';
@@ -38,9 +39,15 @@ export default function TodayPage() {
   }
   
   const tomorrow = addDays(today, 1);
+  const currentHour = today.getHours();
+  
+  // Dynamic: after 12pm show tomorrow's items, before 12pm show today's
+  const isAfternoon = currentHour >= 12;
+  const bringToSchoolDate = isAfternoon ? tomorrow : today;
+  const bringToSchoolLabel = isAfternoon ? 'imorgon' : 'idag';
   
   const todayTasks = activeChildId ? getTasksForDate(activeChildId, today) : [];
-  const itemsToBring = activeChildId ? getItemsToBringForDate(activeChildId, today) : [];
+  const itemsToBring = activeChildId ? getItemsToBringForDate(activeChildId, bringToSchoolDate) : [];
   
   // Get homework due tomorrow for "Pack for Tomorrow" tab
   const tomorrowHomework = homework.filter(hw => {
@@ -70,11 +77,14 @@ export default function TodayPage() {
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
         <div className="px-4 py-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Sun className="w-5 h-5 text-celebration" />
-            <span className="text-sm text-muted-foreground font-medium">
-              {format(today, 'EEEE d MMMM', { locale: sv })}
-            </span>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <Sun className="w-5 h-5 text-celebration" />
+              <span className="text-sm text-muted-foreground font-medium">
+                {format(today, 'EEEE d MMMM', { locale: sv })}
+              </span>
+            </div>
+            <WeatherWidget date={bringToSchoolDate} compact />
           </div>
           <h1 className="text-2xl font-bold">
             {activeChild ? `Hej, ${activeChild.name}! 👋` : 'Välkommen!'}
@@ -106,21 +116,31 @@ export default function TodayPage() {
           </TabsList>
           
           <TabsContent value="today" className="space-y-6">
-            {/* Items to bring */}
-            <BringToSchool items={itemsToBring.map(item => ({
-              homework: {
-                ...item.homework,
-                id: item.homework.id,
-                title: item.homework.title,
-                subject: item.homework.subject as Subject,
-                dueDate: item.homework.due_date,
-                childId: item.homework.child_id,
-                createdAt: item.homework.created_at,
-                tasks: [],
-                completed: item.homework.completed,
-              },
-              items: item.items as string[],
-            }))} />
+            {/* Weather widget for packing */}
+            <WeatherWidget date={bringToSchoolDate} />
+            
+            {/* Items to bring - dynamic based on time */}
+            {itemsToBring.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  📚 Ta med {bringToSchoolLabel}
+                </h3>
+                <BringToSchool items={itemsToBring.map(item => ({
+                  homework: {
+                    ...item.homework,
+                    id: item.homework.id,
+                    title: item.homework.title,
+                    subject: item.homework.subject as Subject,
+                    dueDate: item.homework.due_date,
+                    childId: item.homework.child_id,
+                    createdAt: item.homework.created_at,
+                    tasks: [],
+                    completed: item.homework.completed,
+                  },
+                  items: item.items as string[],
+                }))} />
+              </div>
+            )}
             
             {/* Today's tasks */}
             <section>
@@ -273,6 +293,9 @@ export default function TodayPage() {
                 {format(tomorrow, 'EEEE d MMMM', { locale: sv })}
               </span>
             </div>
+            
+            {/* Weather for tomorrow */}
+            <WeatherWidget date={tomorrow} />
             
             {tomorrowHomework.length === 0 ? (
               <motion.div

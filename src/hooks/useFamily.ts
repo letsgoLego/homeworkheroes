@@ -221,6 +221,21 @@ export function useFamily() {
     
     return true;
   };
+
+  // Delete task
+  const deleteTask = async (taskId: string) => {
+    const { error } = await supabase
+      .from('study_tasks')
+      .delete()
+      .eq('id', taskId);
+    
+    if (error) {
+      toast.error('Kunde inte ta bort uppgift');
+      return false;
+    }
+    
+    return true;
+  };
   
   // Toggle task completion
   const toggleTask = async (taskId: string, completed: boolean) => {
@@ -346,6 +361,7 @@ export function useFamily() {
     addChild,
     addHomework,
     addTask,
+    deleteTask,
     toggleTask,
     deleteHomework,
     scheduleMorePractice,
