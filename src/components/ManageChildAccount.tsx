@@ -59,15 +59,13 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
       // Create auth user with generated email
       const email = `${username.toLowerCase().trim()}@laxhjalpen.child`;
       
+      // Note: We don't store sensitive metadata in auth.users.raw_user_meta_data
+      // Authorization is handled via user_roles table with RLS policies
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            is_child: true,
-            child_id: child.id,
-          },
         },
       });
 
