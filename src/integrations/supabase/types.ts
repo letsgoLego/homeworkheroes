@@ -86,7 +86,10 @@ export type Database = {
           description: string | null
           due_date: string
           id: string
+          is_recurring: boolean
           needs_more_practice: boolean | null
+          recurrence_days: number[] | null
+          recurrence_end_date: string | null
           reminder_date: string | null
           reminder_sent: boolean
           subject: string
@@ -102,7 +105,10 @@ export type Database = {
           description?: string | null
           due_date: string
           id?: string
+          is_recurring?: boolean
           needs_more_practice?: boolean | null
+          recurrence_days?: number[] | null
+          recurrence_end_date?: string | null
           reminder_date?: string | null
           reminder_sent?: boolean
           subject?: string
@@ -118,7 +124,10 @@ export type Database = {
           description?: string | null
           due_date?: string
           id?: string
+          is_recurring?: boolean
           needs_more_practice?: boolean | null
+          recurrence_days?: number[] | null
+          recurrence_end_date?: string | null
           reminder_date?: string | null
           reminder_sent?: boolean
           subject?: string

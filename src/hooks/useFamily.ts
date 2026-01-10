@@ -182,6 +182,9 @@ export function useFamily() {
     bringToSchool?: string[];
     childId: string;
     reminderDate?: string;
+    isRecurring?: boolean;
+    recurrenceDays?: number[];
+    recurrenceEndDate?: string;
   }) => {
     const { data, error } = await supabase
       .from('homework')
@@ -193,6 +196,9 @@ export function useFamily() {
         bring_to_school: homeworkData.bringToSchool,
         child_id: homeworkData.childId,
         reminder_date: homeworkData.reminderDate,
+        is_recurring: homeworkData.isRecurring || false,
+        recurrence_days: homeworkData.recurrenceDays,
+        recurrence_end_date: homeworkData.recurrenceEndDate,
       })
       .select()
       .single();
