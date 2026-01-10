@@ -11,7 +11,7 @@ import { Navigation } from '@/components/Navigation';
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarClock, Sun, Backpack } from 'lucide-react';
+import { CalendarClock, Sun, Backpack, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Subject } from '@/types/homework';
 
@@ -54,6 +54,14 @@ export default function TodayPage() {
     if (hw.child_id !== activeChildId) return false;
     const dueDate = new Date(hw.due_date);
     return format(dueDate, 'yyyy-MM-dd') === format(tomorrow, 'yyyy-MM-dd');
+  });
+  
+  // Get homework with reminders for today
+  const todayStr = format(today, 'yyyy-MM-dd');
+  const homeworkWithReminders = homework.filter(hw => {
+    if (hw.child_id !== activeChildId) return false;
+    if (hw.completed) return false;
+    return hw.reminder_date === todayStr && !hw.reminder_sent;
   });
   
   const upcomingHomework = homework
@@ -116,6 +124,36 @@ export default function TodayPage() {
           </TabsList>
           
           <TabsContent value="today" className="space-y-6">
+            {/* Reminders section */}
+            {homeworkWithReminders.length > 0 && (
+              <motion.section
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 rounded-2xl bg-warning/10 border-2 border-warning/30"
+              >
+                <h3 className="font-bold flex items-center gap-2 text-warning mb-3">
+                  <Bell className="w-5 h-5" />
+                  Påminnelse - 2 dagar kvar!
+                </h3>
+                <div className="space-y-2">
+                  {homeworkWithReminders.map((hw) => (
+                    <div key={hw.id} className="flex items-center gap-3 p-2 rounded-xl bg-background/50">
+                      <SubjectBadge subject={hw.subject as Subject} size="sm" showLabel={false} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{hw.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Inlämning {format(new Date(hw.due_date), 'EEEE d MMM', { locale: sv })}
+                        </p>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {hw.tasks.filter((t) => t.completed).length}/{hw.tasks.length} klart
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.section>
+            )}
+            
             {/* Weather widget for packing */}
             <WeatherWidget date={bringToSchoolDate} />
             

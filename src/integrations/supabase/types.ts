@@ -87,6 +87,8 @@ export type Database = {
           due_date: string
           id: string
           needs_more_practice: boolean | null
+          reminder_date: string | null
+          reminder_sent: boolean
           subject: string
           title: string
           updated_at: string
@@ -101,6 +103,8 @@ export type Database = {
           due_date: string
           id?: string
           needs_more_practice?: boolean | null
+          reminder_date?: string | null
+          reminder_sent?: boolean
           subject?: string
           title: string
           updated_at?: string
@@ -115,6 +119,8 @@ export type Database = {
           due_date?: string
           id?: string
           needs_more_practice?: boolean | null
+          reminder_date?: string | null
+          reminder_sent?: boolean
           subject?: string
           title?: string
           updated_at?: string
