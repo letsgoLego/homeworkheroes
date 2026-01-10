@@ -28,6 +28,15 @@ export default function JoinFamilyPage() {
       return;
     }
 
+    // Validate and clean the invite code
+    const cleanCode = inviteCode.toLowerCase().trim();
+    
+    // Invite codes are 8-character hex strings
+    if (!/^[a-f0-9]{8}$/.test(cleanCode)) {
+      toast.error('Ogiltig inbjudningskod. Koden ska vara 8 tecken.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -35,7 +44,7 @@ export default function JoinFamilyPage() {
       const { data: family, error: familyError } = await supabase
         .from('families')
         .select('id, name')
-        .eq('invite_code', inviteCode.toLowerCase().trim())
+        .eq('invite_code', cleanCode)
         .maybeSingle();
 
       if (familyError) throw familyError;
