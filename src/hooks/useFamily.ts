@@ -181,6 +181,7 @@ export function useFamily() {
     dueDate: string;
     bringToSchool?: string[];
     childId: string;
+    reminderDate?: string;
   }) => {
     const { data, error } = await supabase
       .from('homework')
@@ -191,6 +192,7 @@ export function useFamily() {
         due_date: homeworkData.dueDate,
         bring_to_school: homeworkData.bringToSchool,
         child_id: homeworkData.childId,
+        reminder_date: homeworkData.reminderDate,
       })
       .select()
       .single();

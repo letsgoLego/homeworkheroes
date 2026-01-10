@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS } from '@/types/homework';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
-import { format, addDays, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay } from 'date-fns';
+import { format, addDays, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay, subDays } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, ArrowRight, Check, User } from 'lucide-react';
+import { Plus, X, ArrowRight, Check, User, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AddHomeworkProps {
@@ -38,16 +39,19 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [newItem, setNewItem] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [taskTitle, setTaskTitle] = useState('Plugga');
+  const [enableReminder, setEnableReminder] = useState(true);
   
   const today = startOfDay(new Date());
   const minDate = format(today, 'yyyy-MM-dd');
   
-  // Generate available days between today and due date
+  // Generate available days between today and day before due date (inclusive)
   const availableDays = useMemo(() => {
     if (!dueDate) return [];
     const dueDateParsed = parseISO(dueDate);
-    const days = eachDayOfInterval({ start: today, end: addDays(dueDateParsed, -1) });
-    return days.filter(day => !isWeekend(day)); // Exclude weekends by default
+    // Include all days from today up to and including the day before due date
+    const endDate = subDays(dueDateParsed, 1);
+    if (endDate < today) return [];
+    return eachDayOfInterval({ start: today, end: endDate });
   }, [dueDate, today]);
   
   const resetForm = () => {
@@ -61,6 +65,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setSelectedDays([]);
     setTaskTitle('Plugga');
     setSelectedChildId(null);
+    setEnableReminder(true);
   };
   
   const handleClose = () => {
@@ -87,8 +92,15 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     );
   };
   
-  const selectAllWeekdays = () => {
-    const weekdayDates = availableDays.map(d => format(d, 'yyyy-MM-dd'));
+  const selectAllDays = () => {
+    const allDates = availableDays.map(d => format(d, 'yyyy-MM-dd'));
+    setSelectedDays(allDates);
+  };
+  
+  const selectWeekdaysOnly = () => {
+    const weekdayDates = availableDays
+      .filter(day => !isWeekend(day))
+      .map(d => format(d, 'yyyy-MM-dd'));
     setSelectedDays(weekdayDates);
   };
   
@@ -112,6 +124,10 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     
     setLoading(true);
     
+    // Calculate reminder date (2 days before due date)
+    const dueDateParsed = parseISO(dueDate);
+    const reminderDate = enableReminder ? format(subDays(dueDateParsed, 2), 'yyyy-MM-dd') : undefined;
+    
     const homework = await addHomework({
       title: title.trim(),
       subject,
@@ -119,6 +135,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       dueDate,
       childId: targetChildId,
       bringToSchool: bringItems.length > 0 ? bringItems : undefined,
+      reminderDate,
     });
     
     if (homework) {
@@ -301,6 +318,23 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 )}
               </div>
               
+              {/* Reminder toggle */}
+              <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Påminnelse</p>
+                    <p className="text-xs text-muted-foreground">
+                      Påminn 2 dagar före inlämning
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={enableReminder}
+                  onCheckedChange={setEnableReminder}
+                />
+              </div>
+              
               <Button
                 onClick={() => setStep(2)}
                 disabled={!canProceedStep1}
@@ -335,14 +369,22 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               </div>
               
               {/* Quick select buttons */}
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={selectAllWeekdays}
+                  onClick={selectAllDays}
                   className="flex-1"
                 >
-                  Alla vardagar
+                  Alla dagar
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={selectWeekdaysOnly}
+                  className="flex-1"
+                >
+                  Vardagar
                 </Button>
                 <Button 
                   variant="outline" 
@@ -350,7 +392,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   onClick={selectEveryOtherDay}
                   className="flex-1"
                 >
-                  Varannan dag
+                  Varannan
                 </Button>
                 <Button 
                   variant="outline" 
@@ -368,6 +410,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isSelected = selectedDays.includes(dateStr);
                   const isToday = isSameDay(day, today);
+                  const isWeekendDay = isWeekend(day);
                   
                   return (
                     <button
@@ -377,11 +420,16 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                         'relative p-3 rounded-xl text-center transition-all',
                         isSelected 
                           ? 'bg-primary text-primary-foreground shadow-glow-primary' 
-                          : 'bg-muted hover:bg-muted/80',
+                          : isWeekendDay
+                            ? 'bg-accent/50 hover:bg-accent/70'
+                            : 'bg-muted hover:bg-muted/80',
                         isToday && !isSelected && 'ring-2 ring-primary/50'
                       )}
                     >
-                      <div className="text-xs font-medium capitalize">
+                      <div className={cn(
+                        "text-xs font-medium capitalize",
+                        isWeekendDay && !isSelected && "text-accent-foreground/80"
+                      )}>
                         {format(day, 'EEE', { locale: sv })}
                       </div>
                       <div className="text-lg font-bold">
@@ -406,7 +454,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               
               {availableDays.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Inga vardagar före inlämningsdagen
+                  Inga dagar före inlämningsdagen
                 </p>
               )}
               
