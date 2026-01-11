@@ -7,9 +7,47 @@ interface WeatherData {
   isCold: boolean;
 }
 
+interface SavedLocation {
+  latitude: number;
+  longitude: number;
+  savedAt: number;
+}
+
+const LOCATION_STORAGE_KEY = 'weather_location';
+const LOCATION_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+
 // Weather codes from Open-Meteo
 // https://open-meteo.com/en/docs
 const RAINY_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99];
+
+function getSavedLocation(): SavedLocation | null {
+  try {
+    const saved = localStorage.getItem(LOCATION_STORAGE_KEY);
+    if (!saved) return null;
+    
+    const location: SavedLocation = JSON.parse(saved);
+    // Check if location is still valid (not older than 24 hours)
+    if (Date.now() - location.savedAt < LOCATION_MAX_AGE) {
+      return location;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function saveLocation(latitude: number, longitude: number) {
+  try {
+    const location: SavedLocation = {
+      latitude,
+      longitude,
+      savedAt: Date.now(),
+    };
+    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(location));
+  } catch {
+    // Ignore storage errors
+  }
+}
 
 export function useWeather(date: Date) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -22,14 +60,21 @@ export function useWeather(date: Date) {
         let latitude = 59.33;
         let longitude = 18.07;
 
-        // Try to get user's location
-        if (navigator.geolocation) {
+        // First check for saved location
+        const savedLocation = getSavedLocation();
+        if (savedLocation) {
+          latitude = savedLocation.latitude;
+          longitude = savedLocation.longitude;
+        } else if (navigator.geolocation) {
+          // Try to get user's location
           try {
             const position = await new Promise<GeolocationPosition>((resolve, reject) => {
               navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
             });
             latitude = position.coords.latitude;
             longitude = position.coords.longitude;
+            // Save for future use
+            saveLocation(latitude, longitude);
           } catch {
             // Use default Stockholm coordinates
           }

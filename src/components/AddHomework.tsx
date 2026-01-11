@@ -55,6 +55,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceDays, setRecurrenceDays] = useState<number[]>([1, 2, 3, 4, 5]); // Mon-Fri by default
   const [recurrenceWeeks, setRecurrenceWeeks] = useState(4); // Default 4 weeks
+  const [submissionDay, setSubmissionDay] = useState<number>(5); // Friday by default
   
   const today = startOfDay(new Date());
   const minDate = format(today, 'yyyy-MM-dd');
@@ -84,6 +85,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setIsRecurring(false);
     setRecurrenceDays([1, 2, 3, 4, 5]);
     setRecurrenceWeeks(4);
+    setSubmissionDay(5);
   };
   
   const handleClose = () => {
@@ -350,6 +352,30 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                             'px-3 py-2 rounded-lg text-sm font-medium transition-all',
                             recurrenceDays.includes(day.value)
                               ? 'bg-primary text-primary-foreground shadow-glow-primary'
+                              : 'bg-muted hover:bg-muted/80'
+                          )}
+                        >
+                          {day.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Submission day */}
+                  <div>
+                    <Label className="text-sm font-medium">Vilken dag lämnas den in?</Label>
+                    <p className="text-xs text-muted-foreground mb-1.5">
+                      T.ex. logg som lämnas in varje fredag
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {WEEKDAYS.map((day) => (
+                        <button
+                          key={day.value}
+                          onClick={() => setSubmissionDay(day.value)}
+                          className={cn(
+                            'px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                            submissionDay === day.value
+                              ? 'bg-accent text-accent-foreground shadow-md'
                               : 'bg-muted hover:bg-muted/80'
                           )}
                         >
