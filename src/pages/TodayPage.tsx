@@ -9,9 +9,10 @@ import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { Navigation } from '@/components/Navigation';
 import { WeatherWidget } from '@/components/WeatherWidget';
+import { StreakStats } from '@/components/StreakStats';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarClock, Sun, Backpack, Bell } from 'lucide-react';
+import { CalendarClock, Sun, Backpack, Bell, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Subject } from '@/types/homework';
 
@@ -112,14 +113,18 @@ export default function TodayPage() {
       
       <main className="px-4 py-4">
         <Tabs defaultValue="today" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="today" className="flex items-center gap-2">
               <Sun className="w-4 h-4" />
               Idag
             </TabsTrigger>
+            <TabsTrigger value="streak" className="flex items-center gap-2">
+              <Flame className="w-4 h-4" />
+              Streak
+            </TabsTrigger>
             <TabsTrigger value="pack" className="flex items-center gap-2">
               <Backpack className="w-4 h-4" />
-              Packa imorgon
+              Packa
             </TabsTrigger>
           </TabsList>
           
@@ -322,6 +327,30 @@ export default function TodayPage() {
                   ))}
                 </div>
               </section>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="streak" className="space-y-6">
+            <div className="mb-2">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                  <Flame className="w-4 h-4 text-orange-500" />
+                </span>
+                Mina streaks
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Håll igång dina dagliga läxor!
+              </p>
+            </div>
+            
+            {activeChildId && (
+              <StreakStats homework={homework} childId={activeChildId} />
+            )}
+            
+            {!activeChildId && (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Välj ett barn för att se streaks</p>
+              </div>
             )}
           </TabsContent>
           
