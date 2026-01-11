@@ -185,6 +185,7 @@ export function useFamily() {
     isRecurring?: boolean;
     recurrenceDays?: number[];
     recurrenceEndDate?: string;
+    submissionDay?: number;
   }) => {
     const { data, error } = await supabase
       .from('homework')
@@ -199,6 +200,7 @@ export function useFamily() {
         is_recurring: homeworkData.isRecurring || false,
         recurrence_days: homeworkData.recurrenceDays,
         recurrence_end_date: homeworkData.recurrenceEndDate,
+        submission_day: homeworkData.submissionDay,
       })
       .select()
       .single();
@@ -210,6 +212,46 @@ export function useFamily() {
     
     toast.success('Läxa tillagd! 📚');
     return data;
+  };
+
+  // Update homework
+  const updateHomework = async (homeworkId: string, updates: {
+    title?: string;
+    subject?: string;
+    description?: string;
+    dueDate?: string;
+    bringToSchool?: string[];
+    reminderDate?: string | null;
+    isRecurring?: boolean;
+    recurrenceDays?: number[];
+    recurrenceEndDate?: string;
+    submissionDay?: number | null;
+  }) => {
+    const updateData: Record<string, unknown> = {};
+    
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.subject !== undefined) updateData.subject = updates.subject;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.dueDate !== undefined) updateData.due_date = updates.dueDate;
+    if (updates.bringToSchool !== undefined) updateData.bring_to_school = updates.bringToSchool;
+    if (updates.reminderDate !== undefined) updateData.reminder_date = updates.reminderDate;
+    if (updates.isRecurring !== undefined) updateData.is_recurring = updates.isRecurring;
+    if (updates.recurrenceDays !== undefined) updateData.recurrence_days = updates.recurrenceDays;
+    if (updates.recurrenceEndDate !== undefined) updateData.recurrence_end_date = updates.recurrenceEndDate;
+    if (updates.submissionDay !== undefined) updateData.submission_day = updates.submissionDay;
+
+    const { error } = await supabase
+      .from('homework')
+      .update(updateData)
+      .eq('id', homeworkId);
+    
+    if (error) {
+      toast.error('Kunde inte uppdatera läxa');
+      return false;
+    }
+    
+    toast.success('Läxa uppdaterad! ✓');
+    return true;
   };
   
   // Add task
@@ -368,6 +410,7 @@ export function useFamily() {
     loading,
     addChild,
     addHomework,
+    updateHomework,
     addTask,
     deleteTask,
     toggleTask,

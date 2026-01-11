@@ -93,6 +93,7 @@ export type Database = {
           reminder_date: string | null
           reminder_sent: boolean
           subject: string
+          submission_day: number | null
           title: string
           updated_at: string
         }
@@ -112,6 +113,7 @@ export type Database = {
           reminder_date?: string | null
           reminder_sent?: boolean
           subject?: string
+          submission_day?: number | null
           title: string
           updated_at?: string
         }
@@ -131,6 +133,7 @@ export type Database = {
           reminder_date?: string | null
           reminder_sent?: boolean
           subject?: string
+          submission_day?: number | null
           title?: string
           updated_at?: string
         }
