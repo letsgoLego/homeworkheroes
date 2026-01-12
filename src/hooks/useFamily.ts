@@ -21,6 +21,7 @@ export function useFamily() {
   const [family, setFamily] = useState<Family | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [homework, setHomework] = useState<HomeworkWithTasks[]>([]);
+  const [userRole, setUserRole] = useState<'parent' | 'child' | null>(null);
   const [activeChildId, setActiveChildIdState] = useState<string | null>(() => {
     // Initialize from localStorage
     if (typeof window !== 'undefined') {
@@ -48,12 +49,11 @@ export function useFamily() {
     }
     
     try {
-      // Get user's family via user_roles
+      // Get user's role - could be parent (with family_id) or child (with child_id)
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
-        .select('family_id')
+        .select('family_id, child_id, role')
         .eq('user_id', user.id)
-        .not('family_id', 'is', null)
         .limit(1);
       
       if (rolesError) {
@@ -62,12 +62,41 @@ export function useFamily() {
         return;
       }
       
-      if (!roles || roles.length === 0 || !roles[0].family_id) {
+      if (!roles || roles.length === 0) {
         setLoading(false);
         return;
       }
       
-      const familyId = roles[0].family_id;
+      const userRoleData = roles[0];
+      setUserRole(userRoleData.role as 'parent' | 'child');
+      let familyId: string | null = userRoleData.family_id;
+      
+      // If user is a child, get family_id via the children table
+      if (!familyId && userRoleData.child_id) {
+        const { data: childData, error: childError } = await supabase
+          .from('children')
+          .select('family_id')
+          .eq('id', userRoleData.child_id)
+          .single();
+        
+        if (childError) {
+          console.error('Error fetching child family:', childError);
+          setLoading(false);
+          return;
+        }
+        
+        familyId = childData?.family_id || null;
+        
+        // For child users, automatically set their child as the active one
+        if (userRoleData.child_id && !activeChildId) {
+          setActiveChildId(userRoleData.child_id);
+        }
+      }
+      
+      if (!familyId) {
+        setLoading(false);
+        return;
+      }
       
       // Get family
       const { data: familyData, error: familyError } = await supabase
@@ -433,6 +462,7 @@ export function useFamily() {
     activeChildId,
     setActiveChildId,
     loading,
+    userRole,
     addChild,
     addHomework,
     updateHomework,
