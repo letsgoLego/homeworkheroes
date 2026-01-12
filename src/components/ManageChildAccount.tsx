@@ -47,9 +47,10 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
       return;
     }
 
-    // Validate username (only letters, numbers, underscore)
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      toast.error('Användarnamn får bara innehålla bokstäver, siffror och understreck');
+    // Validate username (only letters, numbers, underscore, 3-20 characters)
+    // This matches the database trigger validation
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      toast.error('Användarnamn måste vara 3-20 tecken (bokstäver, siffror, understreck)');
       return;
     }
 
@@ -239,7 +240,7 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Bara bokstäver, siffror och understreck
+                  3-20 tecken, bara bokstäver, siffror och understreck
                 </p>
               </div>
 
