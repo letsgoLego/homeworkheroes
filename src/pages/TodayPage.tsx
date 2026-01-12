@@ -25,6 +25,7 @@ export default function TodayPage() {
     activeChildId,
     setActiveChildId,
     loading,
+    userRole,
     getTasksForDate,
     getItemsToBringForDate,
     toggleTask,
@@ -33,8 +34,9 @@ export default function TodayPage() {
   const today = new Date();
   const activeChild = children.find((c) => c.id === activeChildId);
   
-  // Redirect to onboarding if no family
-  if (!loading && children.length === 0) {
+  // Redirect to onboarding only if user has no role (not yet part of any family)
+  // Users with a role (parent or child) should NOT be redirected, even if children list is empty
+  if (!loading && !userRole && children.length === 0) {
     navigate('/onboarding');
     return null;
   }
