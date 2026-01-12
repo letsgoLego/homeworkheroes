@@ -10,15 +10,18 @@ interface CompletionModalProps {
   open: boolean;
   onClose: () => void;
   homework: Homework | null;
+  onComplete?: () => void;
 }
 
-export function CompletionModal({ open, onClose, homework }: CompletionModalProps) {
+export function CompletionModal({ open, onClose, homework, onComplete }: CompletionModalProps) {
   const [showScheduler, setShowScheduler] = useState(false);
-  const { scheduleMorePractice } = useFamily();
+  const { scheduleMorePractice, refetch } = useFamily();
   
   if (!homework) return null;
   
-  const handleKnowItAll = () => {
+  const handleKnowItAll = async () => {
+    await refetch();
+    onComplete?.();
     onClose();
     setShowScheduler(false);
   };
@@ -29,6 +32,8 @@ export function CompletionModal({ open, onClose, homework }: CompletionModalProp
   
   const handleSchedulePractice = async (days: number[]) => {
     await scheduleMorePractice(homework.id, days);
+    await refetch();
+    onComplete?.();
     onClose();
     setShowScheduler(false);
   };
