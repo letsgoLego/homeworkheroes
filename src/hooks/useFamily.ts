@@ -14,13 +14,31 @@ interface HomeworkWithTasks extends Homework {
   tasks: StudyTask[];
 }
 
+const ACTIVE_CHILD_KEY = 'laxhjalpen_active_child';
+
 export function useFamily() {
   const { user } = useAuth();
   const [family, setFamily] = useState<Family | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [homework, setHomework] = useState<HomeworkWithTasks[]>([]);
-  const [activeChildId, setActiveChildId] = useState<string | null>(null);
+  const [activeChildId, setActiveChildIdState] = useState<string | null>(() => {
+    // Initialize from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(ACTIVE_CHILD_KEY);
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(true);
+
+  // Wrapper to persist to localStorage
+  const setActiveChildId = useCallback((id: string | null) => {
+    setActiveChildIdState(id);
+    if (id) {
+      localStorage.setItem(ACTIVE_CHILD_KEY, id);
+    } else {
+      localStorage.removeItem(ACTIVE_CHILD_KEY);
+    }
+  }, []);
   
   // Fetch family and children
   const fetchFamilyData = useCallback(async () => {
@@ -77,8 +95,15 @@ export function useFamily() {
       
       if (childrenData) {
         setChildren(childrenData);
-        if (childrenData.length > 0 && !activeChildId) {
+        // Check if stored activeChildId is still valid
+        const storedId = localStorage.getItem(ACTIVE_CHILD_KEY);
+        const validChild = storedId && childrenData.some(c => c.id === storedId);
+        
+        if (childrenData.length > 0 && !validChild) {
           setActiveChildId(childrenData[0].id);
+        } else if (storedId && validChild && activeChildId !== storedId) {
+          // Sync state with localStorage if different
+          setActiveChildIdState(storedId);
         }
       }
       

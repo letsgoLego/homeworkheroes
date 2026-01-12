@@ -6,6 +6,7 @@ import { SubjectBadge } from './ui/SubjectBadge';
 import { celebrateTask, celebrateAssignment } from '@/lib/confetti';
 import { useState } from 'react';
 import { CompletionModal } from './CompletionModal';
+import { useFamily } from '@/hooks/useFamily';
 
 interface TaskCardProps {
   task: StudyTask;
@@ -16,6 +17,7 @@ interface TaskCardProps {
 export function TaskCard({ task, homework, onToggle }: TaskCardProps) {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedHomework, setCompletedHomework] = useState<Homework | null>(null);
+  const { refetch } = useFamily();
   
   const handleToggle = async () => {
     const newCompleted = !task.completed;
@@ -100,6 +102,7 @@ export function TaskCard({ task, homework, onToggle }: TaskCardProps) {
         open={showCompletionModal}
         onClose={() => setShowCompletionModal(false)}
         homework={completedHomework}
+        onComplete={refetch}
       />
     </>
   );
