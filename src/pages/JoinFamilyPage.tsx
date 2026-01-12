@@ -40,14 +40,13 @@ export default function JoinFamilyPage() {
     setLoading(true);
 
     try {
-      // Find family by invite code
-      const { data: family, error: familyError } = await supabase
-        .from('families')
-        .select('id, name')
-        .eq('invite_code', cleanCode)
-        .maybeSingle();
+      // Find family by invite code using secure RPC function
+      const { data: families, error: familyError } = await supabase
+        .rpc('lookup_family_by_invite_code', { code: cleanCode });
 
       if (familyError) throw familyError;
+
+      const family = families && families.length > 0 ? families[0] : null;
 
       if (!family) {
         toast.error('Ingen familj hittades med den koden');

@@ -239,6 +239,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_family_by_invite_code: {
+        Args: { code: string }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       user_belongs_to_family: {
         Args: { _family_id: string; _user_id: string }
         Returns: boolean
