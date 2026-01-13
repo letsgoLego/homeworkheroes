@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,19 +6,30 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Users, ArrowRight, ArrowLeft, Mail, Lock } from 'lucide-react';
+import { Users, ArrowRight, ArrowLeft, Mail, Lock, CheckCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function JoinFamilyStartPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<'code' | 'auth'>('code');
+  const { user, loading: authLoading } = useAuth();
+  const [step, setStep] = useState<'code' | 'auth' | 'confirm'>('code');
   const [inviteCode, setInviteCode] = useState('');
   const [familyInfo, setFamilyInfo] = useState<{ id: string; name: string } | null>(null);
   const [loading, setLoading] = useState(false);
   
-  // Auth state
+  // Auth state (only used if not logged in)
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const handleVerifyCode = async () => {
     if (!inviteCode.trim()) {
@@ -49,11 +60,71 @@ export default function JoinFamilyStartPage() {
       }
 
       setFamilyInfo(family);
-      setStep('auth');
+      
+      // If user is already logged in, go to confirm step
+      if (user) {
+        setStep('confirm');
+      } else {
+        setStep('auth');
+      }
+      
       toast.success(`Familj hittad: ${family.name}`);
     } catch (err: any) {
       console.error('Error verifying code:', err);
       toast.error(err.message || 'Kunde inte verifiera koden');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinFamily = async (userId: string) => {
+    if (!familyInfo) {
+      toast.error('Familj saknas');
+      return;
+    }
+
+    // Check if user already belongs to this family
+    const { data: existingRole } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('family_id', familyInfo.id)
+      .maybeSingle();
+
+    if (existingRole) {
+      toast.info('Du är redan medlem i denna familj!');
+      navigate('/');
+      return;
+    }
+
+    // Add user as parent to family
+    const { error: roleError } = await supabase
+      .from('user_roles')
+      .insert({
+        user_id: userId,
+        role: 'parent',
+        family_id: familyInfo.id,
+      });
+
+    if (roleError) throw roleError;
+
+    toast.success(`Välkommen till ${familyInfo.name}! 🎉`);
+    navigate('/');
+  };
+
+  const handleConfirmJoin = async () => {
+    if (!user) {
+      toast.error('Du måste vara inloggad');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await handleJoinFamily(user.id);
+    } catch (err: any) {
+      console.error('Error joining family:', err);
+      toast.error(err.message || 'Kunde inte gå med i familjen');
     } finally {
       setLoading(false);
     }
@@ -125,33 +196,7 @@ export default function JoinFamilyStartPage() {
         userId = data.user.id;
       }
 
-      // Check if user already belongs to this family
-      const { data: existingRole } = await supabase
-        .from('user_roles')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('family_id', familyInfo.id)
-        .maybeSingle();
-
-      if (existingRole) {
-        toast.info('Du är redan medlem i denna familj!');
-        navigate('/');
-        return;
-      }
-
-      // Add user as parent to family
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: userId,
-          role: 'parent',
-          family_id: familyInfo.id,
-        });
-
-      if (roleError) throw roleError;
-
-      toast.success(`Välkommen till ${familyInfo.name}! 🎉`);
-      navigate('/');
+      await handleJoinFamily(userId);
     } catch (err: any) {
       console.error('Error joining family:', err);
       toast.error(err.message || 'Kunde inte gå med i familjen');
@@ -168,7 +213,7 @@ export default function JoinFamilyStartPage() {
         animate={{ opacity: 1, x: 0 }}
         className="w-full max-w-sm"
       >
-        {step === 'code' ? (
+        {step === 'code' && (
           <>
             <div className="text-center mb-8">
               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -178,6 +223,11 @@ export default function JoinFamilyStartPage() {
               <p className="text-muted-foreground">
                 Ange inbjudningskoden du fått
               </p>
+              {user && (
+                <p className="text-sm text-primary mt-2">
+                  Inloggad som {user.email}
+                </p>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -216,7 +266,7 @@ export default function JoinFamilyStartPage() {
             <div className="mt-6 text-center">
               <Button
                 variant="ghost"
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate(user ? '/' : '/auth')}
                 className="text-muted-foreground"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -224,7 +274,56 @@ export default function JoinFamilyStartPage() {
               </Button>
             </div>
           </>
-        ) : (
+        )}
+
+        {step === 'confirm' && user && (
+          <>
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-primary" />
+              </div>
+              <h1 className="text-2xl font-bold mb-2">Gå med i {familyInfo?.name}?</h1>
+              <p className="text-muted-foreground">
+                Du kommer att läggas till som förälder
+              </p>
+              <p className="text-sm text-primary mt-2">
+                {user.email}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <Button
+                onClick={handleConfirmJoin}
+                disabled={loading}
+                className="w-full h-12 text-lg shadow-glow-primary"
+              >
+                {loading ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                    className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full"
+                  />
+                ) : (
+                  <>
+                    Gå med i familjen
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => setStep('code')}
+                className="w-full"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Ändra kod
+              </Button>
+            </div>
+          </>
+        )}
+
+        {step === 'auth' && !user && (
           <>
             <div className="text-center mb-6">
               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">

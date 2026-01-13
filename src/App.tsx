@@ -58,7 +58,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
       <Route path="/child-login" element={<PublicRoute><ChildLoginPage /></PublicRoute>} />
-      <Route path="/join-family-start" element={<PublicRoute><JoinFamilyStartPage /></PublicRoute>} />
+      <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
       <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
       <Route path="/" element={<ProtectedRoute><TodayPage /></ProtectedRoute>} />
