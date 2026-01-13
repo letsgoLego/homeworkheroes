@@ -195,7 +195,7 @@ export default function AuthPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate('/join-family')}
+                onClick={() => navigate('/join-family-start')}
                 className="h-12"
               >
                 <Users className="w-4 h-4 mr-2" />
