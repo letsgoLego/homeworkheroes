@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { AddChild } from '@/components/AddChild';
 import { ManageChildAccount } from '@/components/ManageChildAccount';
 import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
-import { Users, Download, Smartphone, LogOut, Copy, Check, Settings } from 'lucide-react';
+import { Users, Download, Smartphone, LogOut, Copy, Check, Settings, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -14,6 +15,7 @@ import type { Tables } from '@/integrations/supabase/types';
 type Child = Tables<'children'>;
 
 export default function FamilyPage() {
+  const navigate = useNavigate();
   const [showAddChild, setShowAddChild] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
@@ -201,6 +203,34 @@ export default function FamilyPage() {
             })}
           </div>
         </section>
+        
+        {/* Join another family */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="p-4 rounded-2xl bg-card shadow-card"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+              <UserPlus className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="font-bold">Gå med i en annan familj</h3>
+              <p className="text-sm text-muted-foreground">
+                Använd en inbjudningskod
+              </p>
+            </div>
+          </div>
+          <Button 
+            onClick={() => navigate('/join-family-start')} 
+            className="w-full" 
+            variant="outline"
+          >
+            <UserPlus className="w-4 h-4 mr-2" />
+            Ange inbjudningskod
+          </Button>
+        </motion.div>
         
         {/* Account info */}
         <motion.div
