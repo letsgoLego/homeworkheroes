@@ -34,9 +34,19 @@ export default function TodayPage() {
   const today = new Date();
   const activeChild = children.find((c) => c.id === activeChildId);
   
+  // Don't redirect while still loading user role information
+  // This prevents premature redirects for child accounts and invited parents
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+  
   // Redirect to onboarding only if user has no role (not yet part of any family)
   // Users with a role (parent or child) should NOT be redirected, even if children list is empty
-  if (!loading && !userRole && children.length === 0) {
+  if (!userRole && children.length === 0) {
     navigate('/onboarding');
     return null;
   }
