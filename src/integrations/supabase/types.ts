@@ -154,6 +154,7 @@ export type Database = {
           created_at: string
           homework_id: string
           id: string
+          snoozed_until: string | null
           task_date: string
           title: string
         }
@@ -163,6 +164,7 @@ export type Database = {
           created_at?: string
           homework_id: string
           id?: string
+          snoozed_until?: string | null
           task_date: string
           title: string
         }
@@ -172,6 +174,7 @@ export type Database = {
           created_at?: string
           homework_id?: string
           id?: string
+          snoozed_until?: string | null
           task_date?: string
           title?: string
         }

@@ -29,9 +29,12 @@ export default function TodayPage() {
     getTasksForDate,
     getItemsToBringForDate,
     toggleTask,
+    snoozeTask,
+    unsnoozeTask,
   } = useFamily();
   
   const today = new Date();
+  const todayStr = format(today, 'yyyy-MM-dd');
   const activeChild = children.find((c) => c.id === activeChildId);
   
   // Don't redirect while still loading user role information
@@ -70,7 +73,6 @@ export default function TodayPage() {
   });
   
   // Get homework with reminders for today
-  const todayStr = format(today, 'yyyy-MM-dd');
   const homeworkWithReminders = homework.filter(hw => {
     if (hw.child_id !== activeChildId) return false;
     if (hw.completed) return false;
@@ -82,8 +84,13 @@ export default function TodayPage() {
     .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
     .slice(0, 3);
   
-  const incompleteTasks = todayTasks.filter((t) => !t.task.completed);
+  // Filter tasks: incomplete (not snoozed), snoozed (for today), and completed
+  const incompleteTasks = todayTasks.filter((t) => !t.task.completed && !t.task.snoozed_until);
+  const snoozedTasks = todayTasks.filter((t) => !t.task.completed && t.task.snoozed_until === todayStr);
   const completedTasks = todayTasks.filter((t) => t.task.completed);
+  
+  // Also include tasks that were originally for today but snoozed to a future date
+  const snoozedAwayTasks = todayTasks.filter((t) => !t.task.completed && t.task.snoozed_until && t.task.snoozed_until !== todayStr);
   
   if (loading) {
     return (
@@ -240,6 +247,7 @@ export default function TodayPage() {
                           date: task.task_date,
                           completed: task.completed,
                           completedAt: task.completed_at || undefined,
+                          snoozedUntil: task.snoozed_until || undefined,
                         }}
                         homework={{
                           id: hw.id,
@@ -258,19 +266,24 @@ export default function TodayPage() {
                           completed: hw.completed,
                         }}
                         onToggle={toggleTask}
+                        onSnooze={snoozeTask}
+                        onUnsnooze={unsnoozeTask}
                       />
                     ))}
                     
-                    {completedTasks.length > 0 && (
+                    {/* Completed and Snoozed section */}
+                    {(completedTasks.length > 0 || snoozedAwayTasks.length > 0 || snoozedTasks.length > 0) && (
                       <>
                         <div className="flex items-center gap-2 pt-4">
                           <div className="h-px flex-1 bg-border" />
                           <span className="text-xs text-muted-foreground font-medium">
-                            Klart ({completedTasks.length})
+                            Klart & Snoozat ({completedTasks.length + snoozedAwayTasks.length + snoozedTasks.length})
                           </span>
                           <div className="h-px flex-1 bg-border" />
                         </div>
-                        {completedTasks.map(({ task, homework: hw }) => (
+                        
+                        {/* Snoozed tasks that came back today */}
+                        {snoozedTasks.map(({ task, homework: hw }) => (
                           <TaskCard 
                             key={task.id} 
                             task={{
@@ -280,6 +293,7 @@ export default function TodayPage() {
                               date: task.task_date,
                               completed: task.completed,
                               completedAt: task.completed_at || undefined,
+                              snoozedUntil: task.snoozed_until || undefined,
                             }}
                             homework={{
                               id: hw.id,
@@ -298,6 +312,80 @@ export default function TodayPage() {
                               completed: hw.completed,
                             }}
                             onToggle={toggleTask}
+                            onSnooze={snoozeTask}
+                            onUnsnooze={unsnoozeTask}
+                            isSnoozed
+                          />
+                        ))}
+                        
+                        {/* Tasks snoozed away from today */}
+                        {snoozedAwayTasks.map(({ task, homework: hw }) => (
+                          <TaskCard 
+                            key={task.id} 
+                            task={{
+                              id: task.id,
+                              homeworkId: task.homework_id,
+                              title: task.title,
+                              date: task.task_date,
+                              completed: task.completed,
+                              completedAt: task.completed_at || undefined,
+                              snoozedUntil: task.snoozed_until || undefined,
+                            }}
+                            homework={{
+                              id: hw.id,
+                              title: hw.title,
+                              subject: hw.subject as Subject,
+                              dueDate: hw.due_date,
+                              childId: hw.child_id,
+                              createdAt: hw.created_at,
+                              tasks: hw.tasks.map(t => ({
+                                id: t.id,
+                                homeworkId: t.homework_id,
+                                title: t.title,
+                                date: t.task_date,
+                                completed: t.completed,
+                              })),
+                              completed: hw.completed,
+                            }}
+                            onToggle={toggleTask}
+                            onSnooze={snoozeTask}
+                            onUnsnooze={unsnoozeTask}
+                            isSnoozed
+                          />
+                        ))}
+                        
+                        {/* Completed tasks */}
+                        {completedTasks.map(({ task, homework: hw }) => (
+                          <TaskCard 
+                            key={task.id} 
+                            task={{
+                              id: task.id,
+                              homeworkId: task.homework_id,
+                              title: task.title,
+                              date: task.task_date,
+                              completed: task.completed,
+                              completedAt: task.completed_at || undefined,
+                              snoozedUntil: task.snoozed_until || undefined,
+                            }}
+                            homework={{
+                              id: hw.id,
+                              title: hw.title,
+                              subject: hw.subject as Subject,
+                              dueDate: hw.due_date,
+                              childId: hw.child_id,
+                              createdAt: hw.created_at,
+                              tasks: hw.tasks.map(t => ({
+                                id: t.id,
+                                homeworkId: t.homework_id,
+                                title: t.title,
+                                date: t.task_date,
+                                completed: t.completed,
+                              })),
+                              completed: hw.completed,
+                            }}
+                            onToggle={toggleTask}
+                            onSnooze={snoozeTask}
+                            onUnsnooze={unsnoozeTask}
                           />
                         ))}
                       </>

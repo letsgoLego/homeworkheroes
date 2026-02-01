@@ -15,6 +15,7 @@ export interface StudyTask {
   date: string; // ISO date string
   completed: boolean;
   completedAt?: string;
+  snoozedUntil?: string; // ISO date string - task is snoozed until this date
 }
 
 export interface Homework {
