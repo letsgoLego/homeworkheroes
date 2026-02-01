@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check, Moon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StudyTask, Homework } from '@/types/homework';
 import { SubjectBadge } from './ui/SubjectBadge';
@@ -7,14 +7,18 @@ import { celebrateTask, celebrateAssignment } from '@/lib/confetti';
 import { useState } from 'react';
 import { CompletionModal } from './CompletionModal';
 import { useFamily } from '@/hooks/useFamily';
+import { Button } from './ui/button';
 
 interface TaskCardProps {
   task: StudyTask;
   homework: Homework;
   onToggle: (taskId: string, completed: boolean) => Promise<{ allCompleted: boolean; homework: any }>;
+  onSnooze?: (taskId: string) => Promise<boolean>;
+  onUnsnooze?: (taskId: string) => Promise<boolean>;
+  isSnoozed?: boolean;
 }
 
-export function TaskCard({ task, homework, onToggle }: TaskCardProps) {
+export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSnoozed = false }: TaskCardProps) {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedHomework, setCompletedHomework] = useState<Homework | null>(null);
   const { refetch } = useFamily();
@@ -34,6 +38,20 @@ export function TaskCard({ task, homework, onToggle }: TaskCardProps) {
     }
   };
   
+  const handleSnooze = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSnooze) {
+      await onSnooze(task.id);
+    }
+  };
+  
+  const handleUnsnooze = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onUnsnooze) {
+      await onUnsnooze(task.id);
+    }
+  };
+  
   return (
     <>
       <motion.div
@@ -46,6 +64,8 @@ export function TaskCard({ task, homework, onToggle }: TaskCardProps) {
           'group relative overflow-hidden rounded-2xl p-4 shadow-card transition-all duration-200',
           task.completed
             ? 'bg-success/10 border-2 border-success/30'
+            : isSnoozed
+            ? 'bg-muted/50 border-2 border-muted-foreground/20'
             : 'bg-card border-2 border-transparent hover:border-primary/20'
         )}
       >
@@ -73,11 +93,17 @@ export function TaskCard({ task, homework, onToggle }: TaskCardProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <SubjectBadge subject={homework.subject} size="sm" />
+              {isSnoozed && (
+                <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground flex items-center gap-1">
+                  <Moon className="w-3 h-3" />
+                  Snoozad
+                </span>
+              )}
             </div>
             <h3
               className={cn(
                 'font-semibold text-lg transition-all',
-                task.completed && 'line-through text-muted-foreground'
+                (task.completed || isSnoozed) && 'line-through text-muted-foreground'
               )}
             >
               {task.title}
@@ -86,6 +112,32 @@ export function TaskCard({ task, homework, onToggle }: TaskCardProps) {
               {homework.title}
             </p>
           </div>
+          
+          {/* Snooze/Unsnooze button */}
+          {!task.completed && (
+            <div className="shrink-0">
+              {isSnoozed ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleUnsnooze}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Vakna
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleSnooze}
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted"
+                  title="Snooze till imorgon"
+                >
+                  <span className="text-base">💤</span>
+                </Button>
+              )}
+            </div>
+          )}
         </div>
         
         {/* Completion glow effect */}
@@ -94,6 +146,15 @@ export function TaskCard({ task, homework, onToggle }: TaskCardProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="absolute inset-0 bg-gradient-to-r from-success/5 to-transparent pointer-events-none"
+          />
+        )}
+        
+        {/* Snoozed overlay effect */}
+        {isSnoozed && !task.completed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-gradient-to-r from-muted/10 to-transparent pointer-events-none"
           />
         )}
       </motion.div>

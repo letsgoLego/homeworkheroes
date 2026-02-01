@@ -348,6 +348,7 @@ export function useFamily() {
       .update({
         completed,
         completed_at: completed ? new Date().toISOString() : null,
+        snoozed_until: null, // Clear snooze when completing
       })
       .eq('id', taskId)
       .select('*, homework:homework_id(*)')
@@ -375,6 +376,39 @@ export function useFamily() {
     }
     
     return { allCompleted, homework: hw };
+  };
+  
+  // Snooze task until tomorrow
+  const snoozeTask = async (taskId: string) => {
+    const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+    
+    const { error } = await supabase
+      .from('study_tasks')
+      .update({ snoozed_until: tomorrow })
+      .eq('id', taskId);
+    
+    if (error) {
+      toast.error('Kunde inte snooze:a uppgiften');
+      return false;
+    }
+    
+    toast.success('Uppgiften snoozad till imorgon 💤');
+    return true;
+  };
+  
+  // Unsnooze task
+  const unsnoozeTask = async (taskId: string) => {
+    const { error } = await supabase
+      .from('study_tasks')
+      .update({ snoozed_until: null })
+      .eq('id', taskId);
+    
+    if (error) {
+      toast.error('Kunde inte ta bort snooze');
+      return false;
+    }
+    
+    return true;
   };
   
   // Delete homework
@@ -469,6 +503,8 @@ export function useFamily() {
     addTask,
     deleteTask,
     toggleTask,
+    snoozeTask,
+    unsnoozeTask,
     deleteHomework,
     scheduleMorePractice,
     getHomeworkForChild,
