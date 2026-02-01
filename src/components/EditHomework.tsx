@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useFamily } from '@/hooks/useFamily';
-import { format, parseISO, addDays, isBefore, isSameDay, startOfDay } from 'date-fns';
+import { format, parseISO, addDays, isBefore, isSameDay, startOfDay, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, Calendar, Trash2, Bell, Repeat } from 'lucide-react';
+import { Plus, X, Calendar, Trash2, Bell, Repeat, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS } from '@/types/homework';
@@ -56,11 +56,25 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
   const [submissionDay, setSubmissionDay] = useState<number>(homework.submission_day ?? 5);
   
   // Task state
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskDate, setNewTaskDate] = useState('');
+  const [taskTitle, setTaskTitle] = useState('Plugga');
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   const today = startOfDay(new Date());
   const minDate = format(today, 'yyyy-MM-dd');
+
+  // Generate available days between today and day before due date
+  const availableDays = useMemo(() => {
+    if (homework.is_recurring) return [];
+    const dueDateParsed = parseISO(homework.due_date);
+    const endDate = subDays(dueDateParsed, 1);
+    if (endDate < today) return [];
+    return eachDayOfInterval({ start: today, end: endDate });
+  }, [homework.due_date, homework.is_recurring, today]);
+
+  // Get existing task dates to show which are already scheduled
+  const existingTaskDates = useMemo(() => {
+    return homework.tasks.map(t => t.task_date);
+  }, [homework.tasks]);
 
   // Reset state when homework changes
   useEffect(() => {
@@ -114,28 +128,47 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
     setLoading(false);
   };
 
-  const handleAddTask = async () => {
-    if (!newTaskTitle.trim() || !newTaskDate) return;
+  const toggleDay = (dateStr: string) => {
+    setSelectedDays(prev => 
+      prev.includes(dateStr) 
+        ? prev.filter(d => d !== dateStr)
+        : [...prev, dateStr]
+    );
+  };
 
-    const taskDate = parseISO(newTaskDate);
-    const dueDateParsed = parseISO(homework.due_date);
+  const selectAllDays = () => {
+    const allDates = availableDays
+      .filter(d => !existingTaskDates.includes(format(d, 'yyyy-MM-dd')))
+      .map(d => format(d, 'yyyy-MM-dd'));
+    setSelectedDays(allDates);
+  };
 
-    if (isSameDay(taskDate, dueDateParsed)) {
-      toast.error("Kan inte schemalägga uppgifter på inlämningsdagen!");
-      return;
-    }
+  const selectWeekdaysOnly = () => {
+    const weekdayDates = availableDays
+      .filter(day => !isWeekend(day) && !existingTaskDates.includes(format(day, 'yyyy-MM-dd')))
+      .map(d => format(d, 'yyyy-MM-dd'));
+    setSelectedDays(weekdayDates);
+  };
 
-    if (isBefore(dueDateParsed, taskDate)) {
-      toast.error("Uppgifter måste vara före inlämningsdagen!");
-      return;
-    }
+  const selectEveryOtherDay = () => {
+    const availableNonExisting = availableDays.filter(d => !existingTaskDates.includes(format(d, 'yyyy-MM-dd')));
+    const everyOther = availableNonExisting
+      .filter((_, i) => i % 2 === 0)
+      .map(d => format(d, 'yyyy-MM-dd'));
+    setSelectedDays(everyOther);
+  };
+
+  const handleAddSelectedDays = async () => {
+    if (selectedDays.length === 0) return;
 
     setLoading(true);
-    await addTask(homework.id, newTaskTitle.trim(), newTaskDate);
-    setNewTaskTitle('');
-    setNewTaskDate('');
+    for (const dateStr of selectedDays.sort()) {
+      await addTask(homework.id, taskTitle || 'Plugga', dateStr);
+    }
+    setSelectedDays([]);
     await refetch();
     setLoading(false);
+    toast.success(`${selectedDays.length} uppgift${selectedDays.length > 1 ? 'er' : ''} tillagda`);
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -148,8 +181,6 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
   const sortedTasks = [...homework.tasks].sort(
     (a, b) => new Date(a.task_date).getTime() - new Date(b.task_date).getTime()
   );
-
-  const maxTaskDate = format(addDays(parseISO(homework.due_date), -1), 'yyyy-MM-dd');
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -359,47 +390,151 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
               exit={{ opacity: 0, x: 10 }}
               className="space-y-4"
             >
-              {/* Add task form */}
-              <div className="p-3 rounded-xl bg-muted/50 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Välj dagar att lägga till eller ta bort befintliga uppgifter. 
+                Inlämning: {format(parseISO(homework.due_date), 'd MMMM', { locale: sv })}
+              </p>
+
+              {/* Task title */}
+              <div>
+                <Label className="text-sm font-medium">Vad ska göras?</Label>
                 <Input
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  placeholder="Vad ska du göra?"
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                  placeholder="t.ex. Plugga, Läs, Öva"
+                  className="mt-1.5"
                   disabled={loading}
                 />
-                <div className="flex gap-2">
-                  <Input
-                    type="date"
-                    value={newTaskDate}
-                    onChange={(e) => setNewTaskDate(e.target.value)}
-                    min={minDate}
-                    max={maxTaskDate}
-                    className="flex-1"
-                    disabled={loading}
-                  />
-                  <Button
-                    onClick={handleAddTask}
-                    disabled={!newTaskTitle.trim() || !newTaskDate || loading}
-                    size="icon"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  📝 Inlämning: {format(parseISO(homework.due_date), 'd MMM', { locale: sv })}
-                </p>
               </div>
 
-              {/* Task list */}
+              {/* Quick select buttons */}
+              {availableDays.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={selectAllDays}
+                    className="flex-1"
+                    disabled={loading}
+                  >
+                    Alla
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={selectWeekdaysOnly}
+                    className="flex-1"
+                    disabled={loading}
+                  >
+                    Vardagar
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={selectEveryOtherDay}
+                    className="flex-1"
+                    disabled={loading}
+                  >
+                    Varannan
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setSelectedDays([])}
+                    className="flex-1"
+                    disabled={loading}
+                  >
+                    Rensa
+                  </Button>
+                </div>
+              )}
+
+              {/* Day picker */}
+              {availableDays.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
+                  {availableDays.map((day) => {
+                    const dateStr = format(day, 'yyyy-MM-dd');
+                    const isSelected = selectedDays.includes(dateStr);
+                    const hasExistingTask = existingTaskDates.includes(dateStr);
+                    const isToday = isSameDay(day, today);
+                    const isWeekendDay = isWeekend(day);
+                    
+                    return (
+                      <button
+                        key={dateStr}
+                        onClick={() => !hasExistingTask && toggleDay(dateStr)}
+                        disabled={hasExistingTask || loading}
+                        className={cn(
+                          'relative p-3 rounded-xl text-center transition-all',
+                          hasExistingTask
+                            ? 'bg-success/20 cursor-not-allowed opacity-70'
+                            : isSelected 
+                              ? 'bg-primary text-primary-foreground shadow-glow-primary' 
+                              : isWeekendDay
+                                ? 'bg-accent/50 hover:bg-accent/70'
+                                : 'bg-muted hover:bg-muted/80',
+                          isToday && !isSelected && !hasExistingTask && 'ring-2 ring-primary/50'
+                        )}
+                      >
+                        <div className={cn(
+                          "text-xs font-medium capitalize",
+                          isWeekendDay && !isSelected && !hasExistingTask && "text-accent-foreground/80"
+                        )}>
+                          {format(day, 'EEE', { locale: sv })}
+                        </div>
+                        <div className="text-lg font-bold">
+                          {format(day, 'd')}
+                        </div>
+                        <div className="text-xs opacity-70">
+                          {format(day, 'MMM', { locale: sv })}
+                        </div>
+                        {(isSelected || hasExistingTask) && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className={cn(
+                              "absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center",
+                              hasExistingTask ? "bg-success/40" : "bg-primary-foreground/20"
+                            )}
+                          >
+                            <Check className="w-3 h-3" />
+                          </motion.div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Inga dagar kvar att lägga till före inlämningsdagen
+                </p>
+              )}
+
+              {selectedDays.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-center text-sm text-muted-foreground">
+                    {selectedDays.length} ny{selectedDays.length > 1 ? 'a' : ''} dag{selectedDays.length > 1 ? 'ar' : ''} vald{selectedDays.length > 1 ? 'a' : ''}
+                  </div>
+                  <Button
+                    onClick={handleAddSelectedDays}
+                    disabled={loading}
+                    className="w-full"
+                  >
+                    {loading ? 'Lägger till...' : `Lägg till ${selectedDays.length} uppgift${selectedDays.length > 1 ? 'er' : ''}`}
+                  </Button>
+                </div>
+              )}
+
+              {/* Existing tasks */}
               <div className="space-y-2">
                 <h3 className="text-sm font-medium text-muted-foreground">
-                  Uppgifter ({sortedTasks.length})
+                  Befintliga uppgifter ({sortedTasks.length})
                 </h3>
                 
                 <AnimatePresence mode="popLayout">
                   {sortedTasks.length === 0 ? (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                      Inga uppgifter ännu. Lägg till en ovan!
+                      Inga uppgifter ännu. Välj dagar ovan!
                     </p>
                   ) : (
                     sortedTasks.map((task) => (
@@ -409,12 +544,16 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: -100 }}
-                        className={`flex items-center justify-between p-3 rounded-xl shadow-soft ${
+                        className={cn(
+                          "flex items-center justify-between p-3 rounded-xl shadow-soft",
                           task.completed ? 'bg-success/10' : 'bg-card'
-                        }`}
+                        )}
                       >
                         <div className="flex-1 min-w-0">
-                          <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                          <p className={cn(
+                            "font-medium",
+                            task.completed && 'line-through text-muted-foreground'
+                          )}>
                             {task.title}
                           </p>
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
