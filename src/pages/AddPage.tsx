@@ -7,7 +7,8 @@ import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { useFamily } from '@/hooks/useFamily';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
-import { Plus, Calendar, Trash2, Pencil, Repeat } from 'lucide-react';
+import { Plus, Calendar, Trash2, Pencil, Repeat, Flag } from 'lucide-react';
+import { HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -109,8 +110,14 @@ export default function AddPage() {
                     </div>
                   </div>
                   
-                  <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
+                  <h3 className="font-bold text-lg mb-1 flex items-center gap-2 flex-wrap">
                     {hw.title}
+                    {hw.homework_type && hw.homework_type !== 'inlamning' && (
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Flag className="w-3 h-3" />
+                        {HOMEWORK_TYPE_LABELS[hw.homework_type as HomeworkType]}
+                      </span>
+                    )}
                     {hw.is_recurring && (
                       <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Repeat className="w-3 h-3" />
@@ -120,11 +127,11 @@ export default function AddPage() {
                   </h3>
                   
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                    <Calendar className="w-4 h-4" />
+                    <Flag className="w-4 h-4" />
                     <span>
                       {hw.is_recurring 
                         ? `Pågår t.o.m. ${format(new Date(hw.due_date), 'd MMM', { locale: sv })}`
-                        : `Inlämning ${format(new Date(hw.due_date), 'EEE d MMM', { locale: sv })}`
+                        : `${HOMEWORK_TYPE_LABELS[(hw.homework_type as HomeworkType) || 'inlamning']} ${format(new Date(hw.due_date), 'EEE d MMM', { locale: sv })}`
                       }
                     </span>
                   </div>

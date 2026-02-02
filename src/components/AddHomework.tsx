@@ -6,12 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Subject, SUBJECT_LABELS, SUBJECT_ICONS } from '@/types/homework';
+import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, addWeeks, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay, subDays, getDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, ArrowRight, Check, User, Bell, Repeat } from 'lucide-react';
+import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AddHomeworkProps {
@@ -32,7 +32,7 @@ const WEEKDAYS = [
 ];
 
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
-  const { addHomework, addTask, activeChildId, children, setActiveChildId } = useFamily();
+  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId } = useFamily();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -51,11 +51,17 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [taskTitle, setTaskTitle] = useState('Plugga');
   const [enableReminder, setEnableReminder] = useState(true);
   
+  // Homework type (inlämning or förhör)
+  const [homeworkType, setHomeworkType] = useState<HomeworkType>('inlamning');
+  
   // Recurring homework state
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceDays, setRecurrenceDays] = useState<number[]>([1, 2, 3, 4, 5]); // Mon-Fri by default
   const [recurrenceWeeks, setRecurrenceWeeks] = useState(4); // Default 4 weeks
   const [submissionDay, setSubmissionDay] = useState<number>(5); // Friday by default
+  
+  // Recurring pack items for recurring homework
+  const [recurringBringDays, setRecurringBringDays] = useState<number[]>([]);
   
   const today = startOfDay(new Date());
   const minDate = format(today, 'yyyy-MM-dd');
@@ -86,6 +92,8 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setRecurrenceDays([1, 2, 3, 4, 5]);
     setRecurrenceWeeks(4);
     setSubmissionDay(5);
+    setHomeworkType('inlamning');
+    setRecurringBringDays([]);
   };
   
   const handleClose = () => {
@@ -198,7 +206,15 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       recurrenceDays: isRecurring ? recurrenceDays : undefined,
       recurrenceEndDate,
       submissionDay: isRecurring ? submissionDay : undefined,
+      homeworkType,
     });
+    
+    // Add recurring pack items for bring days (for recurring homework)
+    if (isRecurring && recurringBringDays.length > 0 && bringItems.length > 0) {
+      for (const item of bringItems) {
+        await addRecurringPackItem(targetChildId, item, recurringBringDays);
+      }
+    }
     
     if (homework) {
       // Generate and add tasks
@@ -311,6 +327,31 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                     >
                       <span className="text-xl">{SUBJECT_ICONS[s]}</span>
                       <span className="text-xs font-medium">{SUBJECT_LABELS[s]}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Homework type selector */}
+              <div>
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Flag className="w-4 h-4" />
+                  Typ av läxa
+                </Label>
+                <div className="grid grid-cols-2 gap-2 mt-1.5">
+                  {(['inlamning', 'forhor'] as HomeworkType[]).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setHomeworkType(type)}
+                      className={cn(
+                        'flex items-center justify-center gap-2 p-3 rounded-xl transition-all',
+                        homeworkType === type
+                          ? 'bg-primary text-primary-foreground shadow-glow-primary'
+                          : 'bg-muted hover:bg-muted/80'
+                      )}
+                    >
+                      <span className="text-lg">{HOMEWORK_TYPE_ICONS[type]}</span>
+                      <span className="text-sm font-medium">{HOMEWORK_TYPE_LABELS[type]}</span>
                     </button>
                   ))}
                 </div>

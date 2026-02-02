@@ -2,13 +2,14 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { format, addDays } from 'date-fns';
+import { format, addDays, getDay } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Child = Tables<'children'>;
 type Homework = Tables<'homework'>;
 type StudyTask = Tables<'study_tasks'>;
 type Family = Tables<'families'>;
+type RecurringPackItem = Tables<'recurring_pack_items'>;
 
 interface HomeworkWithTasks extends Homework {
   tasks: StudyTask[];
@@ -21,6 +22,7 @@ export function useFamily() {
   const [family, setFamily] = useState<Family | null>(null);
   const [children, setChildren] = useState<Child[]>([]);
   const [homework, setHomework] = useState<HomeworkWithTasks[]>([]);
+  const [recurringPackItems, setRecurringPackItems] = useState<RecurringPackItem[]>([]);
   const [userRole, setUserRole] = useState<'parent' | 'child' | null>(null);
   const [activeChildId, setActiveChildIdState] = useState<string | null>(() => {
     // Initialize from localStorage
@@ -168,6 +170,20 @@ export function useFamily() {
         } else {
           setHomework([]);
         }
+        
+        // Get recurring pack items
+        const { data: packItemsData, error: packItemsError } = await supabase
+          .from('recurring_pack_items')
+          .select('*')
+          .in('child_id', childIds);
+        
+        if (packItemsError) {
+          console.error('Error fetching recurring pack items:', packItemsError);
+        }
+        
+        if (packItemsData) {
+          setRecurringPackItems(packItemsData);
+        }
       }
     } catch (err) {
       console.error('Error fetching family data:', err);
@@ -240,6 +256,7 @@ export function useFamily() {
     recurrenceDays?: number[];
     recurrenceEndDate?: string;
     submissionDay?: number;
+    homeworkType?: 'inlamning' | 'forhor';
   }) => {
     const { data, error } = await supabase
       .from('homework')
@@ -255,6 +272,7 @@ export function useFamily() {
         recurrence_days: homeworkData.recurrenceDays,
         recurrence_end_date: homeworkData.recurrenceEndDate,
         submission_day: homeworkData.submissionDay,
+        homework_type: homeworkData.homeworkType || 'inlamning',
       })
       .select()
       .single();
@@ -475,10 +493,13 @@ export function useFamily() {
       );
   };
   
-  // Get items to bring for a specific date
+  // Get items to bring for a specific date (includes both homework items and recurring pack items)
   const getItemsToBringForDate = (childId: string, date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    return homework
+    const dayOfWeek = getDay(date);
+    
+    // Get homework items due on this date
+    const homeworkItems = homework
       .filter(
         hw =>
           hw.child_id === childId &&
@@ -487,12 +508,61 @@ export function useFamily() {
           hw.bring_to_school.length > 0
       )
       .map(hw => ({ homework: hw, items: hw.bring_to_school || [] }));
+    
+    // Get recurring pack items for this weekday
+    const recurringItems = recurringPackItems.filter(
+      item => item.child_id === childId && item.weekdays.includes(dayOfWeek)
+    );
+    
+    return { homeworkItems, recurringItems };
+  };
+  
+  // Add recurring pack item
+  const addRecurringPackItem = async (childId: string, itemName: string, weekdays: number[]) => {
+    const { error } = await supabase
+      .from('recurring_pack_items')
+      .insert({
+        child_id: childId,
+        item_name: itemName,
+        weekdays,
+      });
+    
+    if (error) {
+      toast.error('Kunde inte lägga till packningssak');
+      return false;
+    }
+    
+    toast.success('Packningssak tillagd! 🎒');
+    await fetchFamilyData();
+    return true;
+  };
+  
+  // Delete recurring pack item
+  const deleteRecurringPackItem = async (id: string) => {
+    const { error } = await supabase
+      .from('recurring_pack_items')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      toast.error('Kunde inte ta bort packningssak');
+      return false;
+    }
+    
+    await fetchFamilyData();
+    return true;
+  };
+  
+  // Get recurring pack items for a child
+  const getRecurringPackItemsForChild = (childId: string) => {
+    return recurringPackItems.filter(item => item.child_id === childId);
   };
   
   return {
     family,
     children,
     homework,
+    recurringPackItems,
     activeChildId,
     setActiveChildId,
     loading,
@@ -510,6 +580,9 @@ export function useFamily() {
     getHomeworkForChild,
     getTasksForDate,
     getItemsToBringForDate,
+    addRecurringPackItem,
+    deleteRecurringPackItem,
+    getRecurringPackItemsForChild,
     refetch: fetchFamilyData,
   };
 }

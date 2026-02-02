@@ -12,9 +12,10 @@ import { WeatherWidget } from '@/components/WeatherWidget';
 import { StreakStats } from '@/components/StreakStats';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarClock, Sun, Backpack, Bell, Flame } from 'lucide-react';
+import { CalendarClock, Sun, Backpack, Bell, Flame, Flag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Subject } from '@/types/homework';
+import { Subject, HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
+import { RecurringPackItems } from '@/components/RecurringPackItems';
 
 export default function TodayPage() {
   const navigate = useNavigate();
@@ -31,6 +32,9 @@ export default function TodayPage() {
     toggleTask,
     snoozeTask,
     unsnoozeTask,
+    getRecurringPackItemsForChild,
+    addRecurringPackItem,
+    deleteRecurringPackItem,
   } = useFamily();
   
   const today = new Date();
@@ -63,7 +67,8 @@ export default function TodayPage() {
   const bringToSchoolLabel = isAfternoon ? 'imorgon' : 'idag';
   
   const todayTasks = activeChildId ? getTasksForDate(activeChildId, today) : [];
-  const itemsToBring = activeChildId ? getItemsToBringForDate(activeChildId, bringToSchoolDate) : [];
+  const itemsToBringData = activeChildId ? getItemsToBringForDate(activeChildId, bringToSchoolDate) : { homeworkItems: [], recurringItems: [] };
+  const hasItemsToBring = itemsToBringData.homeworkItems.length > 0 || itemsToBringData.recurringItems.length > 0;
   
   // Get homework due tomorrow for "Pack for Tomorrow" tab
   const tomorrowHomework = homework.filter(hw => {
@@ -182,25 +187,29 @@ export default function TodayPage() {
             <WeatherWidget date={bringToSchoolDate} />
             
             {/* Items to bring - dynamic based on time */}
-            {itemsToBring.length > 0 && (
+            {hasItemsToBring && (
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-2">
                   📚 Ta med {bringToSchoolLabel}
                 </h3>
-                <BringToSchool items={itemsToBring.map(item => ({
-                  homework: {
-                    ...item.homework,
-                    id: item.homework.id,
-                    title: item.homework.title,
-                    subject: item.homework.subject as Subject,
-                    dueDate: item.homework.due_date,
-                    childId: item.homework.child_id,
-                    createdAt: item.homework.created_at,
-                    tasks: [],
-                    completed: item.homework.completed,
-                  },
-                  items: item.items as string[],
-                }))} />
+                <BringToSchool 
+                  items={itemsToBringData.homeworkItems.map(item => ({
+                    homework: {
+                      ...item.homework,
+                      id: item.homework.id,
+                      title: item.homework.title,
+                      subject: item.homework.subject as Subject,
+                      dueDate: item.homework.due_date,
+                      childId: item.homework.child_id,
+                      createdAt: item.homework.created_at,
+                      tasks: [],
+                      completed: item.homework.completed,
+                      homeworkType: (item.homework.homework_type as 'inlamning' | 'forhor') || 'inlamning',
+                    },
+                    items: item.items as string[],
+                  }))} 
+                  recurringItems={itemsToBringData.recurringItems}
+                />
               </div>
             )}
             
@@ -464,6 +473,39 @@ export default function TodayPage() {
             {/* Weather for tomorrow */}
             <WeatherWidget date={tomorrow} />
             
+            {/* Recurring pack items for tomorrow */}
+            {activeChildId && (() => {
+              const tomorrowDayOfWeek = tomorrow.getDay();
+              const recurringItemsForTomorrow = getRecurringPackItemsForChild(activeChildId)
+                .filter(item => item.weekdays.includes(tomorrowDayOfWeek));
+              
+              if (recurringItemsForTomorrow.length > 0) {
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="rounded-2xl bg-accent/30 border-2 border-accent p-4 shadow-soft"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+                        🔄
+                      </div>
+                      <h3 className="font-bold">Återkommande</h3>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {recurringItemsForTomorrow.map((item) => (
+                        <li key={item.id} className="text-sm flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                          {item.item_name}
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                );
+              }
+              return null;
+            })()}
+            
             {tomorrowHomework.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -492,7 +534,15 @@ export default function TodayPage() {
                     <div className="flex items-start gap-3">
                       <SubjectBadge subject={hw.subject as Subject} size="md" showLabel={false} />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-base">{hw.title}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-base">{hw.title}</h3>
+                          {hw.homework_type && (
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Flag className="w-3 h-3" />
+                              {HOMEWORK_TYPE_LABELS[hw.homework_type as HomeworkType]}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground capitalize">{hw.subject}</p>
                         
                         {hw.bring_to_school && hw.bring_to_school.length > 0 && (
@@ -530,6 +580,21 @@ export default function TodayPage() {
                     </div>
                   </motion.div>
                 ))}
+              </div>
+            )}
+            
+            {/* Recurring pack items management */}
+            {activeChildId && (
+              <div className="mt-6 pt-6 border-t border-border">
+                <RecurringPackItems
+                  items={getRecurringPackItemsForChild(activeChildId).map(item => ({
+                    id: item.id,
+                    itemName: item.item_name,
+                    weekdays: item.weekdays,
+                  }))}
+                  onAdd={(itemName, weekdays) => addRecurringPackItem(activeChildId, itemName, weekdays)}
+                  onDelete={deleteRecurringPackItem}
+                />
               </div>
             )}
           </TabsContent>

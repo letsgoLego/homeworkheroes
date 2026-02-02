@@ -1,14 +1,23 @@
 import { motion } from 'framer-motion';
-import { Backpack } from 'lucide-react';
+import { Backpack, Flag } from 'lucide-react';
 import { SubjectBadge } from './ui/SubjectBadge';
-import { Homework } from '@/types/homework';
+import { Homework, HOMEWORK_TYPE_LABELS } from '@/types/homework';
+
+interface RecurringPackItem {
+  id: string;
+  child_id: string;
+  item_name: string;
+  weekdays: number[];
+  created_at: string;
+}
 
 interface BringToSchoolProps {
   items: { homework: Homework; items: string[] }[];
+  recurringItems?: RecurringPackItem[];
 }
 
-export function BringToSchool({ items }: BringToSchoolProps) {
-  if (items.length === 0) return null;
+export function BringToSchool({ items, recurringItems = [] }: BringToSchoolProps) {
+  if (items.length === 0 && recurringItems.length === 0) return null;
   
   return (
     <motion.div
@@ -24,14 +33,21 @@ export function BringToSchool({ items }: BringToSchoolProps) {
       </div>
       
       <div className="space-y-3">
-        {items.map(({ homework, items }) => (
+        {/* Homework items with type indicator */}
+        {items.map(({ homework, items: itemsList }) => (
           <div key={homework.id}>
             <div className="flex items-center gap-2 mb-1">
               <SubjectBadge subject={homework.subject} size="sm" showLabel={false} />
-              <span className="text-sm font-medium">{homework.title}</span>
+              <span className="text-sm font-medium flex-1">{homework.title}</span>
+              {homework.homeworkType && (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Flag className="w-3 h-3" />
+                  {HOMEWORK_TYPE_LABELS[homework.homeworkType]}
+                </span>
+              )}
             </div>
             <ul className="pl-8 space-y-1">
-              {items.map((item, index) => (
+              {itemsList.map((item, index) => (
                 <li key={index} className="text-sm text-muted-foreground flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-accent" />
                   {item}
@@ -40,6 +56,26 @@ export function BringToSchool({ items }: BringToSchoolProps) {
             </ul>
           </div>
         ))}
+        
+        {/* Recurring pack items */}
+        {recurringItems.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-6 h-6 rounded-md bg-muted flex items-center justify-center text-sm">
+                🔄
+              </div>
+              <span className="text-sm font-medium">Återkommande</span>
+            </div>
+            <ul className="pl-8 space-y-1">
+              {recurringItems.map((item) => (
+                <li key={item.id} className="text-sm text-muted-foreground flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                  {item.item_name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </motion.div>
   );
