@@ -8,6 +8,8 @@ export type Subject =
   | 'sports' 
   | 'other';
 
+export type HomeworkType = 'inlamning' | 'forhor';
+
 export interface StudyTask {
   id: string;
   homeworkId: string;
@@ -31,6 +33,7 @@ export interface Homework {
   completed: boolean;
   completedAt?: string;
   needsMorePractice?: boolean;
+  homeworkType?: HomeworkType; // inlamning or forhor
 }
 
 export interface Child {
@@ -39,6 +42,14 @@ export interface Child {
   avatar?: string;
   color: string;
   familyId: string;
+}
+
+export interface RecurringPackItem {
+  id: string;
+  childId: string;
+  itemName: string;
+  weekdays: number[]; // 0 = Sunday, 1 = Monday, etc.
+  createdAt: string;
 }
 
 export interface FamilyMember {
@@ -76,4 +87,14 @@ export const SUBJECT_ICONS: Record<Subject, string> = {
   music: '🎵',
   sports: '⚽',
   other: '📝',
+};
+
+export const HOMEWORK_TYPE_LABELS: Record<HomeworkType, string> = {
+  inlamning: 'Inlämning',
+  forhor: 'Förhör',
+};
+
+export const HOMEWORK_TYPE_ICONS: Record<HomeworkType, string> = {
+  inlamning: '📄',
+  forhor: '✍️',
 };

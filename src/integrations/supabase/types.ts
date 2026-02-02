@@ -85,6 +85,7 @@ export type Database = {
           created_at: string
           description: string | null
           due_date: string
+          homework_type: string
           id: string
           is_recurring: boolean
           needs_more_practice: boolean | null
@@ -105,6 +106,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date: string
+          homework_type?: string
           id?: string
           is_recurring?: boolean
           needs_more_practice?: boolean | null
@@ -125,6 +127,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string
+          homework_type?: string
           id?: string
           is_recurring?: boolean
           needs_more_practice?: boolean | null
@@ -140,6 +143,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "homework_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_pack_items: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          item_name: string
+          weekdays: number[]
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          item_name: string
+          weekdays?: number[]
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          item_name?: string
+          weekdays?: number[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_pack_items_child_id_fkey"
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
