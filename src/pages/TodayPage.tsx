@@ -16,6 +16,8 @@ import { CalendarClock, Sun, Backpack, Bell, Flame, Flag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Subject, HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 import { RecurringPackItems } from '@/components/RecurringPackItems';
+import { AddAdhocTask } from '@/components/AddAdhocTask';
+import { AdhocTaskCard } from '@/components/AdhocTaskCard';
 
 export default function TodayPage() {
   const navigate = useNavigate();
@@ -35,6 +37,10 @@ export default function TodayPage() {
     getRecurringPackItemsForChild,
     addRecurringPackItem,
     deleteRecurringPackItem,
+    addAdhocTask,
+    toggleAdhocTask,
+    deleteAdhocTask,
+    getAdhocTasksForDate,
   } = useFamily();
   
   const today = new Date();
@@ -67,6 +73,7 @@ export default function TodayPage() {
   const bringToSchoolLabel = isAfternoon ? 'imorgon' : 'idag';
   
   const todayTasks = activeChildId ? getTasksForDate(activeChildId, today) : [];
+  const todayAdhocTasks = activeChildId ? getAdhocTasksForDate(activeChildId, today) : [];
   const itemsToBringData = activeChildId ? getItemsToBringForDate(activeChildId, bringToSchoolDate) : { homeworkItems: [], recurringItems: [] };
   const hasItemsToBring = itemsToBringData.homeworkItems.length > 0 || itemsToBringData.recurringItems.length > 0;
   
@@ -96,6 +103,14 @@ export default function TodayPage() {
   
   // Also include tasks that were originally for today but snoozed to a future date
   const snoozedAwayTasks = todayTasks.filter((t) => !t.task.completed && t.task.snoozed_until && t.task.snoozed_until !== todayStr);
+  
+  // Filter adhoc tasks
+  const incompleteAdhocTasks = todayAdhocTasks.filter((t) => !t.completed);
+  const completedAdhocTasks = todayAdhocTasks.filter((t) => t.completed);
+  
+  // Combined counts for display
+  const totalIncompleteTasks = incompleteTasks.length + incompleteAdhocTasks.length;
+  const hasAnyTasks = todayTasks.length > 0 || todayAdhocTasks.length > 0;
   
   if (loading) {
     return (
@@ -220,15 +235,15 @@ export default function TodayPage() {
                   📝
                 </span>
                 Dagens uppgifter
-                {incompleteTasks.length > 0 && (
+                {totalIncompleteTasks > 0 && (
                   <span className="text-sm font-normal text-muted-foreground">
-                    ({incompleteTasks.length} kvar)
+                    ({totalIncompleteTasks} kvar)
                   </span>
                 )}
               </h2>
               
               <AnimatePresence mode="popLayout">
-                {todayTasks.length === 0 ? (
+                {!hasAnyTasks ? (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -243,6 +258,15 @@ export default function TodayPage() {
                     </motion.div>
                     <p className="text-lg font-medium">Inga uppgifter idag!</p>
                     <p className="text-muted-foreground">Njut av din lediga tid!</p>
+                    
+                    {/* Add adhoc task button when empty */}
+                    {activeChildId && (
+                      <div className="mt-4">
+                        <AddAdhocTask 
+                          onAdd={(title) => addAdhocTask(activeChildId, title, todayStr)} 
+                        />
+                      </div>
+                    )}
                   </motion.div>
                 ) : (
                   <div className="space-y-3">
@@ -280,13 +304,30 @@ export default function TodayPage() {
                       />
                     ))}
                     
+                    {/* Adhoc tasks (incomplete) */}
+                    {incompleteAdhocTasks.map((task) => (
+                      <AdhocTaskCard
+                        key={task.id}
+                        task={task}
+                        onToggle={toggleAdhocTask}
+                        onDelete={deleteAdhocTask}
+                      />
+                    ))}
+                    
+                    {/* Add adhoc task button */}
+                    {activeChildId && (
+                      <AddAdhocTask 
+                        onAdd={(title) => addAdhocTask(activeChildId, title, todayStr)} 
+                      />
+                    )}
+                    
                     {/* Completed and Snoozed section */}
-                    {(completedTasks.length > 0 || snoozedAwayTasks.length > 0 || snoozedTasks.length > 0) && (
+                    {(completedTasks.length > 0 || snoozedAwayTasks.length > 0 || snoozedTasks.length > 0 || completedAdhocTasks.length > 0) && (
                       <>
                         <div className="flex items-center gap-2 pt-4">
                           <div className="h-px flex-1 bg-border" />
                           <span className="text-xs text-muted-foreground font-medium">
-                            Klart & Snoozat ({completedTasks.length + snoozedAwayTasks.length + snoozedTasks.length})
+                            Klart & Snoozat ({completedTasks.length + snoozedAwayTasks.length + snoozedTasks.length + completedAdhocTasks.length})
                           </span>
                           <div className="h-px flex-1 bg-border" />
                         </div>
@@ -395,6 +436,16 @@ export default function TodayPage() {
                             onToggle={toggleTask}
                             onSnooze={snoozeTask}
                             onUnsnooze={unsnoozeTask}
+                          />
+                        ))}
+                        
+                        {/* Completed adhoc tasks */}
+                        {completedAdhocTasks.map((task) => (
+                          <AdhocTaskCard
+                            key={task.id}
+                            task={task}
+                            onToggle={toggleAdhocTask}
+                            onDelete={deleteAdhocTask}
                           />
                         ))}
                       </>

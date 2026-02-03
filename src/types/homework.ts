@@ -52,6 +52,15 @@ export interface RecurringPackItem {
   createdAt: string;
 }
 
+export interface AdhocTask {
+  id: string;
+  childId: string;
+  title: string;
+  taskDate: string;
+  completed: boolean;
+  completedAt?: string;
+}
+
 export interface FamilyMember {
   id: string;
   name: string;

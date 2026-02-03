@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      adhoc_tasks: {
+        Row: {
+          child_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          task_date: string
+          title: string
+        }
+        Insert: {
+          child_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          task_date: string
+          title: string
+        }
+        Update: {
+          child_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          task_date?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adhoc_tasks_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       children: {
         Row: {
           avatar_url: string | null
