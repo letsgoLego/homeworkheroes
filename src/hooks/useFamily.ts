@@ -10,6 +10,7 @@ type Homework = Tables<'homework'>;
 type StudyTask = Tables<'study_tasks'>;
 type Family = Tables<'families'>;
 type RecurringPackItem = Tables<'recurring_pack_items'>;
+type AdhocTask = Tables<'adhoc_tasks'>;
 
 interface HomeworkWithTasks extends Homework {
   tasks: StudyTask[];
@@ -23,6 +24,7 @@ export function useFamily() {
   const [children, setChildren] = useState<Child[]>([]);
   const [homework, setHomework] = useState<HomeworkWithTasks[]>([]);
   const [recurringPackItems, setRecurringPackItems] = useState<RecurringPackItem[]>([]);
+  const [adhocTasks, setAdhocTasks] = useState<AdhocTask[]>([]);
   const [userRole, setUserRole] = useState<'parent' | 'child' | null>(null);
   const [activeChildId, setActiveChildIdState] = useState<string | null>(() => {
     // Initialize from localStorage
@@ -183,6 +185,20 @@ export function useFamily() {
         
         if (packItemsData) {
           setRecurringPackItems(packItemsData);
+        }
+        
+        // Get adhoc tasks
+        const { data: adhocData, error: adhocError } = await supabase
+          .from('adhoc_tasks')
+          .select('*')
+          .in('child_id', childIds);
+        
+        if (adhocError) {
+          console.error('Error fetching adhoc tasks:', adhocError);
+        }
+        
+        if (adhocData) {
+          setAdhocTasks(adhocData);
         }
       }
     } catch (err) {
@@ -558,11 +574,75 @@ export function useFamily() {
     return recurringPackItems.filter(item => item.child_id === childId);
   };
   
+  // Add adhoc task
+  const addAdhocTask = async (childId: string, title: string, taskDate: string) => {
+    const { error } = await supabase
+      .from('adhoc_tasks')
+      .insert({
+        child_id: childId,
+        title,
+        task_date: taskDate,
+      });
+    
+    if (error) {
+      toast.error('Kunde inte lägga till uppgift');
+      return false;
+    }
+    
+    toast.success('Extra uppgift tillagd! ⭐');
+    await fetchFamilyData();
+    return true;
+  };
+  
+  // Toggle adhoc task completion
+  const toggleAdhocTask = async (taskId: string, completed: boolean) => {
+    const { error } = await supabase
+      .from('adhoc_tasks')
+      .update({
+        completed,
+        completed_at: completed ? new Date().toISOString() : null,
+      })
+      .eq('id', taskId);
+    
+    if (error) {
+      toast.error('Kunde inte uppdatera uppgift');
+      return false;
+    }
+    
+    await fetchFamilyData();
+    return true;
+  };
+  
+  // Delete adhoc task
+  const deleteAdhocTask = async (taskId: string) => {
+    const { error } = await supabase
+      .from('adhoc_tasks')
+      .delete()
+      .eq('id', taskId);
+    
+    if (error) {
+      toast.error('Kunde inte ta bort uppgift');
+      return false;
+    }
+    
+    await fetchFamilyData();
+    return true;
+  };
+  
+  // Get adhoc tasks for a specific date
+  const getAdhocTasksForDate = (childId: string, date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return adhocTasks.filter(
+      task => task.child_id === childId && task.task_date === dateStr
+    );
+  };
+  
   return {
     family,
     children,
     homework,
     recurringPackItems,
+    adhocTasks,
     activeChildId,
     setActiveChildId,
     loading,
@@ -583,6 +663,10 @@ export function useFamily() {
     addRecurringPackItem,
     deleteRecurringPackItem,
     getRecurringPackItemsForChild,
+    addAdhocTask,
+    toggleAdhocTask,
+    deleteAdhocTask,
+    getAdhocTasksForDate,
     refetch: fetchFamilyData,
   };
 }
