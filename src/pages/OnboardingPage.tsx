@@ -43,37 +43,21 @@ export default function OnboardingPage() {
         return;
       }
       
-      // Create family - just insert, don't try to read back immediately
-      const { data: family, error: familyError } = await supabase
-        .from('families')
-        .insert({ name: familyName.trim() })
-        .select('id')
-        .single();
+      // Use atomic RPC function to create family and user_role in one transaction
+      // This prevents any timing vulnerability where the family is visible before the role is assigned
+      const { data: newFamilyId, error } = await supabase
+        .rpc('create_family_with_role', { _family_name: familyName.trim() });
       
-      if (familyError) {
-        console.error('Family creation error:', familyError);
-        throw familyError;
+      if (error) {
+        console.error('Family creation error:', error);
+        throw error;
       }
       
-      if (!family?.id) {
+      if (!newFamilyId) {
         throw new Error('Familj skapades inte korrekt');
       }
       
-      // Add user as parent immediately
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: user.id,
-          role: 'parent',
-          family_id: family.id,
-        });
-      
-      if (roleError) {
-        console.error('Role creation error:', roleError);
-        throw roleError;
-      }
-      
-      setFamilyId(family.id);
+      setFamilyId(newFamilyId);
       setStep('children');
       toast.success('Familj skapad! Lägg nu till dina barn.');
     } catch (err: any) {
