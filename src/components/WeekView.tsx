@@ -3,8 +3,9 @@ import { format, startOfWeek, addDays, isSameDay, isToday } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { SubjectBadge } from './ui/SubjectBadge';
+import { Flag, FileCheck } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
-import { Subject } from '@/types/homework';
+import { Subject, HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 
 type Homework = Tables<'homework'>;
 type StudyTask = Tables<'study_tasks'>;
@@ -37,14 +38,27 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
       );
   };
   
+  // Get homework due on a specific day (not tasks, but actual due dates)
+  const getHomeworkDueOnDay = (date: Date): HomeworkWithTasks[] => {
+    if (!activeChildId) return [];
+    const dateStr = format(date, 'yyyy-MM-dd');
+    
+    return homework.filter(
+      (hw) => hw.child_id === activeChildId && hw.due_date === dateStr && !hw.completed
+    );
+  };
+  
   return (
     <div className="space-y-4">
       {/* Week header */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
         {weekDays.map((day, index) => {
           const tasks = getTasksForDay(day);
+          const dueDates = getHomeworkDueOnDay(day);
           const completedCount = tasks.filter((t) => t.task.completed).length;
           const hasIncomplete = tasks.some((t) => !t.task.completed);
+          const hasInlamning = dueDates.some((hw) => hw.homework_type === 'inlamning');
+          const hasForhor = dueDates.some((hw) => hw.homework_type === 'forhor');
           
           return (
             <motion.button
@@ -69,39 +83,106 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
                 {format(day, 'd')}
               </span>
               
-              {/* Task indicators */}
-              {tasks.length > 0 && (
-                <div className="flex gap-1 mt-1">
-                  {hasIncomplete && (
-                    <span
-                      className={cn(
-                        'w-2 h-2 rounded-full',
-                        isSameDay(day, selectedDate)
-                          ? 'bg-primary-foreground'
-                          : 'bg-accent'
-                      )}
-                    />
-                  )}
-                  {completedCount > 0 && (
-                    <span
-                      className={cn(
-                        'w-2 h-2 rounded-full',
-                        isSameDay(day, selectedDate)
-                          ? 'bg-primary-foreground/50'
-                          : 'bg-success'
-                      )}
-                    />
-                  )}
-                </div>
-              )}
+              {/* Task and due date indicators */}
+              <div className="flex gap-1 mt-1 items-center">
+                {/* Due date indicators - diamond shape for distinction */}
+                {hasInlamning && (
+                  <span
+                    className={cn(
+                      'w-2 h-2 rotate-45',
+                      isSameDay(day, selectedDate)
+                        ? 'bg-primary-foreground'
+                        : 'bg-warning'
+                    )}
+                    title="Inlämning"
+                  />
+                )}
+                {hasForhor && (
+                  <span
+                    className={cn(
+                      'w-2 h-2 rotate-45',
+                      isSameDay(day, selectedDate)
+                        ? 'bg-primary-foreground'
+                        : 'bg-destructive'
+                    )}
+                    title="Förhör"
+                  />
+                )}
+                {/* Task indicators - round */}
+                {hasIncomplete && (
+                  <span
+                    className={cn(
+                      'w-2 h-2 rounded-full',
+                      isSameDay(day, selectedDate)
+                        ? 'bg-primary-foreground'
+                        : 'bg-accent'
+                    )}
+                  />
+                )}
+                {completedCount > 0 && (
+                  <span
+                    className={cn(
+                      'w-2 h-2 rounded-full',
+                      isSameDay(day, selectedDate)
+                        ? 'bg-primary-foreground/50'
+                        : 'bg-success'
+                    )}
+                  />
+                )}
+              </div>
             </motion.button>
           );
         })}
       </div>
       
+      {/* Due dates for selected day */}
+      {getHomeworkDueOnDay(selectedDate).length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <Flag className="w-4 h-4" />
+            Deadline
+          </h3>
+          {getHomeworkDueOnDay(selectedDate).map((hw, index) => (
+            <motion.div
+              key={hw.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={cn(
+                'flex items-center gap-3 p-3 rounded-xl border-2 border-dashed',
+                hw.homework_type === 'forhor'
+                  ? 'bg-destructive/5 border-destructive/30'
+                  : 'bg-warning/5 border-warning/30'
+              )}
+            >
+              <SubjectBadge subject={hw.subject as Subject} size="sm" showLabel={false} />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{hw.title}</p>
+                <p className="text-xs text-muted-foreground capitalize">{hw.subject}</p>
+              </div>
+              <span
+                className={cn(
+                  'text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1',
+                  hw.homework_type === 'forhor'
+                    ? 'bg-destructive/10 text-destructive'
+                    : 'bg-warning/10 text-warning-foreground'
+                )}
+              >
+                {hw.homework_type === 'forhor' ? (
+                  <FileCheck className="w-3 h-3" />
+                ) : (
+                  <Flag className="w-3 h-3" />
+                )}
+                {HOMEWORK_TYPE_LABELS[hw.homework_type as HomeworkType]}
+              </span>
+            </motion.div>
+          ))}
+        </div>
+      )}
+      
       {/* Tasks for selected day */}
       <div className="space-y-3">
-        {getTasksForDay(selectedDate).length === 0 ? (
+        {getTasksForDay(selectedDate).length === 0 && getHomeworkDueOnDay(selectedDate).length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -110,40 +191,43 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
             <p className="text-lg">Inga uppgifter den här dagen! 🎉</p>
             <p className="text-sm">Njut av din lediga tid!</p>
           </motion.div>
-        ) : (
-          getTasksForDay(selectedDate).map(({ task, homework: hw }, index) => (
-            <motion.div
-              key={task.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className={cn(
-                'flex items-center gap-3 p-3 rounded-xl',
-                task.completed
-                  ? 'bg-success/10'
-                  : 'bg-card shadow-soft'
-              )}
-            >
-              <SubjectBadge subject={hw.subject as Subject} size="sm" showLabel={false} />
-              <div className="flex-1 min-w-0">
-                <p
-                  className={cn(
-                    'font-medium truncate',
-                    task.completed && 'line-through text-muted-foreground'
-                  )}
-                >
-                  {task.title}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {hw.title}
-                </p>
-              </div>
-              {task.completed && (
-                <span className="text-success text-sm">✓</span>
-              )}
-            </motion.div>
-          ))
-        )}
+        ) : getTasksForDay(selectedDate).length > 0 ? (
+          <>
+            <h3 className="text-sm font-medium text-muted-foreground">Uppgifter</h3>
+            {getTasksForDay(selectedDate).map(({ task, homework: hw }, index) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className={cn(
+                  'flex items-center gap-3 p-3 rounded-xl',
+                  task.completed
+                    ? 'bg-success/10'
+                    : 'bg-card shadow-soft'
+                )}
+              >
+                <SubjectBadge subject={hw.subject as Subject} size="sm" showLabel={false} />
+                <div className="flex-1 min-w-0">
+                  <p
+                    className={cn(
+                      'font-medium truncate',
+                      task.completed && 'line-through text-muted-foreground'
+                    )}
+                  >
+                    {task.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {hw.title}
+                  </p>
+                </div>
+                {task.completed && (
+                  <span className="text-success text-sm">✓</span>
+                )}
+              </motion.div>
+            ))}
+          </>
+        ) : null}
       </div>
     </div>
   );
