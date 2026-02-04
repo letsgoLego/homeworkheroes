@@ -198,35 +198,8 @@ export default function TodayPage() {
               </motion.section>
             )}
             
-            {/* Weather widget for packing */}
-            <WeatherWidget date={bringToSchoolDate} />
-            
-            {/* Items to bring - dynamic based on time */}
-            {hasItemsToBring && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                  📚 Ta med {bringToSchoolLabel}
-                </h3>
-                <BringToSchool 
-                  items={itemsToBringData.homeworkItems.map(item => ({
-                    homework: {
-                      ...item.homework,
-                      id: item.homework.id,
-                      title: item.homework.title,
-                      subject: item.homework.subject as Subject,
-                      dueDate: item.homework.due_date,
-                      childId: item.homework.child_id,
-                      createdAt: item.homework.created_at,
-                      tasks: [],
-                      completed: item.homework.completed,
-                      homeworkType: (item.homework.homework_type as 'inlamning' | 'forhor') || 'inlamning',
-                    },
-                    items: item.items as string[],
-                  }))} 
-                  recurringItems={itemsToBringData.recurringItems}
-                />
-              </div>
-            )}
+            {/* Weather widget for today */}
+            <WeatherWidget date={today} />
             
             {/* Today's tasks */}
             <section>
@@ -517,45 +490,34 @@ export default function TodayPage() {
           <TabsContent value="pack" className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-sm text-muted-foreground">
-                {format(tomorrow, 'EEEE d MMMM', { locale: sv })}
+                Ta med {bringToSchoolLabel} ({format(bringToSchoolDate, 'EEEE d MMMM', { locale: sv })})
               </span>
             </div>
             
-            {/* Weather for tomorrow */}
-            <WeatherWidget date={tomorrow} />
+            {/* Weather for packing day */}
+            <WeatherWidget date={bringToSchoolDate} />
             
-            {/* Recurring pack items for tomorrow */}
-            {activeChildId && (() => {
-              const tomorrowDayOfWeek = tomorrow.getDay();
-              const recurringItemsForTomorrow = getRecurringPackItemsForChild(activeChildId)
-                .filter(item => item.weekdays.includes(tomorrowDayOfWeek));
-              
-              if (recurringItemsForTomorrow.length > 0) {
-                return (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="rounded-2xl bg-accent/30 border-2 border-accent p-4 shadow-soft"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-                        🔄
-                      </div>
-                      <h3 className="font-bold">Återkommande</h3>
-                    </div>
-                    <ul className="space-y-1.5">
-                      {recurringItemsForTomorrow.map((item) => (
-                        <li key={item.id} className="text-sm flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                          {item.item_name}
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-                );
-              }
-              return null;
-            })()}
+            {/* Items to bring - uses BringToSchool component */}
+            {hasItemsToBring && (
+              <BringToSchool 
+                items={itemsToBringData.homeworkItems.map(item => ({
+                  homework: {
+                    ...item.homework,
+                    id: item.homework.id,
+                    title: item.homework.title,
+                    subject: item.homework.subject as Subject,
+                    dueDate: item.homework.due_date,
+                    childId: item.homework.child_id,
+                    createdAt: item.homework.created_at,
+                    tasks: [],
+                    completed: item.homework.completed,
+                    homeworkType: (item.homework.homework_type as 'inlamning' | 'forhor') || 'inlamning',
+                  },
+                  items: item.items as string[],
+                }))} 
+                recurringItems={itemsToBringData.recurringItems}
+              />
+            )}
             
             {tomorrowHomework.length === 0 ? (
               <motion.div
