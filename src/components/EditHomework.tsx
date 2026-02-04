@@ -40,20 +40,20 @@ const WEEKDAYS = [
   { value: 0, label: 'Sön' },
 ];
 
-export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
-  const { addTask, deleteTask, updateHomework, refetch } = useFamily();
+export function EditHomework({ open, onClose, homework: editingHomework }: EditHomeworkProps) {
+  const { addTask, deleteTask, updateHomework, refetch, homework: allHomework } = useFamily();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'details' | 'tasks'>('details');
   
   // Details state
-  const [title, setTitle] = useState(homework.title);
-  const [subject, setSubject] = useState<Subject>(homework.subject as Subject);
-  const [description, setDescription] = useState(homework.description || '');
-  const [dueDate, setDueDate] = useState(homework.due_date);
-  const [bringItems, setBringItems] = useState<string[]>(homework.bring_to_school || []);
+  const [title, setTitle] = useState(editingHomework.title);
+  const [subject, setSubject] = useState<Subject>(editingHomework.subject as Subject);
+  const [description, setDescription] = useState(editingHomework.description || '');
+  const [dueDate, setDueDate] = useState(editingHomework.due_date);
+  const [bringItems, setBringItems] = useState<string[]>(editingHomework.bring_to_school || []);
   const [newItem, setNewItem] = useState('');
-  const [enableReminder, setEnableReminder] = useState(!!homework.reminder_date);
-  const [submissionDay, setSubmissionDay] = useState<number>(homework.submission_day ?? 5);
+  const [enableReminder, setEnableReminder] = useState(!!editingHomework.reminder_date);
+  const [submissionDay, setSubmissionDay] = useState<number>(editingHomework.submission_day ?? 5);
   
   // Task state
   const [taskTitle, setTaskTitle] = useState('Plugga');
@@ -64,28 +64,46 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
 
   // Generate available days between today and day before due date
   const availableDays = useMemo(() => {
-    if (homework.is_recurring) return [];
-    const dueDateParsed = parseISO(homework.due_date);
+    if (editingHomework.is_recurring) return [];
+    const dueDateParsed = parseISO(editingHomework.due_date);
     const endDate = subDays(dueDateParsed, 1);
     if (endDate < today) return [];
     return eachDayOfInterval({ start: today, end: endDate });
-  }, [homework.due_date, homework.is_recurring, today]);
+  }, [editingHomework.due_date, editingHomework.is_recurring, today]);
 
   // Get existing task dates to show which are already scheduled
   const existingTaskDates = useMemo(() => {
-    return homework.tasks.map(t => t.task_date);
-  }, [homework.tasks]);
+    return editingHomework.tasks.map(t => t.task_date);
+  }, [editingHomework.tasks]);
+
+  // Calculate task counts per day for this child (for workload indicator)
+  const taskCountsByDate = useMemo(() => {
+    const counts: Record<string, number> = {};
+    
+    allHomework
+      .filter(hw => hw.child_id === editingHomework.child_id)
+      .forEach(hw => {
+        hw.tasks.forEach(task => {
+          // Don't count tasks from the homework we're editing, or completed tasks
+          if (hw.id !== editingHomework.id && !task.completed) {
+            counts[task.task_date] = (counts[task.task_date] || 0) + 1;
+          }
+        });
+      });
+    
+    return counts;
+  }, [allHomework, editingHomework.child_id, editingHomework.id]);
 
   // Reset state when homework changes
   useEffect(() => {
-    setTitle(homework.title);
-    setSubject(homework.subject as Subject);
-    setDescription(homework.description || '');
-    setDueDate(homework.due_date);
-    setBringItems(homework.bring_to_school || []);
-    setEnableReminder(!!homework.reminder_date);
-    setSubmissionDay(homework.submission_day ?? 5);
-  }, [homework]);
+    setTitle(editingHomework.title);
+    setSubject(editingHomework.subject as Subject);
+    setDescription(editingHomework.description || '');
+    setDueDate(editingHomework.due_date);
+    setBringItems(editingHomework.bring_to_school || []);
+    setEnableReminder(!!editingHomework.reminder_date);
+    setSubmissionDay(editingHomework.submission_day ?? 5);
+  }, [editingHomework]);
 
   const addBringItem = () => {
     if (newItem.trim()) {
@@ -107,18 +125,18 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
     setLoading(true);
     
     const dueDateParsed = parseISO(dueDate);
-    const reminderDate = enableReminder && !homework.is_recurring 
+    const reminderDate = enableReminder && !editingHomework.is_recurring 
       ? format(addDays(dueDateParsed, -2), 'yyyy-MM-dd') 
       : null;
 
-    const success = await updateHomework(homework.id, {
+    const success = await updateHomework(editingHomework.id, {
       title: title.trim(),
       subject,
       description: description.trim() || undefined,
       dueDate,
       bringToSchool: bringItems.length > 0 ? bringItems : undefined,
       reminderDate,
-      submissionDay: homework.is_recurring ? submissionDay : null,
+      submissionDay: editingHomework.is_recurring ? submissionDay : null,
     });
 
     if (success) {
@@ -163,7 +181,7 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
 
     setLoading(true);
     for (const dateStr of selectedDays.sort()) {
-      await addTask(homework.id, taskTitle || 'Plugga', dateStr);
+      await addTask(editingHomework.id, taskTitle || 'Plugga', dateStr);
     }
     setSelectedDays([]);
     await refetch();
@@ -178,7 +196,7 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
     setLoading(false);
   };
 
-  const sortedTasks = [...homework.tasks].sort(
+  const sortedTasks = [...editingHomework.tasks].sort(
     (a, b) => new Date(a.task_date).getTime() - new Date(b.task_date).getTime()
   );
 
@@ -188,7 +206,7 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             Redigera läxa
-            {homework.is_recurring && (
+            {editingHomework.is_recurring && (
               <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
                 <Repeat className="w-3 h-3" />
                 Återkommande
@@ -219,7 +237,7 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
                 : 'bg-muted hover:bg-muted/80'
             )}
           >
-            Uppgifter ({homework.tasks.length})
+            Uppgifter ({editingHomework.tasks.length})
           </button>
         </div>
 
@@ -268,7 +286,7 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
               </div>
 
               {/* Due date - only for non-recurring */}
-              {!homework.is_recurring && (
+              {!editingHomework.is_recurring && (
                 <div>
                   <Label htmlFor="edit-dueDate" className="text-sm font-medium">
                     Inlämningsdatum
@@ -285,7 +303,7 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
               )}
 
               {/* Submission day - only for recurring */}
-              {homework.is_recurring && (
+              {editingHomework.is_recurring && (
                 <div>
                   <Label className="text-sm font-medium">Inlämningsdag</Label>
                   <p className="text-xs text-muted-foreground mb-1.5">
@@ -356,7 +374,7 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
               </div>
 
               {/* Reminder - only for non-recurring */}
-              {!homework.is_recurring && (
+              {!editingHomework.is_recurring && (
                 <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
                   <div className="flex items-center gap-2">
                     <Bell className="w-4 h-4 text-primary" />
@@ -392,7 +410,7 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
             >
               <p className="text-sm text-muted-foreground">
                 Välj dagar att lägga till eller ta bort befintliga uppgifter. 
-                Inlämning: {format(parseISO(homework.due_date), 'd MMMM', { locale: sv })}
+                Inlämning: {format(parseISO(editingHomework.due_date), 'd MMMM', { locale: sv })}
               </p>
 
               {/* Task title */}
@@ -458,6 +476,7 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
                     const hasExistingTask = existingTaskDates.includes(dateStr);
                     const isToday = isSameDay(day, today);
                     const isWeekendDay = isWeekend(day);
+                    const otherTaskCount = taskCountsByDate[dateStr] || 0;
                     
                     return (
                       <button
@@ -488,6 +507,19 @@ export function EditHomework({ open, onClose, homework }: EditHomeworkProps) {
                         <div className="text-xs opacity-70">
                           {format(day, 'MMM', { locale: sv })}
                         </div>
+                        {/* Workload indicator for other homework */}
+                        {otherTaskCount > 0 && !isSelected && !hasExistingTask && (
+                          <div className={cn(
+                            "absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium px-1.5 py-0.5 rounded-full",
+                            otherTaskCount >= 3 
+                              ? "bg-destructive/20 text-destructive"
+                              : otherTaskCount >= 2 
+                                ? "bg-warning/20 text-warning-foreground"
+                                : "bg-muted-foreground/20 text-muted-foreground"
+                          )}>
+                            {otherTaskCount} uppg
+                          </div>
+                        )}
                         {(isSelected || hasExistingTask) && (
                           <motion.div
                             initial={{ scale: 0 }}

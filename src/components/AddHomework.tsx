@@ -32,7 +32,7 @@ const WEEKDAYS = [
 ];
 
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
-  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId } = useFamily();
+  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework } = useFamily();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -76,6 +76,24 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     return eachDayOfInterval({ start: today, end: endDate });
   }, [dueDate, today, isRecurring]);
   
+  // Calculate task counts per day for the target child (for workload indicator)
+  const taskCountsByDate = useMemo(() => {
+    if (!targetChildId) return {};
+    const counts: Record<string, number> = {};
+    
+    homework
+      .filter(hw => hw.child_id === targetChildId)
+      .forEach(hw => {
+        hw.tasks.forEach(task => {
+          if (!task.completed) {
+            counts[task.task_date] = (counts[task.task_date] || 0) + 1;
+          }
+        });
+      });
+    
+    return counts;
+  }, [homework, targetChildId]);
+
   const resetForm = () => {
     setStep(1);
     setTitle('');
@@ -643,6 +661,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   const isSelected = selectedDays.includes(dateStr);
                   const isToday = isSameDay(day, today);
                   const isWeekendDay = isWeekend(day);
+                  const existingTaskCount = taskCountsByDate[dateStr] || 0;
                   
                   return (
                     <button
@@ -670,6 +689,19 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       <div className="text-xs opacity-70">
                         {format(day, 'MMM', { locale: sv })}
                       </div>
+                      {/* Workload indicator */}
+                      {existingTaskCount > 0 && !isSelected && (
+                        <div className={cn(
+                          "absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium px-1.5 py-0.5 rounded-full",
+                          existingTaskCount >= 3 
+                            ? "bg-destructive/20 text-destructive"
+                            : existingTaskCount >= 2 
+                              ? "bg-warning/20 text-warning-foreground"
+                              : "bg-muted-foreground/20 text-muted-foreground"
+                        )}>
+                          {existingTaskCount} uppg
+                        </div>
+                      )}
                       {isSelected && (
                         <motion.div
                           initial={{ scale: 0 }}
@@ -683,7 +715,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   );
                 })}
               </div>
-              
+
               {availableDays.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   Inga dagar före inlämningsdagen
