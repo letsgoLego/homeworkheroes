@@ -315,8 +315,9 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               )}
               
               {/* Title */}
-              <div>
-                <Label htmlFor="title" className="text-sm font-medium">
+              <div className="p-4 -mx-4 bg-primary/5 border-l-4 border-primary rounded-r-xl">
+                <Label htmlFor="title" className="text-base font-bold text-primary flex items-center gap-2">
+                  <span className="text-lg">📝</span>
                   Vad är läxan?
                 </Label>
                 <Input
@@ -324,8 +325,11 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="t.ex. Matte kapitel 5"
-                  className="mt-1.5"
+                  className="mt-2 h-12 text-base border-2 border-primary/30 focus:border-primary bg-background"
                 />
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Skriv en kort titel för läxan
+                </p>
               </div>
               
               {/* Subject */}
