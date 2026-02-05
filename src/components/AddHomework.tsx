@@ -695,15 +695,20 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       </div>
                       {/* Workload indicator */}
                       {existingTaskCount > 0 && !isSelected && (
-                        <div className={cn(
-                          "absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium px-1.5 py-0.5 rounded-full",
-                          existingTaskCount >= 3 
-                            ? "bg-destructive/20 text-destructive"
-                            : existingTaskCount >= 2 
-                              ? "bg-warning/20 text-warning-foreground"
-                              : "bg-muted-foreground/20 text-muted-foreground"
-                        )}>
-                          {existingTaskCount} uppg
+                        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-0.5">
+                          {Array.from({ length: Math.min(existingTaskCount, 5) }).map((_, i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                existingTaskCount >= 3 
+                                  ? "bg-destructive"
+                                  : existingTaskCount >= 2 
+                                    ? "bg-warning"
+                                    : "bg-muted-foreground"
+                              )}
+                            />
+                          ))}
                         </div>
                       )}
                       {isSelected && (
