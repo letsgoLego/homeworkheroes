@@ -132,7 +132,6 @@ export default function TodayPage() {
                 {format(today, 'EEEE d MMMM', { locale: sv })}
               </span>
             </div>
-            <WeatherWidget date={bringToSchoolDate} compact />
           </div>
           <h1 className="text-2xl font-bold">
             {activeChild ? `Hej, ${activeChild.name}! 👋` : 'Välkommen!'}
@@ -197,9 +196,6 @@ export default function TodayPage() {
                 </div>
               </motion.section>
             )}
-            
-            {/* Weather widget for today */}
-            <WeatherWidget date={today} />
             
             {/* Today's tasks */}
             <section>
