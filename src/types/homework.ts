@@ -5,7 +5,7 @@ export type Subject =
   | 'history' 
   | 'art' 
   | 'music' 
-  | 'sports' 
+  | 'english' 
   | 'other';
 
 export type HomeworkType = 'inlamning' | 'forhor';
@@ -83,7 +83,7 @@ export const SUBJECT_LABELS: Record<Subject, string> = {
   history: 'SO',
   art: 'Bild',
   music: 'Musik',
-  sports: 'Idrott',
+  english: 'Engelska',
   other: 'Övrigt',
 };
 
@@ -94,7 +94,7 @@ export const SUBJECT_ICONS: Record<Subject, string> = {
   history: '🏛️',
   art: '🎨',
   music: '🎵',
-  sports: '⚽',
+  english: '🇬🇧',
   other: '📝',
 };
 

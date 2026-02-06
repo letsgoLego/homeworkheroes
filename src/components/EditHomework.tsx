@@ -28,7 +28,7 @@ interface EditHomeworkProps {
   homework: HomeworkWithTasks;
 }
 
-const subjects: Subject[] = ['math', 'science', 'language', 'history', 'art', 'music', 'sports', 'other'];
+const subjects: Subject[] = ['math', 'science', 'language', 'history', 'art', 'music', 'english', 'other'];
 
 const WEEKDAYS = [
   { value: 1, label: 'Mån' },
