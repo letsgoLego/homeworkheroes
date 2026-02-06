@@ -7,10 +7,10 @@ import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { useFamily } from '@/hooks/useFamily';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
-import { Plus, Calendar, Trash2, Pencil, Repeat, Flag } from 'lucide-react';
+import { Plus, Calendar, Trash2, Pencil, Repeat, Flag, AlertTriangle } from 'lucide-react';
 import { HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
+import { format, isPast, parseISO, startOfDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { Subject } from '@/types/homework';
 import type { Tables } from '@/integrations/supabase/types';
@@ -28,8 +28,12 @@ export default function AddPage() {
   const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
   const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading } = useFamily();
   
+  const today = startOfDay(new Date());
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
-  const activeHomework = childHomework.filter((hw) => !hw.completed);
+  
+  // Split into: overdue (past due, not completed), active (not past due, not completed), completed
+  const overdueHomework = childHomework.filter((hw) => !hw.completed && isPast(parseISO(hw.due_date)) && parseISO(hw.due_date) < today);
+  const activeHomework = childHomework.filter((hw) => !hw.completed && parseISO(hw.due_date) >= today);
   const completedHomework = childHomework.filter((hw) => hw.completed);
   
   if (loading) {
@@ -69,6 +73,81 @@ export default function AddPage() {
           <Plus className="w-5 h-5 mr-2" />
           Lägg till ny läxa
         </Button>
+        
+        {/* Overdue homework */}
+        {overdueHomework.length > 0 && (
+          <section>
+            <h2 className="text-lg font-bold mb-3 text-destructive flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              Försenade ({overdueHomework.length})
+            </h2>
+            
+            <div className="space-y-3">
+              {overdueHomework.map((hw) => (
+                <motion.div
+                  key={hw.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-4 rounded-2xl bg-destructive/10 border border-destructive/30 shadow-card"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <SubjectBadge subject={hw.subject as Subject} size="sm" />
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditingHomework(hw)}
+                        className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                        title="Redigera uppgifter"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteHomework(hw.id)}
+                        className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <h3 className="font-bold text-lg mb-1 flex items-center gap-2 flex-wrap">
+                    {hw.title}
+                    {hw.homework_type && hw.homework_type !== 'inlamning' && (
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Flag className="w-3 h-3" />
+                        {HOMEWORK_TYPE_LABELS[hw.homework_type as HomeworkType]}
+                      </span>
+                    )}
+                  </h3>
+                  
+                  <div className="flex items-center gap-2 text-sm text-destructive mb-3">
+                    <Flag className="w-4 h-4" />
+                    <span>
+                      Försenad: {format(new Date(hw.due_date), 'EEE d MMM', { locale: sv })}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-24 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full bg-destructive transition-all"
+                          style={{
+                            width: hw.tasks.length > 0
+                              ? `${(hw.tasks.filter((t) => t.completed).length / hw.tasks.length) * 100}%`
+                              : '0%',
+                          }}
+                        />
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {hw.tasks.filter((t) => t.completed).length}/{hw.tasks.length} uppgifter
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        )}
         
         {/* Active homework */}
         <section>
