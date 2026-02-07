@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { format, addDays } from 'date-fns';
+import { format, addDays, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { useFamily } from '@/hooks/useFamily';
 import { TaskCard } from '@/components/TaskCard';
@@ -96,13 +96,13 @@ export default function TodayPage() {
     .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
     .slice(0, 3);
   
-  // Filter tasks: incomplete (not snoozed), snoozed (for today), and completed
-  const incompleteTasks = todayTasks.filter((t) => !t.task.completed && !t.task.snoozed_until);
-  const snoozedTasks = todayTasks.filter((t) => !t.task.completed && t.task.snoozed_until === todayStr);
+  // Filter tasks: 
+  // - Active incomplete: not completed AND (not snoozed OR snoozed to today - these "woke up")
+  // - Snoozed away: snoozed to a future date (after today)
+  // - Completed: completed tasks
+  const incompleteTasks = todayTasks.filter((t) => !t.task.completed && (!t.task.snoozed_until || t.task.snoozed_until <= todayStr));
+  const snoozedAwayTasks = todayTasks.filter((t) => !t.task.completed && t.task.snoozed_until && t.task.snoozed_until > todayStr);
   const completedTasks = todayTasks.filter((t) => t.task.completed);
-  
-  // Also include tasks that were originally for today but snoozed to a future date
-  const snoozedAwayTasks = todayTasks.filter((t) => !t.task.completed && t.task.snoozed_until && t.task.snoozed_until !== todayStr);
   
   // Filter adhoc tasks
   const incompleteAdhocTasks = todayAdhocTasks.filter((t) => !t.completed);
@@ -111,6 +111,10 @@ export default function TodayPage() {
   // Combined counts for display
   const totalIncompleteTasks = incompleteTasks.length + incompleteAdhocTasks.length;
   const hasAnyTasks = todayTasks.length > 0 || todayAdhocTasks.length > 0;
+  
+  // Helper to check if snoozing is allowed (tomorrow must not be past due date)
+  const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
+  const canSnoozeTask = (dueDate: string) => tomorrowStr <= dueDate;
   
   if (loading) {
     return (
@@ -239,7 +243,7 @@ export default function TodayPage() {
                   </motion.div>
                 ) : (
                   <div className="space-y-3">
-                    {incompleteTasks.map(({ task, homework: hw }) => (
+                    {incompleteTasks.map(({ task, homework: hw, wasSnoozed }) => (
                       <TaskCard 
                         key={task.id} 
                         task={{
@@ -270,6 +274,8 @@ export default function TodayPage() {
                         onToggle={toggleTask}
                         onSnooze={snoozeTask}
                         onUnsnooze={unsnoozeTask}
+                        wasSnoozed={wasSnoozed}
+                        canSnooze={canSnoozeTask(hw.due_date)}
                       />
                     ))}
                     
@@ -290,52 +296,16 @@ export default function TodayPage() {
                       />
                     )}
                     
-                    {/* Completed and Snoozed section */}
-                    {(completedTasks.length > 0 || snoozedAwayTasks.length > 0 || snoozedTasks.length > 0 || completedAdhocTasks.length > 0) && (
+                    {/* Completed and Snoozed Away section */}
+                    {(completedTasks.length > 0 || snoozedAwayTasks.length > 0 || completedAdhocTasks.length > 0) && (
                       <>
                         <div className="flex items-center gap-2 pt-4">
                           <div className="h-px flex-1 bg-border" />
                           <span className="text-xs text-muted-foreground font-medium">
-                            Klart & Snoozat ({completedTasks.length + snoozedAwayTasks.length + snoozedTasks.length + completedAdhocTasks.length})
+                            Klart & Snoozat ({completedTasks.length + snoozedAwayTasks.length + completedAdhocTasks.length})
                           </span>
                           <div className="h-px flex-1 bg-border" />
                         </div>
-                        
-                        {/* Snoozed tasks that came back today */}
-                        {snoozedTasks.map(({ task, homework: hw }) => (
-                          <TaskCard 
-                            key={task.id} 
-                            task={{
-                              id: task.id,
-                              homeworkId: task.homework_id,
-                              title: task.title,
-                              date: task.task_date,
-                              completed: task.completed,
-                              completedAt: task.completed_at || undefined,
-                              snoozedUntil: task.snoozed_until || undefined,
-                            }}
-                            homework={{
-                              id: hw.id,
-                              title: hw.title,
-                              subject: hw.subject as Subject,
-                              dueDate: hw.due_date,
-                              childId: hw.child_id,
-                              createdAt: hw.created_at,
-                              tasks: hw.tasks.map(t => ({
-                                id: t.id,
-                                homeworkId: t.homework_id,
-                                title: t.title,
-                                date: t.task_date,
-                                completed: t.completed,
-                              })),
-                              completed: hw.completed,
-                            }}
-                            onToggle={toggleTask}
-                            onSnooze={snoozeTask}
-                            onUnsnooze={unsnoozeTask}
-                            isSnoozed
-                          />
-                        ))}
                         
                         {/* Tasks snoozed away from today */}
                         {snoozedAwayTasks.map(({ task, homework: hw }) => (
@@ -370,6 +340,7 @@ export default function TodayPage() {
                             onSnooze={snoozeTask}
                             onUnsnooze={unsnoozeTask}
                             isSnoozed
+                            canSnooze={canSnoozeTask(hw.due_date)}
                           />
                         ))}
                         
