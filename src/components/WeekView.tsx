@@ -39,13 +39,19 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
   };
   
   // Get homework due on a specific day (not tasks, but actual due dates)
+  // Returns both incomplete and completed homework for the day
   const getHomeworkDueOnDay = (date: Date): HomeworkWithTasks[] => {
     if (!activeChildId) return [];
     const dateStr = format(date, 'yyyy-MM-dd');
     
     return homework.filter(
-      (hw) => hw.child_id === activeChildId && hw.due_date === dateStr && !hw.completed
+      (hw) => hw.child_id === activeChildId && hw.due_date === dateStr
     );
+  };
+  
+  // Get incomplete homework due on a specific day (for indicators)
+  const getIncompleteHomeworkDueOnDay = (date: Date): HomeworkWithTasks[] => {
+    return getHomeworkDueOnDay(date).filter((hw) => !hw.completed);
   };
   
   return (
@@ -55,10 +61,12 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
         {weekDays.map((day, index) => {
           const tasks = getTasksForDay(day);
           const dueDates = getHomeworkDueOnDay(day);
+          const incompleteDueDates = getIncompleteHomeworkDueOnDay(day);
           const completedCount = tasks.filter((t) => t.task.completed).length;
           const hasIncomplete = tasks.some((t) => !t.task.completed);
-          const hasInlamning = dueDates.some((hw) => hw.homework_type === 'inlamning');
-          const hasForhor = dueDates.some((hw) => hw.homework_type === 'forhor');
+          const hasInlamning = incompleteDueDates.some((hw) => hw.homework_type === 'inlamning');
+          const hasForhor = incompleteDueDates.some((hw) => hw.homework_type === 'forhor');
+          const hasCompletedDeadline = dueDates.some((hw) => hw.completed);
           
           return (
             <motion.button
@@ -119,7 +127,7 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
                     )}
                   />
                 )}
-                {completedCount > 0 && (
+                {(completedCount > 0 || hasCompletedDeadline) && (
                   <span
                     className={cn(
                       'w-2 h-2 rounded-full',
@@ -150,31 +158,42 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
               transition={{ delay: index * 0.1 }}
               className={cn(
                 'flex items-center gap-3 p-3 rounded-xl border-2 border-dashed',
-                hw.homework_type === 'forhor'
+                hw.completed
+                  ? 'bg-success/10 border-success/30'
+                  : hw.homework_type === 'forhor'
                   ? 'bg-destructive/5 border-destructive/30'
                   : 'bg-warning/5 border-warning/30'
               )}
             >
               <SubjectBadge subject={hw.subject as Subject} size="sm" showLabel={false} />
               <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{hw.title}</p>
+                <p className={cn(
+                  'font-medium truncate',
+                  hw.completed && 'line-through text-muted-foreground'
+                )}>{hw.title}</p>
                 <p className="text-xs text-muted-foreground capitalize">{hw.subject}</p>
               </div>
-              <span
-                className={cn(
-                  'text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1',
-                  hw.homework_type === 'forhor'
-                    ? 'bg-destructive/10 text-destructive'
-                    : 'bg-warning/10 text-warning-foreground'
-                )}
-              >
-                {hw.homework_type === 'forhor' ? (
-                  <FileCheck className="w-3 h-3" />
-                ) : (
-                  <Flag className="w-3 h-3" />
-                )}
-                {HOMEWORK_TYPE_LABELS[hw.homework_type as HomeworkType]}
-              </span>
+              {hw.completed ? (
+                <span className="text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 bg-success/10 text-success">
+                  ✓ Klar
+                </span>
+              ) : (
+                <span
+                  className={cn(
+                    'text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1',
+                    hw.homework_type === 'forhor'
+                      ? 'bg-destructive/10 text-destructive'
+                      : 'bg-warning/10 text-warning-foreground'
+                  )}
+                >
+                  {hw.homework_type === 'forhor' ? (
+                    <FileCheck className="w-3 h-3" />
+                  ) : (
+                    <Flag className="w-3 h-3" />
+                  )}
+                  {HOMEWORK_TYPE_LABELS[hw.homework_type as HomeworkType]}
+                </span>
+              )}
             </motion.div>
           ))}
         </div>
