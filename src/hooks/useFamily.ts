@@ -412,9 +412,15 @@ export function useFamily() {
     return { allCompleted, homework: hw };
   };
   
-  // Snooze task until tomorrow
-  const snoozeTask = async (taskId: string) => {
+  // Snooze task until tomorrow (with due date validation)
+  const snoozeTask = async (taskId: string, homeworkDueDate?: string) => {
     const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
+    
+    // If due date is provided, validate that we're not snoozing past it
+    if (homeworkDueDate && tomorrow > homeworkDueDate) {
+      toast.error('Kan inte snooza förbi deadline');
+      return false;
+    }
     
     const { error } = await supabase
       .from('study_tasks')
@@ -497,15 +503,28 @@ export function useFamily() {
     return homework.filter(hw => hw.child_id === childId);
   };
   
-  // Get tasks for a specific date
+  // Get tasks for a specific date (includes snoozed tasks that "wake up" on this date)
   const getTasksForDate = (childId: string, date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return homework
       .filter(hw => hw.child_id === childId)
       .flatMap(hw => 
         hw.tasks
-          .filter(t => t.task_date === dateStr)
-          .map(task => ({ task, homework: hw }))
+          .filter(t => {
+            // Include if: task is scheduled for this date AND not snoozed to a future date
+            const isScheduledToday = t.task_date === dateStr && 
+              (!t.snoozed_until || t.snoozed_until <= dateStr);
+            
+            // OR: task was snoozed UNTIL this date (it "wakes up" today)
+            const isSnoozedToToday = t.snoozed_until === dateStr;
+            
+            return isScheduledToday || isSnoozedToToday;
+          })
+          .map(task => ({ 
+            task, 
+            homework: hw,
+            wasSnoozed: task.snoozed_until === dateStr, // Flag for UI: task woke up today from snooze
+          }))
       );
   };
   

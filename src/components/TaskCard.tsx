@@ -13,12 +13,14 @@ interface TaskCardProps {
   task: StudyTask;
   homework: Homework;
   onToggle: (taskId: string, completed: boolean) => Promise<{ allCompleted: boolean; homework: any }>;
-  onSnooze?: (taskId: string) => Promise<boolean>;
+  onSnooze?: (taskId: string, homeworkDueDate?: string) => Promise<boolean>;
   onUnsnooze?: (taskId: string) => Promise<boolean>;
   isSnoozed?: boolean;
+  wasSnoozed?: boolean; // Task was snoozed and is now appearing on its snooze date
+  canSnooze?: boolean; // Whether snoozing is allowed (false if tomorrow > due date)
 }
 
-export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSnoozed = false }: TaskCardProps) {
+export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSnoozed = false, wasSnoozed = false, canSnooze = true }: TaskCardProps) {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedHomework, setCompletedHomework] = useState<Homework | null>(null);
   const { refetch } = useFamily();
@@ -41,7 +43,7 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSno
   const handleSnooze = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onSnooze) {
-      await onSnooze(task.id);
+      await onSnooze(task.id, homework.dueDate);
     }
   };
   
@@ -93,6 +95,11 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSno
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <SubjectBadge subject={homework.subject} size="sm" />
+              {wasSnoozed && !isSnoozed && (
+                <span className="text-xs bg-primary/10 px-2 py-0.5 rounded-full text-primary flex items-center gap-1">
+                  🔔 Från igår
+                </span>
+              )}
               {isSnoozed && (
                 <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground flex items-center gap-1">
                   <Moon className="w-3 h-3" />
@@ -125,7 +132,7 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSno
                 >
                   Vakna
                 </Button>
-              ) : (
+              ) : canSnooze ? (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -134,6 +141,16 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSno
                   title="Snooze till imorgon"
                 >
                   <span className="text-base">💤</span>
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled
+                  className="text-muted-foreground/50 cursor-not-allowed"
+                  title="Kan inte snooza förbi deadline"
+                >
+                  <span className="text-base opacity-50">💤</span>
                 </Button>
               )}
             </div>
