@@ -52,6 +52,24 @@ export type Database = {
           },
         ]
       }
+      app_config: {
+        Row: {
+          created_at: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       children: {
         Row: {
           avatar_url: string | null
@@ -187,6 +205,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth_key: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_homework_notify: string | null
+          last_reminder_notify: string | null
+          last_unfinished_notify: string | null
+          notify_new_homework: boolean
+          notify_reminder: boolean
+          notify_unfinished: boolean
+          p256dh: string
+          timezone: string
+          user_id: string
+        }
+        Insert: {
+          auth_key: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_homework_notify?: string | null
+          last_reminder_notify?: string | null
+          last_unfinished_notify?: string | null
+          notify_new_homework?: boolean
+          notify_reminder?: boolean
+          notify_unfinished?: boolean
+          p256dh: string
+          timezone?: string
+          user_id: string
+        }
+        Update: {
+          auth_key?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_homework_notify?: string | null
+          last_reminder_notify?: string | null
+          last_unfinished_notify?: string | null
+          notify_new_homework?: boolean
+          notify_reminder?: boolean
+          notify_unfinished?: boolean
+          p256dh?: string
+          timezone?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       recurring_pack_items: {
         Row: {
