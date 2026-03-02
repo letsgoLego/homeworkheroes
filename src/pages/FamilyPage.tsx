@@ -7,6 +7,7 @@ import { ManageChildAccount } from '@/components/ManageChildAccount';
 import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
 import { Users, Download, Smartphone, LogOut, Copy, Check, Settings, UserPlus } from 'lucide-react';
+import { NotificationSettings } from '@/components/NotificationSettings';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -103,6 +104,9 @@ export default function FamilyPage() {
             </p>
           </motion.div>
         )}
+        
+        {/* Notification Settings */}
+        <NotificationSettings />
         
         {/* Install App Card */}
         <motion.div
