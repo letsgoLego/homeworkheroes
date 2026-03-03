@@ -243,7 +243,7 @@ export default function TodayPage() {
                   </motion.div>
                 ) : (
                   <div className="space-y-3">
-                    {incompleteTasks.map(({ task, homework: hw, wasSnoozed }) => (
+                    {incompleteTasks.map(({ task, homework: hw, wasSnoozed, daysOld }) => (
                       <TaskCard 
                         key={task.id} 
                         task={{
@@ -276,6 +276,7 @@ export default function TodayPage() {
                         onUnsnooze={unsnoozeTask}
                         wasSnoozed={wasSnoozed}
                         canSnooze={canSnoozeTask(hw.due_date)}
+                        daysOld={daysOld}
                       />
                     ))}
                     

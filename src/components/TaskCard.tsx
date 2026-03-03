@@ -16,11 +16,12 @@ interface TaskCardProps {
   onSnooze?: (taskId: string, homeworkDueDate?: string) => Promise<boolean>;
   onUnsnooze?: (taskId: string) => Promise<boolean>;
   isSnoozed?: boolean;
-  wasSnoozed?: boolean; // Task was snoozed and is now appearing on its snooze date
-  canSnooze?: boolean; // Whether snoozing is allowed (false if tomorrow > due date)
+  wasSnoozed?: boolean;
+  canSnooze?: boolean;
+  daysOld?: number; // How many days overdue the task is
 }
 
-export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSnoozed = false, wasSnoozed = false, canSnooze = true }: TaskCardProps) {
+export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSnoozed = false, wasSnoozed = false, canSnooze = true, daysOld = 0 }: TaskCardProps) {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedHomework, setCompletedHomework] = useState<Homework | null>(null);
   const { refetch } = useFamily();
@@ -93,9 +94,14 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, isSno
           </button>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <SubjectBadge subject={homework.subject} size="sm" />
-              {wasSnoozed && !isSnoozed && (
+              {daysOld > 0 && !task.completed && !isSnoozed && (
+                <span className="text-xs bg-destructive/10 px-2 py-0.5 rounded-full text-destructive flex items-center gap-1">
+                  ⏳ {daysOld} {daysOld === 1 ? 'dag' : 'dagar'} sedan
+                </span>
+              )}
+              {wasSnoozed && !isSnoozed && daysOld === 0 && (
                 <span className="text-xs bg-primary/10 px-2 py-0.5 rounded-full text-primary flex items-center gap-1">
                   🔔 Från igår
                 </span>
