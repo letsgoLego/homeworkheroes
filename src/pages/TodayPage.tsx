@@ -32,6 +32,7 @@ export default function TodayPage() {
     getTasksForDate,
     getItemsToBringForDate,
     toggleTask,
+    deleteTask,
     snoozeTask,
     unsnoozeTask,
     getRecurringPackItemsForChild,
@@ -272,6 +273,7 @@ export default function TodayPage() {
                           completed: hw.completed,
                         }}
                         onToggle={toggleTask}
+                        onDelete={deleteTask}
                         onSnooze={snoozeTask}
                         onUnsnooze={unsnoozeTask}
                         wasSnoozed={wasSnoozed}
@@ -338,6 +340,7 @@ export default function TodayPage() {
                               completed: hw.completed,
                             }}
                             onToggle={toggleTask}
+                            onDelete={deleteTask}
                             onSnooze={snoozeTask}
                             onUnsnooze={unsnoozeTask}
                             isSnoozed
@@ -375,6 +378,7 @@ export default function TodayPage() {
                               completed: hw.completed,
                             }}
                             onToggle={toggleTask}
+                            onDelete={deleteTask}
                             onSnooze={snoozeTask}
                             onUnsnooze={unsnoozeTask}
                           />
