@@ -503,7 +503,7 @@ export function useFamily() {
     return homework.filter(hw => hw.child_id === childId);
   };
   
-  // Get tasks for a specific date (includes snoozed tasks that "wake up" on this date)
+  // Get tasks for a specific date (includes snoozed tasks and overdue tasks)
   const getTasksForDate = (childId: string, date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return homework
@@ -518,13 +518,28 @@ export function useFamily() {
             // OR: task was snoozed UNTIL this date (it "wakes up" today)
             const isSnoozedToToday = t.snoozed_until === dateStr;
             
-            return isScheduledToday || isSnoozedToToday;
+            // OR: task is from a previous day, not completed, and not snoozed to a future date
+            const isOverdue = !t.completed && 
+              t.task_date < dateStr && 
+              (!t.snoozed_until || t.snoozed_until <= dateStr) &&
+              // Don't show if snoozed to a specific future date (already handled by isSnoozedToToday)
+              t.snoozed_until !== dateStr;
+            
+            return isScheduledToday || isSnoozedToToday || isOverdue;
           })
-          .map(task => ({ 
-            task, 
-            homework: hw,
-            wasSnoozed: task.snoozed_until === dateStr, // Flag for UI: task woke up today from snooze
-          }))
+          .map(task => {
+            // Calculate how many days old the task is
+            const taskDate = task.snoozed_until || task.task_date;
+            const diffMs = date.getTime() - new Date(taskDate + 'T00:00:00').getTime();
+            const daysOld = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+            
+            return { 
+              task, 
+              homework: hw,
+              wasSnoozed: task.snoozed_until === dateStr,
+              daysOld,
+            };
+          })
       );
   };
   
