@@ -39,6 +39,7 @@ export default function TodayPage() {
     addRecurringPackItem,
     deleteRecurringPackItem,
     addAdhocTask,
+    adhocTasks,
     toggleAdhocTask,
     deleteAdhocTask,
     getAdhocTasksForDate,
@@ -440,18 +441,18 @@ export default function TodayPage() {
           <TabsContent value="streak" className="space-y-6">
             <div className="mb-2">
               <h2 className="text-lg font-bold flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                  <Flame className="w-4 h-4 text-orange-500" />
+                <span className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Flame className="w-4 h-4 text-primary" />
                 </span>
-                Mina streaks
+                Min progress
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Håll igång dina dagliga läxor!
+                Så här går det för dig!
               </p>
             </div>
             
             {activeChildId && (
-              <StreakStats homework={homework} childId={activeChildId} />
+              <StreakStats homework={homework} childId={activeChildId} adhocTasks={adhocTasks} />
             )}
             
             {!activeChildId && (
