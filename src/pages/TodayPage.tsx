@@ -101,7 +101,9 @@ export default function TodayPage() {
   // - Active incomplete: not completed AND (not snoozed OR snoozed to today - these "woke up")
   // - Snoozed away: snoozed to a future date (after today)
   // - Completed: completed tasks
-  const incompleteTasks = todayTasks.filter((t) => !t.task.completed && (!t.task.snoozed_until || t.task.snoozed_until <= todayStr));
+  const incompleteTasks = todayTasks
+    .filter((t) => !t.task.completed && (!t.task.snoozed_until || t.task.snoozed_until <= todayStr))
+    .sort((a, b) => (a.daysOld || 0) - (b.daysOld || 0));
   const snoozedAwayTasks = todayTasks.filter((t) => !t.task.completed && t.task.snoozed_until && t.task.snoozed_until > todayStr);
   const completedTasks = todayTasks.filter((t) => t.task.completed);
   
