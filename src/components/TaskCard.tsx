@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform, PanInfo, useAnimation } from 'framer-motion';
 import { Check, Moon, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StudyTask, Homework } from '@/types/homework';
@@ -22,6 +22,9 @@ interface TaskCardProps {
   daysOld?: number;
 }
 
+const DELETE_BUTTON_WIDTH = 80;
+const DELETE_THRESHOLD = -200;
+
 export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDelete, isSnoozed = false, wasSnoozed = false, canSnooze = true, daysOld = 0 }: TaskCardProps) {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedHomework, setCompletedHomework] = useState<Homework | null>(null);
@@ -29,8 +32,8 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
   const { refetch } = useFamily();
   
   const x = useMotionValue(0);
-  const deleteOpacity = useTransform(x, [-120, -60], [1, 0]);
-  const deleteScale = useTransform(x, [-120, -60, 0], [1, 0.8, 0.5]);
+  const controls = useAnimation();
+  const deleteOpacity = useTransform(x, [-DELETE_BUTTON_WIDTH, 0], [1, 0]);
   
   const handleToggle = async () => {
     const newCompleted = !task.completed;
@@ -68,36 +71,53 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
     setIsDeleting(false);
   };
 
+  const handleDeleteButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    handleDelete();
+  };
+
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.x < -100) {
-      handleDelete();
+    const offset = info.offset.x;
+    
+    if (offset < DELETE_THRESHOLD) {
+      // Full swipe — delete immediately
+      controls.start({ x: -500, transition: { duration: 0.2 } }).then(handleDelete);
+    } else if (offset < -40) {
+      // Partial swipe — snap open to reveal delete button
+      controls.start({ x: -DELETE_BUTTON_WIDTH, transition: { type: 'spring', stiffness: 500, damping: 30 } });
+    } else {
+      // Snap back closed
+      controls.start({ x: 0, transition: { type: 'spring', stiffness: 500, damping: 30 } });
     }
   };
   
   return (
     <>
       <div className="relative overflow-hidden rounded-2xl">
-        {/* Delete background */}
+        {/* Delete button background */}
         <motion.div
-          style={{ opacity: deleteOpacity, scale: deleteScale }}
-          className="absolute inset-0 flex items-center justify-end pr-6 bg-destructive rounded-2xl"
+          style={{ opacity: deleteOpacity }}
+          className="absolute inset-0 flex items-center justify-end rounded-2xl bg-destructive"
         >
-          <div className="flex items-center gap-2 text-destructive-foreground">
+          <button
+            onClick={handleDeleteButtonClick}
+            className="flex items-center justify-center gap-2 text-destructive-foreground h-full px-5"
+            style={{ width: DELETE_BUTTON_WIDTH }}
+          >
             <Trash2 className="w-5 h-5" />
-            <span className="font-medium text-sm">Ta bort</span>
-          </div>
+          </button>
         </motion.div>
 
         {/* Draggable card */}
         <motion.div
           layout
           style={{ x }}
+          animate={controls}
           drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={{ left: 0.5, right: 0 }}
+          dragConstraints={{ left: -300, right: 0 }}
+          dragElastic={{ left: 0.3, right: 0 }}
           onDragEnd={handleDragEnd}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, x: -200 }}
           whileTap={{ scale: 0.98 }}
           className={cn(
