@@ -1,10 +1,10 @@
-import { motion, useMotionValue, useTransform, PanInfo, useAnimation } from 'framer-motion';
+import { motion, useAnimation, PanInfo, AnimatePresence } from 'framer-motion';
 import { Check, Moon, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StudyTask, Homework } from '@/types/homework';
 import { SubjectBadge } from './ui/SubjectBadge';
 import { celebrateTask, celebrateAssignment } from '@/lib/confetti';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { CompletionModal } from './CompletionModal';
 import { useFamily } from '@/hooks/useFamily';
 import { Button } from './ui/button';
@@ -23,17 +23,17 @@ interface TaskCardProps {
 }
 
 const DELETE_BUTTON_WIDTH = 80;
-const DELETE_THRESHOLD = -200;
+const DELETE_THRESHOLD = -180;
 
 export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDelete, isSnoozed = false, wasSnoozed = false, canSnooze = true, daysOld = 0 }: TaskCardProps) {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completedHomework, setCompletedHomework] = useState<Homework | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isRemoved, setIsRemoved] = useState(false);
   const { refetch } = useFamily();
   
-  const x = useMotionValue(0);
   const controls = useAnimation();
-  const deleteOpacity = useTransform(x, [-DELETE_BUTTON_WIDTH, 0], [1, 0]);
   
   const handleToggle = async () => {
     const newCompleted = !task.completed;
@@ -64,61 +64,83 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
     }
   };
 
-  const handleDelete = async () => {
+  const performDelete = async () => {
     if (!onDelete || isDeleting) return;
     setIsDeleting(true);
-    await onDelete(task.id);
-    setIsDeleting(false);
+    setIsRemoved(true);
+    // Small delay for exit animation
+    setTimeout(async () => {
+      await onDelete(task.id);
+      refetch();
+    }, 250);
   };
 
   const handleDeleteButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    handleDelete();
+    controls.start({ x: -400, opacity: 0, transition: { duration: 0.2 } }).then(performDelete);
   };
 
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const offset = info.offset.x;
+    const velocity = info.velocity.x;
     
-    if (offset < DELETE_THRESHOLD) {
-      // Full swipe — delete immediately
-      controls.start({ x: -500, transition: { duration: 0.2 } }).then(handleDelete);
+    if (offset < DELETE_THRESHOLD || velocity < -500) {
+      // Full swipe — animate out and delete
+      controls.start({ x: -400, opacity: 0, transition: { duration: 0.2 } }).then(performDelete);
     } else if (offset < -40) {
       // Partial swipe — snap open to reveal delete button
-      controls.start({ x: -DELETE_BUTTON_WIDTH, transition: { type: 'spring', stiffness: 500, damping: 30 } });
+      setIsOpen(true);
+      controls.start({ x: -DELETE_BUTTON_WIDTH, transition: { type: 'spring', stiffness: 400, damping: 30 } });
     } else {
       // Snap back closed
-      controls.start({ x: 0, transition: { type: 'spring', stiffness: 500, damping: 30 } });
+      setIsOpen(false);
+      controls.start({ x: 0, transition: { type: 'spring', stiffness: 400, damping: 30 } });
+    }
+  };
+
+  const handleCardTap = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      controls.start({ x: 0, transition: { type: 'spring', stiffness: 400, damping: 30 } });
     }
   };
   
+  if (isRemoved) {
+    return (
+      <motion.div
+        initial={{ height: 'auto', opacity: 1 }}
+        animate={{ height: 0, opacity: 0, marginBottom: 0 }}
+        transition={{ duration: 0.25, ease: 'easeInOut' }}
+        className="overflow-hidden"
+      />
+    );
+  }
+
   return (
     <>
       <div className="relative overflow-hidden rounded-2xl">
         {/* Delete button background */}
-        <motion.div
-          style={{ opacity: deleteOpacity }}
-          className="absolute inset-0 flex items-center justify-end rounded-2xl bg-destructive"
-        >
+        <div className="absolute inset-0 flex items-center justify-end rounded-2xl bg-destructive">
           <button
             onClick={handleDeleteButtonClick}
-            className="flex items-center justify-center gap-2 text-destructive-foreground h-full px-5"
+            className="flex flex-col items-center justify-center gap-1 text-destructive-foreground h-full"
             style={{ width: DELETE_BUTTON_WIDTH }}
           >
             <Trash2 className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Ta bort</span>
           </button>
-        </motion.div>
+        </div>
 
         {/* Draggable card */}
         <motion.div
-          layout
-          style={{ x }}
           animate={controls}
           drag="x"
           dragConstraints={{ left: -300, right: 0 }}
-          dragElastic={{ left: 0.3, right: 0 }}
+          dragElastic={{ left: 0.2, right: 0 }}
           onDragEnd={handleDragEnd}
-          initial={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, x: -200 }}
+          onClick={handleCardTap}
+          initial={{ x: 0 }}
+          
           whileTap={{ scale: 0.98 }}
           className={cn(
             'group relative overflow-hidden rounded-2xl p-4 shadow-card transition-colors duration-200',
