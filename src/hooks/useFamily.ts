@@ -127,16 +127,26 @@ export function useFamily() {
       }
       
       if (childrenData) {
-        setChildren(childrenData);
-        // Check if stored activeChildId is still valid
-        const storedId = localStorage.getItem(ACTIVE_CHILD_KEY);
-        const validChild = storedId && childrenData.some(c => c.id === storedId);
+        // For child users, filter to only their own child
+        const filteredChildren = userRoleData.role === 'child' && userRoleData.child_id
+          ? childrenData.filter(c => c.id === userRoleData.child_id)
+          : childrenData;
         
-        if (childrenData.length > 0 && !validChild) {
-          setActiveChildId(childrenData[0].id);
-        } else if (storedId && validChild && activeChildId !== storedId) {
-          // Sync state with localStorage if different
-          setActiveChildIdState(storedId);
+        setChildren(filteredChildren);
+        
+        // For child users, always lock to their own child
+        if (userRoleData.role === 'child' && userRoleData.child_id) {
+          setActiveChildId(userRoleData.child_id);
+        } else {
+          // Check if stored activeChildId is still valid
+          const storedId = localStorage.getItem(ACTIVE_CHILD_KEY);
+          const validChild = storedId && filteredChildren.some(c => c.id === storedId);
+          
+          if (filteredChildren.length > 0 && !validChild) {
+            setActiveChildId(filteredChildren[0].id);
+          } else if (storedId && validChild && activeChildId !== storedId) {
+            setActiveChildIdState(storedId);
+          }
         }
       }
       

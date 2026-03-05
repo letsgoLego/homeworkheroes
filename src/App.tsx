@@ -8,12 +8,14 @@ import TodayPage from "./pages/TodayPage";
 import WeekPage from "./pages/WeekPage";
 import AddPage from "./pages/AddPage";
 import FamilyPage from "./pages/FamilyPage";
+import ChildProfilePage from "./pages/ChildProfilePage";
 import AuthPage from "./pages/AuthPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import JoinFamilyPage from "./pages/JoinFamilyPage";
 import JoinFamilyStartPage from "./pages/JoinFamilyStartPage";
 import ChildLoginPage from "./pages/ChildLoginPage";
 import NotFound from "./pages/NotFound";
+import ParentRouteGuard from "./components/ParentRouteGuard";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+
 function AppRoutes() {
   return (
     <Routes>
@@ -63,8 +66,9 @@ function AppRoutes() {
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
       <Route path="/" element={<ProtectedRoute><TodayPage /></ProtectedRoute>} />
       <Route path="/week" element={<ProtectedRoute><WeekPage /></ProtectedRoute>} />
-      <Route path="/add" element={<ProtectedRoute><AddPage /></ProtectedRoute>} />
-      <Route path="/family" element={<ProtectedRoute><FamilyPage /></ProtectedRoute>} />
+      <Route path="/add" element={<ProtectedRoute><ParentRouteGuard><AddPage /></ParentRouteGuard></ProtectedRoute>} />
+      <Route path="/family" element={<ProtectedRoute><ParentRouteGuard><FamilyPage /></ParentRouteGuard></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ChildProfilePage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
