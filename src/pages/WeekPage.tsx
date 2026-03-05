@@ -66,15 +66,17 @@ export default function WeekPage() {
           </div>
         </div>
         
-        {/* Child switcher */}
-        <div className="px-4 pb-3">
-          <ChildSwitcher 
-            children={children}
-            activeChildId={activeChildId}
-            onSelectChild={setActiveChildId}
-            onAddChild={() => setShowAddChild(true)} 
-          />
-        </div>
+        {/* Child switcher - only for parents */}
+        {!loading && children.length > 0 && (
+          <div className="px-4 pb-3">
+            <ChildSwitcher 
+              children={children}
+              activeChildId={activeChildId}
+              onSelectChild={setActiveChildId}
+              onAddChild={() => setShowAddChild(true)} 
+            />
+          </div>
+        )}
       </header>
       
       <main className="px-4 py-4">

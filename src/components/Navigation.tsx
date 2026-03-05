@@ -1,17 +1,26 @@
 import { motion } from 'framer-motion';
 import { useLocation, Link } from 'react-router-dom';
-import { Home, Calendar, Plus, Users } from 'lucide-react';
+import { Home, Calendar, Plus, Users, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useFamily } from '@/hooks/useFamily';
 
-const navItems = [
+const parentNavItems = [
   { path: '/', icon: Home, label: 'Idag' },
   { path: '/week', icon: Calendar, label: 'Vecka' },
   { path: '/add', icon: Plus, label: 'Lägg till', isAction: true },
   { path: '/family', icon: Users, label: 'Familj' },
 ];
 
+const childNavItems = [
+  { path: '/', icon: Home, label: 'Idag' },
+  { path: '/week', icon: Calendar, label: 'Vecka' },
+  { path: '/profile', icon: User, label: 'Profil' },
+];
+
 export function Navigation() {
   const location = useLocation();
+  const { userRole } = useFamily();
+  const navItems = userRole === 'child' ? childNavItems : parentNavItems;
   
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border safe-area-bottom z-50">

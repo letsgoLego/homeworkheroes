@@ -146,15 +146,17 @@ export default function TodayPage() {
           </h1>
         </div>
         
-        {/* Child switcher */}
-        <div className="px-4 pb-3">
-          <ChildSwitcher 
-            children={children}
-            activeChildId={activeChildId}
-            onSelectChild={setActiveChildId}
-            onAddChild={() => setShowAddChild(true)} 
-          />
-        </div>
+        {/* Child switcher - only for parents */}
+        {userRole !== 'child' && (
+          <div className="px-4 pb-3">
+            <ChildSwitcher 
+              children={children}
+              activeChildId={activeChildId}
+              onSelectChild={setActiveChildId}
+              onAddChild={() => setShowAddChild(true)} 
+            />
+          </div>
+        )}
       </header>
       
       <main className="px-4 py-4">
