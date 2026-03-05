@@ -120,7 +120,7 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
     <>
       <div className="relative overflow-hidden rounded-2xl">
         {/* Delete button background */}
-        <div className="absolute inset-0 flex items-center justify-end rounded-2xl bg-destructive">
+        <div className="absolute inset-0 flex items-center justify-end rounded-2xl bg-destructive/60">
           <button
             onClick={handleDeleteButtonClick}
             className="flex flex-col items-center justify-center gap-1 text-destructive-foreground h-full"
