@@ -4,18 +4,25 @@ import { Home, Calendar, Plus, Users, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFamily } from '@/hooks/useFamily';
 
-const parentNavItems = [
+const parentNavItems: NavItem[] = [
   { path: '/', icon: Home, label: 'Idag' },
   { path: '/week', icon: Calendar, label: 'Vecka' },
   { path: '/add', icon: Plus, label: 'Lägg till', isAction: true },
   { path: '/family', icon: Users, label: 'Familj' },
 ];
 
-const childNavItems = [
+const childNavItems: NavItem[] = [
   { path: '/', icon: Home, label: 'Idag' },
   { path: '/week', icon: Calendar, label: 'Vecka' },
   { path: '/profile', icon: User, label: 'Profil' },
 ];
+
+interface NavItem {
+  path: string;
+  icon: typeof Home;
+  label: string;
+  isAction?: boolean;
+}
 
 export function Navigation() {
   const location = useLocation();
