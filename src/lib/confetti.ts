@@ -45,3 +45,26 @@ export const celebrateAssignment = () => {
     });
   }, 250);
 };
+
+export const celebrateStars = () => {
+  const defaults = {
+    spread: 360,
+    ticks: 80,
+    gravity: 0.4,
+    decay: 0.94,
+    startVelocity: 20,
+    zIndex: 9999,
+    shapes: ['star' as const],
+    colors: ['#e6c229', '#f5d547', '#ffec6e', '#ffd700', '#fff3a0'],
+  };
+
+  const shoot = () => {
+    confetti({ ...defaults, particleCount: 20, origin: { x: 0.2, y: 0.3 }, scalar: 1.2 });
+    confetti({ ...defaults, particleCount: 20, origin: { x: 0.8, y: 0.3 }, scalar: 1.2 });
+    confetti({ ...defaults, particleCount: 15, origin: { x: 0.5, y: 0.1 }, scalar: 0.9 });
+  };
+
+  shoot();
+  setTimeout(shoot, 200);
+  setTimeout(shoot, 400);
+};

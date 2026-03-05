@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Check, Trash2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { celebrateStars } from '@/lib/confetti';
 
 interface AdhocTask {
   id: string;
@@ -33,7 +34,11 @@ export function AdhocTaskCard({ task, onToggle, onDelete }: AdhocTaskCardProps) 
       <div className="flex items-center gap-3">
         {/* Checkbox */}
         <button
-          onClick={() => onToggle(task.id, !task.completed)}
+          onClick={() => {
+            const newCompleted = !task.completed;
+            onToggle(task.id, newCompleted);
+            if (newCompleted) celebrateStars();
+          }}
           className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center transition-all flex-shrink-0',
             task.completed

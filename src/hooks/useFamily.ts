@@ -409,6 +409,9 @@ export function useFamily() {
         .eq('id', hw.id);
     }
     
+    // Always refetch to ensure UI is in sync
+    await fetchFamilyData();
+    
     return { allCompleted, homework: hw };
   };
   
