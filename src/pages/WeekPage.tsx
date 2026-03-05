@@ -13,7 +13,7 @@ import { useFamily } from '@/hooks/useFamily';
 export default function WeekPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const { children, activeChildId, setActiveChildId, homework, loading } = useFamily();
+  const { children, activeChildId, setActiveChildId, homework, loading, userRole } = useFamily();
   
   const handlePrevWeek = () => {
     setSelectedDate(subWeeks(selectedDate, 1));
@@ -67,7 +67,7 @@ export default function WeekPage() {
         </div>
         
         {/* Child switcher - only for parents */}
-        {!loading && children.length > 0 && (
+        {userRole !== 'child' && children.length > 0 && (
           <div className="px-4 pb-3">
             <ChildSwitcher 
               children={children}
