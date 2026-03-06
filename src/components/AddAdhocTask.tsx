@@ -39,7 +39,7 @@ export function AddAdhocTask({ onAdd }: AddAdhocTaskProps) {
         <Button
           variant="outline"
           size="sm"
-          className="w-full border-dashed border-2 text-muted-foreground hover:text-foreground hover:border-primary/50"
+          className="w-full border-dashed border-2 text-muted-foreground hover:text-celebration-foreground hover:border-celebration hover:bg-celebration/10"
         >
           <Plus className="w-4 h-4 mr-2" />
           Lägg till extra uppgift
