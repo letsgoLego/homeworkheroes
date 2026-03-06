@@ -82,7 +82,7 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
   const handleToggleBlock = async (memberId: string, currentlyBlocked: boolean) => {
     const { error } = await supabase
       .from('user_roles')
-      .update({ blocked: !currentlyBlocked })
+      .update({ blocked: !currentlyBlocked } as any)
       .eq('user_id', memberId)
       .eq('family_id', familyId);
 
