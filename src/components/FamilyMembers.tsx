@@ -55,7 +55,7 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
   const handleRoleChange = async (memberId: string, newRole: 'parent' | 'child') => {
     const { error } = await supabase
       .from('user_roles')
-      .update({ role: newRole })
+      .update({ role: newRole } as any)
       .eq('user_id', memberId)
       .eq('family_id', familyId);
 
@@ -63,14 +63,26 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
       toast.error('Kunde inte ändra roll');
       return;
     }
-    toast.success('Roll uppdaterad');
+    
+    // If changing to child, clear child_id so user is prompted to link
+    if (newRole === 'child') {
+      toast.success('Roll ändrad till barn – välj vilken barnprofil att koppla');
+    } else {
+      // If changing to parent, clear child_id link
+      await supabase
+        .from('user_roles')
+        .update({ child_id: null } as any)
+        .eq('user_id', memberId)
+        .eq('family_id', familyId);
+      toast.success('Roll ändrad till förälder');
+    }
     fetchMembers();
   };
 
   const handleToggleBlock = async (memberId: string, currentlyBlocked: boolean) => {
     const { error } = await supabase
       .from('user_roles')
-      .update({ blocked: !currentlyBlocked })
+      .update({ blocked: !currentlyBlocked } as any)
       .eq('user_id', memberId)
       .eq('family_id', familyId);
 
@@ -85,7 +97,7 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
   const handleChildLink = async (memberId: string, childId: string | null) => {
     const { error } = await supabase
       .from('user_roles')
-      .update({ child_id: childId === 'none' ? null : childId })
+      .update({ child_id: childId === 'none' ? null : childId } as any)
       .eq('user_id', memberId)
       .eq('family_id', familyId);
 
@@ -210,22 +222,30 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
                     </Select>
 
                     {member.role === 'child' && (
-                      <Select
-                        value={member.child_id || 'none'}
-                        onValueChange={(val) => handleChildLink(member.user_id, val)}
-                      >
-                        <SelectTrigger className="h-8 text-xs flex-1 min-w-[120px]">
-                          <SelectValue placeholder="Länka barn..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Ingen</SelectItem>
-                          {children.map((child) => (
-                            <SelectItem key={child.id} value={child.id}>
-                              {child.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className={`flex-1 min-w-[120px] ${!member.child_id ? 'ring-2 ring-primary/50 rounded-md' : ''}`}>
+                        <Select
+                          value={member.child_id || 'none'}
+                          onValueChange={(val) => handleChildLink(member.user_id, val)}
+                        >
+                          <SelectTrigger className="h-8 text-xs w-full">
+                            <SelectValue placeholder="⚠️ Välj barnprofil..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Ingen koppling</SelectItem>
+                            {children.map((child) => (
+                              <SelectItem key={child.id} value={child.id}>
+                                <span className="flex items-center gap-1">
+                                  <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: child.color }} />
+                                  {child.name}
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {!member.child_id && (
+                          <p className="text-xs text-primary mt-1">⚠️ Koppla till barnprofil så läxorna visas rätt</p>
+                        )}
+                      </div>
                     )}
 
                     <Button
