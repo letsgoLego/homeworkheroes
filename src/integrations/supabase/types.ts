@@ -329,6 +329,7 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          blocked: boolean
           child_id: string | null
           created_at: string
           family_id: string | null
@@ -337,6 +338,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          blocked?: boolean
           child_id?: string | null
           created_at?: string
           family_id?: string | null
@@ -345,6 +347,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          blocked?: boolean
           child_id?: string | null
           created_at?: string
           family_id?: string | null
@@ -377,6 +380,17 @@ export type Database = {
       create_family_with_role: {
         Args: { _family_name: string }
         Returns: string
+      }
+      get_family_members: {
+        Args: { _family_id: string }
+        Returns: {
+          blocked: boolean
+          child_id: string
+          child_name: string
+          email: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
       }
       has_role: {
         Args: {
