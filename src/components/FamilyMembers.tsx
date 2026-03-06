@@ -97,7 +97,7 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
   const handleChildLink = async (memberId: string, childId: string | null) => {
     const { error } = await supabase
       .from('user_roles')
-      .update({ child_id: childId === 'none' ? null : childId })
+      .update({ child_id: childId === 'none' ? null : childId } as any)
       .eq('user_id', memberId)
       .eq('family_id', familyId);
 
