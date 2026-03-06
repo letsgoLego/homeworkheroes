@@ -106,6 +106,11 @@ export default function FamilyPage() {
           </motion.div>
         )}
         
+        {/* Family Members Management */}
+        {family && (
+          <FamilyMembers familyId={family.id} children={children} />
+        )}
+        
         {/* Notification Settings */}
         <NotificationSettings />
         
