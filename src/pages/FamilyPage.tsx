@@ -8,6 +8,7 @@ import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
 import { Users, Download, Smartphone, LogOut, Copy, Check, Settings, UserPlus } from 'lucide-react';
 import { NotificationSettings } from '@/components/NotificationSettings';
+import { FamilyMembers } from '@/components/FamilyMembers';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -103,6 +104,11 @@ export default function FamilyPage() {
               Dela denna kod med familjemedlemmar för att bjuda in dem
             </p>
           </motion.div>
+        )}
+        
+        {/* Family Members Management */}
+        {family && (
+          <FamilyMembers familyId={family.id} children={children} />
         )}
         
         {/* Notification Settings */}
