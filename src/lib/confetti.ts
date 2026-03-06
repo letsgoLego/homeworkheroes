@@ -1,6 +1,14 @@
 import confetti from 'canvas-confetti';
 
+export const haptic = (style: 'light' | 'medium' | 'heavy' = 'medium') => {
+  if ('vibrate' in navigator) {
+    const patterns = { light: [10], medium: [20], heavy: [30, 10, 30] };
+    navigator.vibrate(patterns[style]);
+  }
+};
+
 export const celebrateTask = () => {
+  haptic('light');
   confetti({
     particleCount: 50,
     spread: 60,
@@ -10,6 +18,7 @@ export const celebrateTask = () => {
 };
 
 export const celebrateAssignment = () => {
+  haptic('heavy');
   const duration = 2000;
   const animationEnd = Date.now() + duration;
   const defaults = { 
@@ -47,8 +56,8 @@ export const celebrateAssignment = () => {
 };
 
 export const celebrateStars = () => {
+  haptic('medium');
   const defaults = {
-    spread: 360,
     ticks: 80,
     gravity: 0.4,
     decay: 0.94,
