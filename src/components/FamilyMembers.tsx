@@ -55,7 +55,7 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
   const handleRoleChange = async (memberId: string, newRole: 'parent' | 'child') => {
     const { error } = await supabase
       .from('user_roles')
-      .update({ role: newRole })
+      .update({ role: newRole } as any)
       .eq('user_id', memberId)
       .eq('family_id', familyId);
 
@@ -63,7 +63,19 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
       toast.error('Kunde inte ändra roll');
       return;
     }
-    toast.success('Roll uppdaterad');
+    
+    // If changing to child, clear child_id so user is prompted to link
+    if (newRole === 'child') {
+      toast.success('Roll ändrad till barn – välj vilken barnprofil att koppla');
+    } else {
+      // If changing to parent, clear child_id link
+      await supabase
+        .from('user_roles')
+        .update({ child_id: null } as any)
+        .eq('user_id', memberId)
+        .eq('family_id', familyId);
+      toast.success('Roll ändrad till förälder');
+    }
     fetchMembers();
   };
 
