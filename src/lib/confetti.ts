@@ -19,6 +19,7 @@ export const celebrateTask = () => {
 
 export const celebrateAssignment = () => {
   haptic('heavy');
+  const duration = 2000;
   const animationEnd = Date.now() + duration;
   const defaults = { 
     startVelocity: 30, 
@@ -56,7 +57,7 @@ export const celebrateAssignment = () => {
 
 export const celebrateStars = () => {
   haptic('medium');
-    spread: 360,
+  const defaults = {
     ticks: 80,
     gravity: 0.4,
     decay: 0.94,
