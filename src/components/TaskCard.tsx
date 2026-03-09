@@ -145,7 +145,7 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
           className={cn(
             'group relative overflow-hidden rounded-2xl p-4 shadow-card transition-colors duration-200',
             task.completed
-              ? 'bg-success/10 border-2 border-success/30'
+              ? 'bg-success/5 border-2 border-success/20'
               : isSnoozed
               ? 'bg-muted/50 border-2 border-muted-foreground/20'
               : 'bg-card border-2 border-transparent hover:border-primary/20'
