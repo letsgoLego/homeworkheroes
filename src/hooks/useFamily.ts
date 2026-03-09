@@ -542,8 +542,7 @@ export function useFamily() {
           })
           .map(task => {
             // Calculate how many days old the task is
-            const taskDate = task.snoozed_until || task.task_date;
-            const diffMs = date.getTime() - new Date(taskDate + 'T00:00:00').getTime();
+            const diffMs = date.getTime() - new Date(task.task_date + 'T00:00:00').getTime();
             const daysOld = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
             
             return { 
