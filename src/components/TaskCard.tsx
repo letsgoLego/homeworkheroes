@@ -247,7 +247,7 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="absolute inset-0 bg-gradient-to-r from-success/5 to-transparent pointer-events-none"
+              className="absolute inset-0 bg-gradient-to-br from-success/10 to-success/5 pointer-events-none"
             />
           )}
           
