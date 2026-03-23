@@ -9,10 +9,10 @@ import { Switch } from '@/components/ui/switch';
 import { useFamily } from '@/hooks/useFamily';
 import { format, parseISO, addDays, isBefore, isSameDay, startOfDay, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, Calendar, Trash2, Bell, Repeat, Check } from 'lucide-react';
+import { Plus, X, Calendar, Trash2, Bell, Repeat, Check, Flag } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Subject, SUBJECT_LABELS, SUBJECT_ICONS } from '@/types/homework';
+import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Homework = Tables<'homework'>;
