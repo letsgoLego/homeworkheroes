@@ -31,7 +31,7 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
   const [isDeleting, setIsDeleting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isRemoved, setIsRemoved] = useState(false);
-  const { refetch } = useFamily();
+  
   
   const controls = useAnimation();
   
