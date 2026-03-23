@@ -141,6 +141,8 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
       bringToSchool: bringItems.length > 0 ? bringItems : undefined,
       reminderDate,
       submissionDay: editingHomework.is_recurring ? submissionDay : null,
+      homeworkType,
+      recurrenceDays: editingHomework.is_recurring ? recurrenceDays : undefined,
     });
 
     if (success) {
