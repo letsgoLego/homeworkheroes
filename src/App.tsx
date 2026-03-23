@@ -66,7 +66,7 @@ function AppRoutes() {
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
       <Route path="/" element={<ProtectedRoute><TodayPage /></ProtectedRoute>} />
       <Route path="/week" element={<ProtectedRoute><WeekPage /></ProtectedRoute>} />
-      <Route path="/add" element={<ProtectedRoute><ParentRouteGuard><AddPage /></ParentRouteGuard></ProtectedRoute>} />
+      <Route path="/add" element={<ProtectedRoute><AddPage /></ProtectedRoute>} />
       <Route path="/family" element={<ProtectedRoute><ParentRouteGuard><FamilyPage /></ParentRouteGuard></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ChildProfilePage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
