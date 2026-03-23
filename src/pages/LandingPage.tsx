@@ -4,13 +4,15 @@ import { Button } from '@/components/ui/button';
 import { 
   BookOpen, Calendar, CheckCircle2, Backpack, Users, 
   ArrowRight, Sparkles, Bell, BarChart3, ChevronDown,
-  Plus, Flag, Repeat, Moon
+  Plus, Flag, Repeat, Moon, Smartphone, UserPlus, Eye,
+  Clock, Star, Zap, Heart, Shield
 } from 'lucide-react';
-import heroFamily from '@/assets/hero-family.png';
-import appMockup from '@/assets/app-mockup.png';
-import featurePacklist from '@/assets/feature-packlist.png';
-import featurePlanning from '@/assets/feature-planning.png';
-import featureCelebrate from '@/assets/feature-celebrate.png';
+import screenshotToday from '@/assets/screenshot-today.png';
+import screenshotAdd from '@/assets/screenshot-add.png';
+import screenshotWeek from '@/assets/screenshot-week.png';
+import screenshotFamily from '@/assets/screenshot-family.png';
+import screenshotCelebrate from '@/assets/screenshot-celebrate.png';
+import screenshotPacklist from '@/assets/screenshot-packlist.png';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -75,7 +77,7 @@ export default function LandingPage() {
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                <a href="#features">
+                <a href="#how-to">
                   <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 text-lg font-semibold px-8">
                     Se hur det fungerar
                     <ChevronDown className="w-5 h-5 ml-2" />
@@ -91,18 +93,18 @@ export default function LandingPage() {
               className="relative flex justify-center"
             >
               <img
-                src={heroFamily}
-                alt="Förälder och barn som pluggar tillsammans"
-                width={500}
-                height={500}
-                className="w-full max-w-md drop-shadow-xl"
+                src={screenshotToday}
+                alt="Homework Heroes dagvy med uppgifter"
+                width={320}
+                height={568}
+                className="w-64 sm:w-72 rounded-[2rem] shadow-elevated"
               />
               <img
-                src={appMockup}
-                alt="Homework Heroes app"
+                src={screenshotCelebrate}
+                alt="Fira avklarade uppgifter"
                 width={200}
-                height={250}
-                className="absolute -right-4 bottom-4 w-40 sm:w-48 drop-shadow-2xl hidden sm:block"
+                height={355}
+                className="absolute -right-2 sm:-right-8 bottom-0 w-44 sm:w-52 rounded-[2rem] shadow-elevated hidden sm:block"
                 loading="lazy"
               />
             </motion.div>
@@ -130,7 +132,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ============ HOW IT WORKS ============ */}
+      {/* ============ HOW IT WORKS (3 steps) ============ */}
       <section id="features" className="py-16 sm:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <motion.div
@@ -162,35 +164,44 @@ export default function LandingPage() {
                 title: 'Lägg till läxan',
                 desc: 'Välj ämne, typ (inlämning eller förhör), deadline och vad som ska tas med till skolan.',
                 color: 'bg-primary/10 text-primary',
+                image: screenshotAdd,
               },
               {
                 step: '2',
                 icon: Calendar,
-                title: 'Välj pluggdagar',
+                title: 'Planera veckan',
                 desc: 'Fördela uppgifterna över veckans dagar. Se arbetsbelastningen per dag så du inte bokar för mycket.',
                 color: 'bg-accent/10 text-accent',
+                image: screenshotWeek,
               },
               {
                 step: '3',
                 icon: CheckCircle2,
                 title: 'Bocka av & fira',
-                desc: 'Varje avklarad uppgift firas med konfetti! Klara alla uppgifter för en hel läxa och det blir fest.',
+                desc: 'Varje avklarad uppgift firas med konfetti! Klara alla uppgifter och streaken växer.',
                 color: 'bg-success/10 text-success',
+                image: screenshotCelebrate,
               },
             ].map((item) => (
               <motion.div
                 key={item.step}
                 variants={fadeUp}
-                className="relative bg-card rounded-3xl p-8 shadow-card border border-border hover:shadow-elevated transition-shadow"
+                className="relative bg-card rounded-3xl p-6 shadow-card border border-border hover:shadow-elevated transition-shadow"
               >
                 <div className="absolute -top-4 -left-2 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-extrabold shadow-md">
                   {item.step}
                 </div>
-                <div className={`w-14 h-14 rounded-2xl ${item.color} flex items-center justify-center mb-4`}>
-                  <item.icon className="w-7 h-7" />
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-48 object-cover object-top rounded-2xl mb-4"
+                  loading="lazy"
+                />
+                <div className={`w-12 h-12 rounded-2xl ${item.color} flex items-center justify-center mb-3`}>
+                  <item.icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-bold text-foreground mb-2">{item.title}</h3>
-                <p className="text-muted-foreground">{item.desc}</p>
+                <p className="text-muted-foreground text-sm">{item.desc}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -216,10 +227,11 @@ export default function LandingPage() {
               </motion.h2>
               <motion.div variants={stagger} className="space-y-4">
                 {[
-                  { icon: BookOpen, text: 'Se vilka läxor som är aktiva, avklarade eller försenade' },
+                  { icon: Eye, text: 'Se vilka läxor som är aktiva, avklarade eller försenade' },
                   { icon: BarChart3, text: 'Följ ditt barns streak och veckostatistik' },
                   { icon: Users, text: 'Hantera hela familjen – lägg till barn och föräldrar' },
                   { icon: Bell, text: 'Få påminnelser när deadlines närmar sig' },
+                  { icon: Shield, text: 'Kontrollera roller – bestäm vem som är förälder eller barn' },
                 ].map((item) => (
                   <motion.div key={item.text} variants={fadeUp} className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -238,11 +250,11 @@ export default function LandingPage() {
               className="flex justify-center"
             >
               <img
-                src={appMockup}
-                alt="App-översikt med uppgifter och kalender"
-                width={350}
-                height={440}
-                className="drop-shadow-2xl"
+                src={screenshotFamily}
+                alt="Familjevy med medlemmar och statistik"
+                width={320}
+                height={568}
+                className="w-64 sm:w-72 rounded-[2rem] shadow-elevated"
                 loading="lazy"
               />
             </motion.div>
@@ -250,8 +262,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ============ FEATURE DEEP DIVES (How-to) ============ */}
-      <section id="guide" className="py-16 sm:py-24">
+      {/* ============ HOW-TO GUIDE (Step by step features) ============ */}
+      <section id="how-to" className="py-16 sm:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <motion.div
             initial="hidden"
@@ -261,68 +273,112 @@ export default function LandingPage() {
             className="text-center mb-16"
           >
             <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
-              Allt du kan göra
+              Steg-för-steg guide 📖
             </motion.h2>
             <motion.p variants={fadeUp} className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              En komplett guide till alla funktioner i Homework Heroes
+              Lär dig allt du kan göra i Homework Heroes
             </motion.p>
           </motion.div>
 
-          {/* Feature 1: Lägg till läxor */}
-          <FeatureBlock
-            reverse={false}
-            image={featurePlanning}
-            imageAlt="Planera dina pluggdagar"
-            badge={{ icon: Plus, label: 'Lägg till läxor', color: 'bg-primary/10 text-primary' }}
-            title="Skapa läxor med alla detaljer"
+          {/* Guide 1: Skapa konto & familj */}
+          <HowToStep
+            stepNumber={1}
+            title="Skapa konto & sätt upp din familj"
+            description="Registrera dig som förälder, skapa en familj och bjud in resten. Barn kan logga in med eget barnkonto."
             items={[
-              { icon: BookOpen, title: 'Välj ämne', desc: 'Matte, svenska, NO, SO, engelska, bild, musik – alla ämnen finns.' },
-              { icon: Flag, title: 'Inlämning eller förhör', desc: 'Markera vilken typ av läxa det är för tydligare planering.' },
-              { icon: Calendar, title: 'Sätt deadline', desc: 'Välj inlämningsdatum och se det tydligt i veckovyn.' },
-              { icon: Repeat, title: 'Återkommande läxor', desc: 'Perfekt för läsläxor eller veckologgar som upprepas.' },
+              { icon: UserPlus, title: 'Skapa konto', desc: 'Registrera dig med e-post och lösenord. Det tar under en minut.' },
+              { icon: Users, title: 'Skapa familj', desc: 'Ge din familj ett namn. Du får en unik inbjudningskod att dela.' },
+              { icon: Heart, title: 'Bjud in familjen', desc: 'Dela koden så att partners och barn kan gå med i familjen.' },
+              { icon: Shield, title: 'Tilldela roller', desc: 'Bestäm vem som är förälder (full kontroll) och vem som är barn (ser sina egna läxor).' },
             ]}
           />
 
-          {/* Feature 2: Planera pluggdagar */}
-          <FeatureBlock
-            reverse={true}
-            image={featureCelebrate}
-            imageAlt="Fira avklarade uppgifter"
-            badge={{ icon: Calendar, label: 'Smart planering', color: 'bg-accent/10 text-accent' }}
-            title="Fördela arbetet över veckan"
+          {/* Guide 2: Lägg till läxor */}
+          <HowToStep
+            stepNumber={2}
+            title="Lägg till en läxa"
+            description="Skapa en läxa med alla detaljer som behövs för att planera pluggandet."
+            image={screenshotAdd}
+            imageAlt="Lägg till läxa-formulär"
+            reverse
             items={[
-              { icon: Calendar, title: 'Välj dagar', desc: 'Klicka på dagar i kalendern för att lägga in pluggpass. Se hur många uppgifter du redan har varje dag.' },
-              { icon: CheckCircle2, title: 'Snabbval', desc: 'Välj "Alla dagar", "Vardagar" eller "Varannan dag" med ett klick.' },
-              { icon: Moon, title: 'Snooze', desc: 'Hinner du inte idag? Skjut upp till imorgon med ett svep.' },
-              { icon: Sparkles, title: 'Extra uppgifter', desc: 'Lägg till bonusuppgifter för extra stjärnor och känsla av framgång.' },
+              { icon: BookOpen, title: 'Välj ämne', desc: 'Matte, svenska, NO, SO, engelska, bild, musik – alla ämnen finns med tydliga färgkodade ikoner.' },
+              { icon: Flag, title: 'Typ av läxa', desc: 'Markera om det är en inlämning eller ett förhör. Det syns direkt på kortet.' },
+              { icon: Calendar, title: 'Sätt deadline', desc: 'Välj när läxan ska vara klar. Appen visar automatiskt hur många dagar som är kvar.' },
+              { icon: Backpack, title: 'Saker att ta med', desc: 'Lägg till vad som behöver packas – räknare, bok, gympapåse – allt visas i packlistan.' },
+              { icon: Repeat, title: 'Återkommande läxor', desc: 'Läsläxor eller veckologgar? Ställ in vilka dagar de ska upprepas automatiskt.' },
             ]}
           />
 
-          {/* Feature 3: Packlistor */}
-          <FeatureBlock
-            reverse={false}
-            image={featurePacklist}
-            imageAlt="Packlista för skolan"
-            badge={{ icon: Backpack, label: 'Packlistor', color: 'bg-celebration/15 text-celebration-foreground' }}
-            title="Glöm aldrig att packa rätt"
+          {/* Guide 3: Planera pluggdagar */}
+          <HowToStep
+            stepNumber={3}
+            title="Planera dina pluggdagar"
+            description="Fördela arbetet smart över veckan – se direkt om en dag blir för fullpackad."
+            image={screenshotWeek}
+            imageAlt="Veckoöversikt med uppgifter"
             items={[
-              { icon: Backpack, title: 'Per läxa', desc: 'Lägg till saker att ta med kopplat till specifika läxor.' },
-              { icon: Repeat, title: 'Återkommande saker', desc: 'Gympapåse på tisdagar? Flöjt på torsdagar? Ställ in det en gång.' },
-              { icon: Bell, title: 'Smarta påminnelser', desc: 'Appen visar vad som behövs imorgon redan på eftermiddagen.' },
+              { icon: Calendar, title: 'Välj dagar', desc: 'Klicka på dagarna i kalendern för att lägga in pluggpass. Varje dag visar hur många uppgifter du redan har.' },
+              { icon: Zap, title: 'Snabbval', desc: 'Använd "Alla dagar", "Vardagar" eller "Varannan dag" för att snabbt fördela arbetet.' },
+              { icon: Moon, title: 'Snooze', desc: 'Hinner du inte idag? Svep för att skjuta upp uppgiften till imorgon.' },
+              { icon: Clock, title: 'Överblick', desc: 'Veckovyn visar alla läxor och uppgifter sorterade per dag – perfekt för att planera framåt.' },
             ]}
           />
 
-          {/* Feature 4: Statistik & streak */}
-          <FeatureBlock
-            reverse={true}
-            image={heroFamily}
-            imageAlt="Familj som pluggar tillsammans"
-            badge={{ icon: BarChart3, label: 'Statistik', color: 'bg-success/10 text-success' }}
-            title="Följ framstegen"
+          {/* Guide 4: Packlistor */}
+          <HowToStep
+            stepNumber={4}
+            title="Packlistor – glöm aldrig att packa"
+            description="Appen samlar ihop allt som ska med till skolan och visar det tydligt."
+            image={screenshotPacklist}
+            imageAlt="Packlista med saker att ta med"
+            reverse
             items={[
-              { icon: BarChart3, title: 'Veckostatistik', desc: 'Se hur många uppgifter och läxor som klarats av den här veckan.' },
-              { icon: Sparkles, title: 'Streak', desc: 'Håll din streak vid liv genom att klara alla uppgifter varje dag.' },
-              { icon: CheckCircle2, title: 'Completion rate', desc: 'Procent av avklarade uppgifter – en positiv motivator.' },
+              { icon: Backpack, title: 'Per läxa', desc: 'Saker kopplade till specifika läxor visas automatiskt den dag de behövs.' },
+              { icon: Repeat, title: 'Återkommande saker', desc: 'Gympapåse på tisdagar? Flöjt på torsdagar? Ställ in det en gång och glöm det.' },
+              { icon: Bell, title: 'Daglig lista', desc: 'Varje morgon ser du exakt vad som ska med i ryggsäcken.' },
+            ]}
+          />
+
+          {/* Guide 5: Extra uppgifter */}
+          <HowToStep
+            stepNumber={5}
+            title="Extra uppgifter – gör det lilla extra"
+            description="Lägg till bonusuppgifter utöver läxorna för att visa engagemang."
+            items={[
+              { icon: Star, title: 'Bonusuppgifter', desc: 'Skapa frivilliga uppgifter som "Läs 15 minuter extra" eller "Öva glosor". Firas med stjärnor!' },
+              { icon: Sparkles, title: 'Stjärnregn', desc: 'När du klarar en extra uppgift regnar det guldstjärnor – motivation som fungerar.' },
+              { icon: BarChart3, title: 'Räknas i statistiken', desc: 'Extra uppgifter ökar din veckostatistik och visar att du gör mer än vad som krävs.' },
+            ]}
+          />
+
+          {/* Guide 6: Fira framgång */}
+          <HowToStep
+            stepNumber={6}
+            title="Fira varje framgång"
+            description="Positiv förstärkning gör att pluggandet känns bra – inte som ett måste."
+            image={screenshotCelebrate}
+            imageAlt="Firande med konfetti och trofé"
+            reverse
+            items={[
+              { icon: Sparkles, title: 'Konfetti', desc: 'Varje avklarad uppgift belönas med en konfettiexplosion. Det är omöjligt att inte le!' },
+              { icon: BarChart3, title: 'Streak', desc: 'Klara alla uppgifter en dag och din streak ökar. Hur lång kan du göra den?' },
+              { icon: Repeat, title: 'Öva mer', desc: 'Kan du inte allt? Välj "Öva mer" och schemalägg repetition med smart mellanrum.' },
+            ]}
+          />
+
+          {/* Guide 7: Familjehantering */}
+          <HowToStep
+            stepNumber={7}
+            title="Hantera familjen"
+            description="Som förälder har du full kontroll. Barn ser bara sin egen information."
+            image={screenshotFamily}
+            imageAlt="Familjevy med medlemmar"
+            items={[
+              { icon: Users, title: 'Familjemedlemmar', desc: 'Se alla som är med i familjen. Tilldela roller och koppla barn till rätt profil.' },
+              { icon: Shield, title: 'Roller', desc: 'Föräldrar ser allt och kan hantera. Barn ser bara sina egna läxor och uppgifter.' },
+              { icon: Smartphone, title: 'Barnkonto', desc: 'Barn loggar in med eget användarnamn eller e-post – enkelt och säkert.' },
+              { icon: Bell, title: 'Påminnelser', desc: 'Ställ in notiser för nya läxor, deadlines och ogjorda uppgifter.' },
             ]}
           />
         </div>
@@ -371,42 +427,42 @@ export default function LandingPage() {
   );
 }
 
-/* ============ FEATURE BLOCK COMPONENT ============ */
-interface FeatureItem {
+/* ============ HOW-TO STEP COMPONENT ============ */
+interface HowToItem {
   icon: typeof BookOpen;
   title: string;
   desc: string;
 }
 
-interface FeatureBlockProps {
-  reverse: boolean;
-  image: string;
-  imageAlt: string;
-  badge: { icon: typeof BookOpen; label: string; color: string };
+interface HowToStepProps {
+  stepNumber: number;
   title: string;
-  items: FeatureItem[];
+  description: string;
+  items: HowToItem[];
+  image?: string;
+  imageAlt?: string;
+  reverse?: boolean;
 }
 
-function FeatureBlock({ reverse, image, imageAlt, badge, title, items }: FeatureBlockProps) {
-  const BadgeIcon = badge.icon;
+function HowToStep({ stepNumber, title, description, items, image, imageAlt, reverse }: HowToStepProps) {
   return (
     <motion.div
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-80px' }}
       variants={stagger}
-      className={`grid lg:grid-cols-2 gap-10 items-center py-12 border-b border-border last:border-0 ${
+      className={`grid ${image ? 'lg:grid-cols-2' : 'lg:grid-cols-1 max-w-3xl mx-auto'} gap-10 items-center py-12 border-b border-border last:border-0 ${
         reverse ? 'lg:[direction:rtl]' : ''
       }`}
     >
       <div className={reverse ? 'lg:[direction:ltr]' : ''}>
-        <motion.div variants={fadeUp} className={`inline-flex items-center gap-2 ${badge.color} px-3 py-1 rounded-full text-sm font-bold mb-3`}>
-          <BadgeIcon className="w-4 h-4" />
-          {badge.label}
+        <motion.div variants={fadeUp} className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-extrabold shadow-md">
+            {stepNumber}
+          </div>
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground">{title}</h3>
         </motion.div>
-        <motion.h3 variants={fadeUp} className="text-2xl sm:text-3xl font-extrabold text-foreground mb-6">
-          {title}
-        </motion.h3>
+        <motion.p variants={fadeUp} className="text-muted-foreground mb-6">{description}</motion.p>
         <motion.div variants={stagger} className="space-y-4">
           {items.map((item) => (
             <motion.div key={item.title} variants={fadeUp} className="flex items-start gap-3">
@@ -421,19 +477,21 @@ function FeatureBlock({ reverse, image, imageAlt, badge, title, items }: Feature
           ))}
         </motion.div>
       </div>
-      <motion.div
-        variants={fadeUp}
-        className={`flex justify-center ${reverse ? 'lg:[direction:ltr]' : ''}`}
-      >
-        <img
-          src={image}
-          alt={imageAlt}
-          width={360}
-          height={360}
-          className="w-full max-w-sm drop-shadow-lg"
-          loading="lazy"
-        />
-      </motion.div>
+      {image && (
+        <motion.div
+          variants={fadeUp}
+          className={`flex justify-center ${reverse ? 'lg:[direction:ltr]' : ''}`}
+        >
+          <img
+            src={image}
+            alt={imageAlt || title}
+            width={320}
+            height={568}
+            className="w-56 sm:w-64 rounded-[2rem] shadow-elevated"
+            loading="lazy"
+          />
+        </motion.div>
+      )}
     </motion.div>
   );
 }
