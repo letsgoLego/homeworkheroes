@@ -105,6 +105,8 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
     setBringItems(editingHomework.bring_to_school || []);
     setEnableReminder(!!editingHomework.reminder_date);
     setSubmissionDay(editingHomework.submission_day ?? 5);
+    setHomeworkType((editingHomework.homework_type as HomeworkType) || 'inlamning');
+    setRecurrenceDays(editingHomework.recurrence_days || [1, 2, 3, 4, 5]);
   }, [editingHomework]);
 
   const addBringItem = () => {
