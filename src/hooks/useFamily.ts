@@ -384,6 +384,7 @@ export function useFamily() {
       return false;
     }
     
+    await fetchFamilyData();
     return true;
   };
   
