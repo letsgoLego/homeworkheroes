@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { format, addDays, getDay } from 'date-fns';
+import { format, addDays, getDay, subDays } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Child = Tables<'children'>;
@@ -17,6 +17,7 @@ interface HomeworkWithTasks extends Homework {
 }
 
 const ACTIVE_CHILD_KEY = 'laxhjalpen_active_child';
+const DEBOUNCE_MS = 1000;
 
 export function useFamily() {
   const { user } = useAuth();
@@ -27,7 +28,6 @@ export function useFamily() {
   const [adhocTasks, setAdhocTasks] = useState<AdhocTask[]>([]);
   const [userRole, setUserRole] = useState<'parent' | 'child' | null>(null);
   const [activeChildId, setActiveChildIdState] = useState<string | null>(() => {
-    // Initialize from localStorage
     if (typeof window !== 'undefined') {
       return localStorage.getItem(ACTIVE_CHILD_KEY);
     }
@@ -35,7 +35,9 @@ export function useFamily() {
   });
   const [loading, setLoading] = useState(true);
 
-  // Wrapper to persist to localStorage
+  // Debounce timer ref for realtime
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const setActiveChildId = useCallback((id: string | null) => {
     setActiveChildIdState(id);
     if (id) {
@@ -45,7 +47,7 @@ export function useFamily() {
     }
   }, []);
   
-  // Fetch family and children
+  // Fetch family and children — optimized with combined query and date filter
   const fetchFamilyData = useCallback(async () => {
     if (!user) {
       setLoading(false);
@@ -53,7 +55,6 @@ export function useFamily() {
     }
     
     try {
-      // Get user's role - could be parent (with family_id) or child (with child_id)
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('family_id, child_id, role')
@@ -75,7 +76,6 @@ export function useFamily() {
       setUserRole(userRoleData.role as 'parent' | 'child');
       let familyId: string | null = userRoleData.family_id;
       
-      // If user is a child, get family_id via the children table
       if (!familyId && userRoleData.child_id) {
         const { data: childData, error: childError } = await supabase
           .from('children')
@@ -91,7 +91,6 @@ export function useFamily() {
         
         familyId = childData?.family_id || null;
         
-        // For child users, automatically set their child as the active one
         if (userRoleData.child_id && !activeChildId) {
           setActiveChildId(userRoleData.child_id);
         }
@@ -102,7 +101,6 @@ export function useFamily() {
         return;
       }
       
-      // Get family
       const { data: familyData, error: familyError } = await supabase
         .from('families')
         .select('*')
@@ -115,7 +113,6 @@ export function useFamily() {
       
       if (familyData) setFamily(familyData);
       
-      // Get children
       const { data: childrenData, error: childrenError } = await supabase
         .from('children')
         .select('*')
@@ -127,18 +124,15 @@ export function useFamily() {
       }
       
       if (childrenData) {
-        // For child users, filter to only their own child
         const filteredChildren = userRoleData.role === 'child' && userRoleData.child_id
           ? childrenData.filter(c => c.id === userRoleData.child_id)
           : childrenData;
         
         setChildren(filteredChildren);
         
-        // For child users, always lock to their own child
         if (userRoleData.role === 'child' && userRoleData.child_id) {
           setActiveChildId(userRoleData.child_id);
         } else {
-          // Check if stored activeChildId is still valid
           const storedId = localStorage.getItem(ACTIVE_CHILD_KEY);
           const validChild = storedId && filteredChildren.some(c => c.id === storedId);
           
@@ -150,40 +144,33 @@ export function useFamily() {
         }
       }
       
-      // Get homework with tasks
       const childIds = childrenData?.map(c => c.id) || [];
       if (childIds.length > 0) {
+        // Optimization 3: Filter by date range (30 days back)
+        const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
+        
+        // Optimization 4: Combined query — fetch homework with tasks in one request
         const { data: homeworkData, error: homeworkError } = await supabase
           .from('homework')
-          .select('*')
-          .in('child_id', childIds);
+          .select('*, study_tasks(*)')
+          .in('child_id', childIds)
+          .or(`due_date.gte.${thirtyDaysAgo},completed.eq.false`);
         
         if (homeworkError) {
           console.error('Error fetching homework:', homeworkError);
         }
         
-        if (homeworkData && homeworkData.length > 0) {
-          // Get all tasks for these homework items
-          const { data: tasksData, error: tasksError } = await supabase
-            .from('study_tasks')
-            .select('*')
-            .in('homework_id', homeworkData.map(h => h.id));
-          
-          if (tasksError) {
-            console.error('Error fetching tasks:', tasksError);
-          }
-          
-          const homeworkWithTasks: HomeworkWithTasks[] = homeworkData.map(hw => ({
+        if (homeworkData) {
+          const homeworkWithTasks: HomeworkWithTasks[] = homeworkData.map((hw: any) => ({
             ...hw,
-            tasks: tasksData?.filter(t => t.homework_id === hw.id) || [],
+            tasks: hw.study_tasks || [],
+            study_tasks: undefined,
           }));
-          
           setHomework(homeworkWithTasks);
         } else {
           setHomework([]);
         }
         
-        // Get recurring pack items
         const { data: packItemsData, error: packItemsError } = await supabase
           .from('recurring_pack_items')
           .select('*')
@@ -197,7 +184,6 @@ export function useFamily() {
           setRecurringPackItems(packItemsData);
         }
         
-        // Get adhoc tasks
         const { data: adhocData, error: adhocError } = await supabase
           .from('adhoc_tasks')
           .select('*')
@@ -218,37 +204,43 @@ export function useFamily() {
     }
   }, [user, activeChildId]);
   
+  // Debounced refetch for realtime events
+  const debouncedRefetch = useCallback(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = setTimeout(() => {
+      fetchFamilyData();
+    }, DEBOUNCE_MS);
+  }, [fetchFamilyData]);
+
   useEffect(() => {
     fetchFamilyData();
   }, [fetchFamilyData]);
   
-  // Set up realtime subscriptions
+  // Optimization 1 & 5: Debounced realtime, removed children table
   useEffect(() => {
     if (!family?.id) return;
     
-    const homeworkChannel = supabase
+    const channel = supabase
       .channel('homework-changes')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'homework' },
-        () => fetchFamilyData()
+        () => debouncedRefetch()
       )
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'study_tasks' },
-        () => fetchFamilyData()
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'children' },
-        () => fetchFamilyData()
+        () => debouncedRefetch()
       )
       .subscribe();
     
     return () => {
-      supabase.removeChannel(homeworkChannel);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      supabase.removeChannel(channel);
     };
-  }, [family?.id, fetchFamilyData]);
+  }, [family?.id, debouncedRefetch]);
   
   // Add child
   const addChild = async (name: string, color: string) => {
@@ -372,8 +364,14 @@ export function useFamily() {
     return true;
   };
 
-  // Delete task
+  // Optimization 2: Optimistic delete task
   const deleteTask = async (taskId: string) => {
+    // Optimistic update
+    setHomework(prev => prev.map(hw => ({
+      ...hw,
+      tasks: hw.tasks.filter(t => t.id !== taskId),
+    })));
+
     const { error } = await supabase
       .from('study_tasks')
       .delete()
@@ -381,39 +379,50 @@ export function useFamily() {
     
     if (error) {
       toast.error('Kunde inte ta bort uppgift');
+      await fetchFamilyData(); // Revert on error
       return false;
     }
     
-    await fetchFamilyData();
     return true;
   };
   
-  // Toggle task completion
+  // Optimization 2: Optimistic toggle task
   const toggleTask = async (taskId: string, completed: boolean) => {
-    const { data: task, error } = await supabase
+    // Find the homework containing this task before optimistic update
+    const hw = homework.find(h => h.tasks.some(t => t.id === taskId));
+    if (!hw) return { allCompleted: false, homework: null };
+
+    // Optimistic update
+    const updatedTasks = hw.tasks.map(t =>
+      t.id === taskId ? { ...t, completed, completed_at: completed ? new Date().toISOString() : null, snoozed_until: null } : t
+    );
+    const allCompleted = updatedTasks.every(t => t.completed);
+
+    setHomework(prev => prev.map(h => {
+      if (h.id !== hw.id) return h;
+      return {
+        ...h,
+        tasks: updatedTasks,
+        completed: allCompleted ? true : h.completed,
+        completed_at: allCompleted && !h.completed ? new Date().toISOString() : h.completed_at,
+      };
+    }));
+
+    // DB mutation
+    const { error } = await supabase
       .from('study_tasks')
       .update({
         completed,
         completed_at: completed ? new Date().toISOString() : null,
-        snoozed_until: null, // Clear snooze when completing
+        snoozed_until: null,
       })
-      .eq('id', taskId)
-      .select('*, homework:homework_id(*)')
-      .single();
+      .eq('id', taskId);
     
     if (error) {
       toast.error('Kunde inte uppdatera uppgift');
+      await fetchFamilyData(); // Revert on error
       return { allCompleted: false, homework: null };
     }
-    
-    // Check if all tasks for this homework are completed
-    const hw = homework.find(h => h.id === task.homework_id);
-    if (!hw) return { allCompleted: false, homework: null };
-    
-    const updatedTasks = hw.tasks.map(t => 
-      t.id === taskId ? { ...t, completed } : t
-    );
-    const allCompleted = updatedTasks.every(t => t.completed);
     
     if (allCompleted && !hw.completed) {
       await supabase
@@ -422,21 +431,23 @@ export function useFamily() {
         .eq('id', hw.id);
     }
     
-    // Always refetch to ensure UI is in sync
-    await fetchFamilyData();
-    
     return { allCompleted, homework: hw };
   };
   
-  // Snooze task until tomorrow (with due date validation)
+  // Optimization 2: Optimistic snooze task
   const snoozeTask = async (taskId: string, homeworkDueDate?: string) => {
     const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
     
-    // If due date is provided, validate that we're not snoozing past it
     if (homeworkDueDate && tomorrow > homeworkDueDate) {
       toast.error('Kan inte snooza förbi deadline');
       return false;
     }
+
+    // Optimistic update
+    setHomework(prev => prev.map(hw => ({
+      ...hw,
+      tasks: hw.tasks.map(t => t.id === taskId ? { ...t, snoozed_until: tomorrow } : t),
+    })));
     
     const { error } = await supabase
       .from('study_tasks')
@@ -445,16 +456,22 @@ export function useFamily() {
     
     if (error) {
       toast.error('Kunde inte snooze:a uppgiften');
+      await fetchFamilyData();
       return false;
     }
     
     toast.success('Uppgiften snoozad till imorgon 💤');
-    await fetchFamilyData();
     return true;
   };
   
-  // Unsnooze task
+  // Optimization 2: Optimistic unsnooze task
   const unsnoozeTask = async (taskId: string) => {
+    // Optimistic update
+    setHomework(prev => prev.map(hw => ({
+      ...hw,
+      tasks: hw.tasks.map(t => t.id === taskId ? { ...t, snoozed_until: null } : t),
+    })));
+
     const { error } = await supabase
       .from('study_tasks')
       .update({ snoozed_until: null })
@@ -462,10 +479,10 @@ export function useFamily() {
     
     if (error) {
       toast.error('Kunde inte ta bort snooze');
+      await fetchFamilyData();
       return false;
     }
     
-    await fetchFamilyData();
     return true;
   };
   
@@ -516,12 +533,10 @@ export function useFamily() {
     return true;
   };
   
-  // Get homework for active child
   const getHomeworkForChild = (childId: string) => {
     return homework.filter(hw => hw.child_id === childId);
   };
   
-  // Get tasks for a specific date (includes snoozed tasks and overdue tasks)
   const getTasksForDate = (childId: string, date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return homework
@@ -529,24 +544,17 @@ export function useFamily() {
       .flatMap(hw => 
         hw.tasks
           .filter(t => {
-            // Include if: task is scheduled for this date AND not snoozed to a future date
             const isScheduledToday = t.task_date === dateStr && 
               (!t.snoozed_until || t.snoozed_until <= dateStr);
-            
-            // OR: task was snoozed UNTIL this date (it "wakes up" today)
             const isSnoozedToToday = t.snoozed_until === dateStr;
-            
-            // OR: task is from a previous day, not completed, and not snoozed to a future date
             const isOverdue = !t.completed && 
               t.task_date < dateStr && 
               (!t.snoozed_until || t.snoozed_until <= dateStr) &&
-              // Don't show if snoozed to a specific future date (already handled by isSnoozedToToday)
               t.snoozed_until !== dateStr;
             
             return isScheduledToday || isSnoozedToToday || isOverdue;
           })
           .map(task => {
-            // Calculate how many days old the task is
             const diffMs = date.getTime() - new Date(task.task_date + 'T00:00:00').getTime();
             const daysOld = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
             
@@ -560,12 +568,10 @@ export function useFamily() {
       );
   };
   
-  // Get items to bring for a specific date (includes both homework items and recurring pack items)
   const getItemsToBringForDate = (childId: string, date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     const dayOfWeek = getDay(date);
     
-    // Get homework items due on this date
     const homeworkItems = homework
       .filter(
         hw =>
@@ -576,7 +582,6 @@ export function useFamily() {
       )
       .map(hw => ({ homework: hw, items: hw.bring_to_school || [] }));
     
-    // Get recurring pack items for this weekday
     const recurringItems = recurringPackItems.filter(
       item => item.child_id === childId && item.weekdays.includes(dayOfWeek)
     );
@@ -584,7 +589,6 @@ export function useFamily() {
     return { homeworkItems, recurringItems };
   };
   
-  // Add recurring pack item
   const addRecurringPackItem = async (childId: string, itemName: string, weekdays: number[]) => {
     const { error } = await supabase
       .from('recurring_pack_items')
@@ -604,7 +608,6 @@ export function useFamily() {
     return true;
   };
   
-  // Delete recurring pack item
   const deleteRecurringPackItem = async (id: string) => {
     const { error } = await supabase
       .from('recurring_pack_items')
@@ -616,37 +619,48 @@ export function useFamily() {
       return false;
     }
     
-    await fetchFamilyData();
+    // Optimistic update
+    setRecurringPackItems(prev => prev.filter(item => item.id !== id));
     return true;
   };
   
-  // Get recurring pack items for a child
   const getRecurringPackItemsForChild = (childId: string) => {
     return recurringPackItems.filter(item => item.child_id === childId);
   };
   
-  // Add adhoc task
+  // Optimization 2: Optimistic add adhoc task
   const addAdhocTask = async (childId: string, title: string, taskDate: string) => {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('adhoc_tasks')
       .insert({
         child_id: childId,
         title,
         task_date: taskDate,
-      });
+      })
+      .select()
+      .single();
     
     if (error) {
       toast.error('Kunde inte lägga till uppgift');
       return false;
     }
     
+    // Optimistic update with real data
+    if (data) {
+      setAdhocTasks(prev => [...prev, data]);
+    }
+    
     toast.success('Extra uppgift tillagd! ⭐');
-    await fetchFamilyData();
     return true;
   };
   
-  // Toggle adhoc task completion
+  // Optimization 2: Optimistic toggle adhoc task
   const toggleAdhocTask = async (taskId: string, completed: boolean) => {
+    // Optimistic update
+    setAdhocTasks(prev => prev.map(t =>
+      t.id === taskId ? { ...t, completed, completed_at: completed ? new Date().toISOString() : null } : t
+    ));
+
     const { error } = await supabase
       .from('adhoc_tasks')
       .update({
@@ -657,15 +671,18 @@ export function useFamily() {
     
     if (error) {
       toast.error('Kunde inte uppdatera uppgift');
+      await fetchFamilyData();
       return false;
     }
     
-    await fetchFamilyData();
     return true;
   };
   
-  // Delete adhoc task
+  // Optimization 2: Optimistic delete adhoc task
   const deleteAdhocTask = async (taskId: string) => {
+    // Optimistic update
+    setAdhocTasks(prev => prev.filter(t => t.id !== taskId));
+
     const { error } = await supabase
       .from('adhoc_tasks')
       .delete()
@@ -673,14 +690,13 @@ export function useFamily() {
     
     if (error) {
       toast.error('Kunde inte ta bort uppgift');
+      await fetchFamilyData();
       return false;
     }
     
-    await fetchFamilyData();
     return true;
   };
   
-  // Get adhoc tasks for a specific date
   const getAdhocTasksForDate = (childId: string, date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return adhocTasks.filter(
