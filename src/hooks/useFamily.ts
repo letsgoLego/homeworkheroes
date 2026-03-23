@@ -384,6 +384,7 @@ export function useFamily() {
       return false;
     }
     
+    await fetchFamilyData();
     return true;
   };
   
@@ -448,6 +449,7 @@ export function useFamily() {
     }
     
     toast.success('Uppgiften snoozad till imorgon 💤');
+    await fetchFamilyData();
     return true;
   };
   
@@ -463,6 +465,7 @@ export function useFamily() {
       return false;
     }
     
+    await fetchFamilyData();
     return true;
   };
   

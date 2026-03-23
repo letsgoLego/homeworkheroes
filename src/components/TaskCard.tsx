@@ -32,7 +32,7 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
   const [isOpen, setIsOpen] = useState(false);
   const [isRemoved, setIsRemoved] = useState(false);
   const { refetch } = useFamily();
-  
+
   const controls = useAnimation();
   
   const handleToggle = async () => {
@@ -68,10 +68,9 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
     if (!onDelete || isDeleting) return;
     setIsDeleting(true);
     setIsRemoved(true);
-    // Small delay for exit animation
+    // Small delay for exit animation, then delete
     setTimeout(async () => {
       await onDelete(task.id);
-      refetch();
     }, 250);
   };
 
