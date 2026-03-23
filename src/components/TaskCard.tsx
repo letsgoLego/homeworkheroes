@@ -68,10 +68,9 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
     if (!onDelete || isDeleting) return;
     setIsDeleting(true);
     setIsRemoved(true);
-    // Small delay for exit animation
+    // Small delay for exit animation, then delete
     setTimeout(async () => {
       await onDelete(task.id);
-      refetch();
     }, 250);
   };
 
