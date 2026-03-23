@@ -291,6 +291,31 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                 </div>
               </div>
 
+              {/* Homework type */}
+              <div>
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Flag className="w-4 h-4" />
+                  Typ av läxa
+                </Label>
+                <div className="grid grid-cols-2 gap-2 mt-1.5">
+                  {(['inlamning', 'forhor'] as HomeworkType[]).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setHomeworkType(type)}
+                      className={cn(
+                        'flex items-center justify-center gap-2 p-3 rounded-xl transition-all',
+                        homeworkType === type
+                          ? 'bg-primary text-primary-foreground shadow-glow-primary'
+                          : 'bg-muted hover:bg-muted/80'
+                      )}
+                    >
+                      <span className="text-lg">{HOMEWORK_TYPE_ICONS[type]}</span>
+                      <span className="text-sm font-medium">{HOMEWORK_TYPE_LABELS[type]}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Due date - only for non-recurring */}
               {!editingHomework.is_recurring && (
                 <div>
@@ -308,30 +333,57 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                 </div>
               )}
 
-              {/* Submission day - only for recurring */}
+              {/* Recurring days - only for recurring */}
               {editingHomework.is_recurring && (
-                <div>
-                  <Label className="text-sm font-medium">Inlämningsdag</Label>
-                  <p className="text-xs text-muted-foreground mb-1.5">
-                    Vilken veckodag lämnas den in?
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {WEEKDAYS.map((day) => (
-                      <button
-                        key={day.value}
-                        onClick={() => setSubmissionDay(day.value)}
-                        className={cn(
-                          'px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                          submissionDay === day.value
-                            ? 'bg-accent text-accent-foreground shadow-md'
-                            : 'bg-muted hover:bg-muted/80'
-                        )}
-                      >
-                        {day.label}
-                      </button>
-                    ))}
+                <>
+                  <div>
+                    <Label className="text-sm font-medium">Vilka dagar i veckan?</Label>
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      {WEEKDAYS.map((day) => (
+                        <button
+                          key={day.value}
+                          onClick={() => setRecurrenceDays(prev =>
+                            prev.includes(day.value)
+                              ? prev.filter(d => d !== day.value)
+                              : [...prev, day.value].sort((a, b) => a - b)
+                          )}
+                          className={cn(
+                            'px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                            recurrenceDays.includes(day.value)
+                              ? 'bg-primary text-primary-foreground shadow-glow-primary'
+                              : 'bg-muted hover:bg-muted/80'
+                          )}
+                        >
+                          {day.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+
+                  {/* Submission day */}
+                  <div>
+                    <Label className="text-sm font-medium">Inlämningsdag</Label>
+                    <p className="text-xs text-muted-foreground mb-1.5">
+                      Vilken veckodag lämnas den in?
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {WEEKDAYS.map((day) => (
+                        <button
+                          key={day.value}
+                          onClick={() => setSubmissionDay(day.value)}
+                          className={cn(
+                            'px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                            submissionDay === day.value
+                              ? 'bg-accent text-accent-foreground shadow-md'
+                              : 'bg-muted hover:bg-muted/80'
+                          )}
+                        >
+                          {day.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
 
               {/* Description */}
