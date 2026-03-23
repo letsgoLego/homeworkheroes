@@ -9,10 +9,10 @@ import { Switch } from '@/components/ui/switch';
 import { useFamily } from '@/hooks/useFamily';
 import { format, parseISO, addDays, isBefore, isSameDay, startOfDay, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, Calendar, Trash2, Bell, Repeat, Check } from 'lucide-react';
+import { Plus, X, Calendar, Trash2, Bell, Repeat, Check, Flag } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Subject, SUBJECT_LABELS, SUBJECT_ICONS } from '@/types/homework';
+import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Homework = Tables<'homework'>;
@@ -54,6 +54,8 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
   const [newItem, setNewItem] = useState('');
   const [enableReminder, setEnableReminder] = useState(!!editingHomework.reminder_date);
   const [submissionDay, setSubmissionDay] = useState<number>(editingHomework.submission_day ?? 5);
+  const [homeworkType, setHomeworkType] = useState<HomeworkType>((editingHomework.homework_type as HomeworkType) || 'inlamning');
+  const [recurrenceDays, setRecurrenceDays] = useState<number[]>(editingHomework.recurrence_days || [1, 2, 3, 4, 5]);
   
   // Task state
   const [taskTitle, setTaskTitle] = useState('Plugga');
@@ -103,6 +105,8 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
     setBringItems(editingHomework.bring_to_school || []);
     setEnableReminder(!!editingHomework.reminder_date);
     setSubmissionDay(editingHomework.submission_day ?? 5);
+    setHomeworkType((editingHomework.homework_type as HomeworkType) || 'inlamning');
+    setRecurrenceDays(editingHomework.recurrence_days || [1, 2, 3, 4, 5]);
   }, [editingHomework]);
 
   const addBringItem = () => {
@@ -137,6 +141,8 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
       bringToSchool: bringItems.length > 0 ? bringItems : undefined,
       reminderDate,
       submissionDay: editingHomework.is_recurring ? submissionDay : null,
+      homeworkType,
+      recurrenceDays: editingHomework.is_recurring ? recurrenceDays : undefined,
     });
 
     if (success) {
@@ -285,6 +291,31 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                 </div>
               </div>
 
+              {/* Homework type */}
+              <div>
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Flag className="w-4 h-4" />
+                  Typ av läxa
+                </Label>
+                <div className="grid grid-cols-2 gap-2 mt-1.5">
+                  {(['inlamning', 'forhor'] as HomeworkType[]).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setHomeworkType(type)}
+                      className={cn(
+                        'flex items-center justify-center gap-2 p-3 rounded-xl transition-all',
+                        homeworkType === type
+                          ? 'bg-primary text-primary-foreground shadow-glow-primary'
+                          : 'bg-muted hover:bg-muted/80'
+                      )}
+                    >
+                      <span className="text-lg">{HOMEWORK_TYPE_ICONS[type]}</span>
+                      <span className="text-sm font-medium">{HOMEWORK_TYPE_LABELS[type]}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Due date - only for non-recurring */}
               {!editingHomework.is_recurring && (
                 <div>
@@ -302,30 +333,57 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                 </div>
               )}
 
-              {/* Submission day - only for recurring */}
+              {/* Recurring days - only for recurring */}
               {editingHomework.is_recurring && (
-                <div>
-                  <Label className="text-sm font-medium">Inlämningsdag</Label>
-                  <p className="text-xs text-muted-foreground mb-1.5">
-                    Vilken veckodag lämnas den in?
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {WEEKDAYS.map((day) => (
-                      <button
-                        key={day.value}
-                        onClick={() => setSubmissionDay(day.value)}
-                        className={cn(
-                          'px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                          submissionDay === day.value
-                            ? 'bg-accent text-accent-foreground shadow-md'
-                            : 'bg-muted hover:bg-muted/80'
-                        )}
-                      >
-                        {day.label}
-                      </button>
-                    ))}
+                <>
+                  <div>
+                    <Label className="text-sm font-medium">Vilka dagar i veckan?</Label>
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      {WEEKDAYS.map((day) => (
+                        <button
+                          key={day.value}
+                          onClick={() => setRecurrenceDays(prev =>
+                            prev.includes(day.value)
+                              ? prev.filter(d => d !== day.value)
+                              : [...prev, day.value].sort((a, b) => a - b)
+                          )}
+                          className={cn(
+                            'px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                            recurrenceDays.includes(day.value)
+                              ? 'bg-primary text-primary-foreground shadow-glow-primary'
+                              : 'bg-muted hover:bg-muted/80'
+                          )}
+                        >
+                          {day.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+
+                  {/* Submission day */}
+                  <div>
+                    <Label className="text-sm font-medium">Inlämningsdag</Label>
+                    <p className="text-xs text-muted-foreground mb-1.5">
+                      Vilken veckodag lämnas den in?
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {WEEKDAYS.map((day) => (
+                        <button
+                          key={day.value}
+                          onClick={() => setSubmissionDay(day.value)}
+                          className={cn(
+                            'px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                            submissionDay === day.value
+                              ? 'bg-accent text-accent-foreground shadow-md'
+                              : 'bg-muted hover:bg-muted/80'
+                          )}
+                        >
+                          {day.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
 
               {/* Description */}

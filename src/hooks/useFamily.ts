@@ -324,6 +324,7 @@ export function useFamily() {
     recurrenceDays?: number[];
     recurrenceEndDate?: string;
     submissionDay?: number | null;
+    homeworkType?: string;
   }) => {
     const updateData: Record<string, unknown> = {};
     
@@ -337,6 +338,7 @@ export function useFamily() {
     if (updates.recurrenceDays !== undefined) updateData.recurrence_days = updates.recurrenceDays;
     if (updates.recurrenceEndDate !== undefined) updateData.recurrence_end_date = updates.recurrenceEndDate;
     if (updates.submissionDay !== undefined) updateData.submission_day = updates.submissionDay;
+    if (updates.homeworkType !== undefined) updateData.homework_type = updates.homeworkType;
 
     const { error } = await supabase
       .from('homework')
