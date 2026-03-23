@@ -15,6 +15,7 @@ import JoinFamilyPage from "./pages/JoinFamilyPage";
 import JoinFamilyStartPage from "./pages/JoinFamilyStartPage";
 import ChildLoginPage from "./pages/ChildLoginPage";
 import NotFound from "./pages/NotFound";
+import LandingPage from "./pages/LandingPage";
 import ParentRouteGuard from "./components/ParentRouteGuard";
 
 const queryClient = new QueryClient();
