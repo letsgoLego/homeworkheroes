@@ -477,6 +477,7 @@ export default function TodayPage() {
             {/* Items to bring - uses BringToSchool component */}
             {hasItemsToBring && (
               <BringToSchool 
+                packDate={bringToSchoolDate}
                 items={itemsToBringData.homeworkItems.map(item => ({
                   homework: {
                     ...item.homework,
