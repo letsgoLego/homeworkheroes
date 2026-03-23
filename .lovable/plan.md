@@ -1,24 +1,42 @@
-# ✅ Fix Snooze Feature - COMPLETED
 
-## Summary
-Fixed the snooze feature so that:
-1. ✅ Snoozed tasks appear as active tasks the next day (with "🔔 Från igår" indicator)
-2. ✅ Users can complete or snooze the task again
-3. ✅ Cannot snooze past the homework's due date (disabled button + error toast)
 
-## Changes Made
+## Plan: Reduce Backend Consumption
 
-### `src/hooks/useFamily.ts`
-- Updated `getTasksForDate` to include tasks where `snoozed_until === dateStr` (tasks that "wake up" today)
-- Added `wasSnoozed` flag to identify tasks that came from a snooze
-- Updated `snoozeTask` to accept optional `homeworkDueDate` and validate before snoozing
+### Problem Summary
+Each user interaction triggers 6+ DB queries via `fetchFamilyData()`, often doubled by realtime echo. A single task completion = ~12 queries. Multiply by family members and daily usage.
 
-### `src/pages/TodayPage.tsx`
-- Updated filtering logic: snoozed tasks that "woke up" today are now in `incompleteTasks` (active section)
-- Added `canSnoozeTask` helper to check if snoozing is allowed based on due date
-- Pass `wasSnoozed` and `canSnooze` props to TaskCard
+### Optimizations (ordered by impact)
 
-### `src/components/TaskCard.tsx`
-- Added `wasSnoozed` prop to show "🔔 Från igår" indicator
-- Added `canSnooze` prop to disable snooze button when tomorrow > due date
-- Updated snooze handler to pass homework due date for validation
+**1. Debounce realtime refetches**
+- Add a 1-second debounce to the realtime handler so rapid changes (e.g. checking off multiple tasks) batch into one refetch instead of one per change.
+- Prevents the "mutation + realtime echo" double-fetch problem.
+
+**2. Optimistic local state updates instead of full refetch**
+- For `toggleTask`, `deleteTask`, `snoozeTask`, `toggleAdhocTask`, `deleteAdhocTask`: update the local state arrays directly after a successful mutation.
+- Remove the `await fetchFamilyData()` calls from these mutation functions.
+- Realtime subscription remains as a safety net but with debounce from step 1.
+- This eliminates ~6 queries per user action.
+
+**3. Filter homework by date range**
+- Add `.gte('due_date', thirtyDaysAgo)` to the homework query so you don't fetch ancient completed homework.
+- Reduces payload size and query cost as data grows.
+
+**4. Combine queries where possible**
+- Fetch homework with tasks in a single query using Supabase's relation syntax: `.select('*, study_tasks(*)')` instead of two separate queries.
+- Reduces 2 queries to 1 per refetch.
+
+**5. Remove redundant realtime tables**
+- The `children` table rarely changes. Remove it from the realtime subscription. Child additions/deletions can trigger a manual refetch.
+- Saves 1 realtime channel subscription.
+
+### Files to Change
+- `src/hooks/useFamily.ts` — All 5 optimizations live here
+
+### Expected Impact
+- ~70-80% reduction in database queries during normal usage
+- Each task toggle: from ~12 queries down to ~1 (the mutation itself)
+- Background realtime: batched to max 1 refetch per second instead of per-event
+
+### No User-Facing Changes
+Everything works identically from the user's perspective. The UI updates faster (optimistic) and the backend does less work.
+
