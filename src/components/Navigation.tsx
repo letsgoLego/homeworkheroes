@@ -14,6 +14,7 @@ const parentNavItems: NavItem[] = [
 const childNavItems: NavItem[] = [
   { path: '/', icon: Home, label: 'Idag' },
   { path: '/week', icon: Calendar, label: 'Vecka' },
+  { path: '/add', icon: Plus, label: 'Lägg till', isAction: true },
   { path: '/profile', icon: User, label: 'Profil' },
 ];
 
