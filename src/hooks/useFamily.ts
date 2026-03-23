@@ -449,6 +449,7 @@ export function useFamily() {
     }
     
     toast.success('Uppgiften snoozad till imorgon 💤');
+    await fetchFamilyData();
     return true;
   };
   
