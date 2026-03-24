@@ -506,7 +506,7 @@ export default function TodayPage() {
               onToggleHomeworkComplete={toggleHomeworkComplete}
             />
             
-            {!hasItemsToBring && tomorrowHomework.length === 0 && (
+            {!hasItemsToBring && packDateHomework.length === 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
