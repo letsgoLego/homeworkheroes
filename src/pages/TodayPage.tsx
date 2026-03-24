@@ -475,30 +475,38 @@ export default function TodayPage() {
             {/* Weather for packing day */}
             <WeatherWidget date={bringToSchoolDate} />
             
-            {/* Items to bring - uses BringToSchool component */}
-            {hasItemsToBring && (
-              <BringToSchool 
-                packDate={bringToSchoolDate}
-                items={itemsToBringData.homeworkItems.map(item => ({
-                  homework: {
-                    ...item.homework,
-                    id: item.homework.id,
-                    title: item.homework.title,
-                    subject: item.homework.subject as Subject,
-                    dueDate: item.homework.due_date,
-                    childId: item.homework.child_id,
-                    createdAt: item.homework.created_at,
-                    tasks: [],
-                    completed: item.homework.completed,
-                    homeworkType: (item.homework.homework_type as 'inlamning' | 'forhor') || 'inlamning',
-                  },
-                  items: item.items as string[],
-                }))} 
-                recurringItems={itemsToBringData.recurringItems}
-              />
-            )}
+            {/* Unified pack & homework checklist */}
+            <BringToSchool 
+              packDate={bringToSchoolDate}
+              items={itemsToBringData.homeworkItems.map(item => ({
+                homework: {
+                  ...item.homework,
+                  id: item.homework.id,
+                  title: item.homework.title,
+                  subject: item.homework.subject as Subject,
+                  dueDate: item.homework.due_date,
+                  childId: item.homework.child_id,
+                  createdAt: item.homework.created_at,
+                  tasks: [],
+                  completed: item.homework.completed,
+                  homeworkType: (item.homework.homework_type as 'inlamning' | 'forhor') || 'inlamning',
+                },
+                items: item.items as string[],
+              }))} 
+              recurringItems={itemsToBringData.recurringItems}
+              homeworkDue={tomorrowHomework.map(hw => ({
+                id: hw.id,
+                title: hw.title,
+                subject: hw.subject,
+                homework_type: hw.homework_type,
+                completed: hw.completed,
+                tasks: hw.tasks.map(t => ({ id: t.id, completed: t.completed })),
+                bring_to_school: hw.bring_to_school,
+              }))}
+              onToggleHomeworkComplete={toggleHomeworkComplete}
+            />
             
-            {tomorrowHomework.length === 0 ? (
+            {!hasItemsToBring && tomorrowHomework.length === 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -511,68 +519,9 @@ export default function TodayPage() {
                 >
                   🎒
                 </motion.div>
-                <p className="text-lg font-medium">Inget ska lämnas in imorgon!</p>
-                <p className="text-muted-foreground">Inga läxor att packa</p>
+                <p className="text-lg font-medium">Inget att packa!</p>
+                <p className="text-muted-foreground">Inga läxor eller saker att ta med</p>
               </motion.div>
-            ) : (
-              <div className="space-y-3">
-                {tomorrowHomework.map((hw) => (
-                  <motion.div
-                    key={hw.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="rounded-2xl bg-card border-2 border-border p-4 shadow-soft"
-                  >
-                    <div className="flex items-start gap-3">
-                      <SubjectBadge subject={hw.subject as Subject} size="md" showLabel={false} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-base">{hw.title}</h3>
-                          {hw.homework_type && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <Flag className="w-3 h-3" />
-                              {HOMEWORK_TYPE_LABELS[hw.homework_type as HomeworkType]}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground capitalize">{hw.subject}</p>
-                        
-                        {hw.bring_to_school && hw.bring_to_school.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-border">
-                            <p className="text-xs font-medium text-muted-foreground mb-2">Saker att ta med:</p>
-                            <ul className="space-y-1">
-                              {hw.bring_to_school.map((item, index) => (
-                                <li key={index} className="text-sm flex items-center gap-2">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                  {item}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {hw.tasks.length > 0 && (
-                          <div className="mt-2">
-                            <span className="text-xs text-muted-foreground">
-                              {hw.tasks.filter(t => t.completed).length}/{hw.tasks.length} uppgifter klara
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {hw.completed ? (
-                        <span className="text-xs bg-success/20 text-success px-2 py-1 rounded-full font-medium">
-                          Klart
-                        </span>
-                      ) : (
-                        <span className="text-xs bg-warning/20 text-warning px-2 py-1 rounded-full font-medium">
-                          Pågår
-                        </span>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
             )}
             
             {/* Recurring pack items management */}
