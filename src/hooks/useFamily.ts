@@ -759,6 +759,7 @@ export function useFamily() {
     toggleAdhocTask,
     deleteAdhocTask,
     getAdhocTasksForDate,
+    toggleHomeworkComplete,
     refetch: fetchFamilyData,
   };
 }
