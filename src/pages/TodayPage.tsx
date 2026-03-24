@@ -494,7 +494,7 @@ export default function TodayPage() {
                 items: item.items as string[],
               }))} 
               recurringItems={itemsToBringData.recurringItems}
-              homeworkDue={tomorrowHomework.map(hw => ({
+              homeworkDue={packDateHomework.map(hw => ({
                 id: hw.id,
                 title: hw.title,
                 subject: hw.subject,
