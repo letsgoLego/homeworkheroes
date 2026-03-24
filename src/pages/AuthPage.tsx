@@ -217,8 +217,12 @@ export default function AuthPage() {
       </div>
       
       {/* Footer */}
-      <div className="text-center pb-8 text-sm text-muted-foreground">
-        <p>Enkel läxhantering för hela familjen</p>
+      <div className="text-center pb-8 space-y-2">
+        <Link to="/landing" className="text-sm text-primary font-medium inline-flex items-center gap-1 hover:underline">
+          <Info className="w-4 h-4" />
+          Läs mer om Läxhjälpen
+        </Link>
+        <p className="text-sm text-muted-foreground">Enkel läxhantering för hela familjen</p>
       </div>
     </div>
   );
