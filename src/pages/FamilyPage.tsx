@@ -255,6 +255,15 @@ export default function FamilyPage() {
           <p className="text-xs text-muted-foreground mt-1">
             ✨ Data synkas automatiskt mellan alla enheter
           </p>
+          <a
+            href="/landing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-primary font-medium mt-2 hover:underline"
+          >
+            <ExternalLink className="w-3 h-3" />
+            Om Läxhjälpen
+          </a>
         </motion.div>
       </main>
       
