@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { BookOpen, Mail, Lock, ArrowRight, Users, User } from 'lucide-react';
+import { BookOpen, Mail, Lock, ArrowRight, Users, User, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -216,8 +217,12 @@ export default function AuthPage() {
       </div>
       
       {/* Footer */}
-      <div className="text-center pb-8 text-sm text-muted-foreground">
-        <p>Enkel läxhantering för hela familjen</p>
+      <div className="text-center pb-8 space-y-2">
+        <Link to="/landing" className="text-sm text-primary font-medium inline-flex items-center gap-1 hover:underline">
+          <Info className="w-4 h-4" />
+          Läs mer om Läxhjälpen
+        </Link>
+        <p className="text-sm text-muted-foreground">Enkel läxhantering för hela familjen</p>
       </div>
     </div>
   );
