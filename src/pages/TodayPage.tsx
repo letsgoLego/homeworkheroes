@@ -43,6 +43,7 @@ export default function TodayPage() {
     toggleAdhocTask,
     deleteAdhocTask,
     getAdhocTasksForDate,
+    toggleHomeworkComplete,
   } = useFamily();
   
   const today = new Date();
