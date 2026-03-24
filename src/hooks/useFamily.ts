@@ -703,6 +703,31 @@ export function useFamily() {
       task => task.child_id === childId && task.task_date === dateStr
     );
   };
+
+  const toggleHomeworkComplete = async (homeworkId: string, completed: boolean) => {
+    // Optimistic update
+    setHomework(prev => prev.map(hw => {
+      if (hw.id !== homeworkId) return hw;
+      return {
+        ...hw,
+        completed,
+        completed_at: completed ? new Date().toISOString() : null,
+      };
+    }));
+
+    const { error } = await supabase
+      .from('homework')
+      .update({
+        completed,
+        completed_at: completed ? new Date().toISOString() : null,
+      })
+      .eq('id', homeworkId);
+
+    if (error) {
+      toast.error('Kunde inte uppdatera läxa');
+      await fetchFamilyData();
+    }
+  };
   
   return {
     family,
@@ -734,6 +759,7 @@ export function useFamily() {
     toggleAdhocTask,
     deleteAdhocTask,
     getAdhocTasksForDate,
+    toggleHomeworkComplete,
     refetch: fetchFamilyData,
   };
 }
