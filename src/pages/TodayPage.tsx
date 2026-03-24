@@ -80,11 +80,11 @@ export default function TodayPage() {
   const itemsToBringData = activeChildId ? getItemsToBringForDate(activeChildId, bringToSchoolDate) : { homeworkItems: [], recurringItems: [] };
   const hasItemsToBring = itemsToBringData.homeworkItems.length > 0 || itemsToBringData.recurringItems.length > 0;
   
-  // Get homework due tomorrow for "Pack for Tomorrow" tab
-  const tomorrowHomework = homework.filter(hw => {
+  // Get homework due on pack date (today before 12, tomorrow after 12)
+  const packDateHomework = homework.filter(hw => {
     if (hw.child_id !== activeChildId) return false;
-    const dueDate = new Date(hw.due_date);
-    return format(dueDate, 'yyyy-MM-dd') === format(tomorrow, 'yyyy-MM-dd');
+    const dueDate = format(new Date(hw.due_date), 'yyyy-MM-dd');
+    return dueDate === format(bringToSchoolDate, 'yyyy-MM-dd');
   });
   
   // Get homework with reminders for today
@@ -494,7 +494,7 @@ export default function TodayPage() {
                 items: item.items as string[],
               }))} 
               recurringItems={itemsToBringData.recurringItems}
-              homeworkDue={tomorrowHomework.map(hw => ({
+              homeworkDue={packDateHomework.map(hw => ({
                 id: hw.id,
                 title: hw.title,
                 subject: hw.subject,
@@ -506,7 +506,7 @@ export default function TodayPage() {
               onToggleHomeworkComplete={toggleHomeworkComplete}
             />
             
-            {!hasItemsToBring && tomorrowHomework.length === 0 && (
+            {!hasItemsToBring && packDateHomework.length === 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
