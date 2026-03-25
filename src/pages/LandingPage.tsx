@@ -5,7 +5,7 @@ import {
   BookOpen, Calendar, CheckCircle2, Backpack, Users, 
   ArrowRight, Sparkles, Bell, BarChart3, ChevronDown,
   Plus, Flag, Repeat, Moon, Smartphone, UserPlus, Eye,
-  Clock, Star, Zap, Heart, Shield
+  Clock, Star, Zap, Heart, Shield, Crown
 } from 'lucide-react';
 import screenshotToday from '@/assets/screenshot-today.png';
 import screenshotAdd from '@/assets/screenshot-add.png';
