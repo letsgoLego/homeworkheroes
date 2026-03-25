@@ -1,0 +1,1 @@
+ALTER TABLE public.families ADD COLUMN subscription_override text DEFAULT NULL;
