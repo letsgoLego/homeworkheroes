@@ -14,6 +14,7 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
