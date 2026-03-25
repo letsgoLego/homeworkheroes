@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface SubscriptionState {
   subscribed: boolean;
-  status: 'free' | 'active' | 'canceled';
+  status: 'free' | 'active' | 'canceled' | 'gifted';
   subscriptionEnd: string | null;
   interval: string | null;
   loading: boolean;
@@ -35,6 +35,33 @@ export function useSubscription() {
     }
 
     try {
+      // First check if the family has a gifted override
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('family_id')
+        .eq('user_id', user.id)
+        .limit(1);
+
+      if (roles && roles.length > 0 && roles[0].family_id) {
+        const { data: familyData } = await supabase
+          .from('families')
+          .select('subscription_override')
+          .eq('id', roles[0].family_id)
+          .maybeSingle();
+
+        if (familyData?.subscription_override === 'gifted') {
+          setState({
+            subscribed: true,
+            status: 'gifted',
+            subscriptionEnd: null,
+            interval: null,
+            loading: false,
+          });
+          return;
+        }
+      }
+
+      // Otherwise check Stripe
       const { data, error } = await supabase.functions.invoke('check-subscription');
       if (error) throw error;
 
