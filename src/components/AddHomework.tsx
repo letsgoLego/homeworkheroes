@@ -11,8 +11,10 @@ import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, addWeeks, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay, subDays, getDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag } from 'lucide-react';
+import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSubscription } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 interface AddHomeworkProps {
   open: boolean;
@@ -32,7 +34,9 @@ const WEEKDAYS = [
 ];
 
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
-  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework } = useFamily();
+  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework, getActiveHomeworkCount } = useFamily();
+  const { subscribed } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -181,9 +185,18 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     return dates;
   };
   
+  const FREE_LIMIT = 3;
+  const activeCount = targetChildId ? getActiveHomeworkCount(targetChildId) : 0;
+  const isAtLimit = !subscribed && activeCount >= FREE_LIMIT;
+
   const handleSubmit = async () => {
     if (!targetChildId) {
       toast.error("Välj ett barn först");
+      return;
+    }
+
+    if (isAtLimit) {
+      setShowUpgrade(true);
       return;
     }
     

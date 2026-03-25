@@ -729,6 +729,11 @@ export function useFamily() {
     }
   };
   
+  // Count active (non-completed) homework per child
+  const getActiveHomeworkCount = (childId: string) => {
+    return homework.filter(hw => hw.child_id === childId && !hw.completed).length;
+  };
+
   return {
     family,
     children,
@@ -739,6 +744,7 @@ export function useFamily() {
     setActiveChildId,
     loading,
     userRole,
+    getActiveHomeworkCount,
     addChild,
     addHomework,
     updateHomework,
