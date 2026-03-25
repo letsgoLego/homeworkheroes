@@ -268,6 +268,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const canProceedStep1 = title.trim() && (isRecurring ? recurrenceDays.length > 0 : dueDate);
   
   return (
+    <>
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
         <DialogHeader>
@@ -275,6 +276,22 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
             {step === 1 ? 'Ny läxa' : 'När ska du plugga?'}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Free tier limit warning */}
+        {isAtLimit && (
+          <div className="p-3 rounded-xl bg-celebration/10 border border-celebration/20">
+            <div className="flex items-center gap-2 mb-1">
+              <Lock className="w-4 h-4 text-celebration" />
+              <p className="text-sm font-bold text-celebration-foreground">Max {FREE_LIMIT} aktiva läxor</p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Uppgradera till Premium för obegränsat antal läxor.
+            </p>
+            <Button size="sm" className="mt-2 w-full" onClick={() => setShowUpgrade(true)}>
+              Uppgradera nu
+            </Button>
+          </div>
+        )}
         
         <AnimatePresence mode="wait">
           {step === 1 ? (
@@ -771,5 +788,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
         </AnimatePresence>
       </DialogContent>
     </Dialog>
+    <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />
+    </>
   );
 }
