@@ -60,7 +60,7 @@ export default function LandingPage() {
             >
               <motion.div variants={fadeUp} className="inline-flex items-center gap-2 bg-celebration/15 text-celebration-foreground px-4 py-1.5 rounded-full text-sm font-bold mb-6">
                 <Sparkles className="w-4 h-4 text-celebration" />
-                Gratis att använda
+                Gratis att komma igång
               </motion.div>
               <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight mb-6">
                 Läxläsning som{' '}
