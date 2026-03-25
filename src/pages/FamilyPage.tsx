@@ -145,7 +145,7 @@ export default function FamilyPage() {
               <Crown className="w-4 h-4 mr-2" />
               Uppgradera till Premium
             </Button>
-          )}
+          ) : null}
         </motion.div>
 
         {/* Family Members Management */}
