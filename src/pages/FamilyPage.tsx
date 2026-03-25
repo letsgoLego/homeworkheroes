@@ -6,13 +6,16 @@ import { AddChild } from '@/components/AddChild';
 import { ManageChildAccount } from '@/components/ManageChildAccount';
 import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
-import { Users, Download, Smartphone, LogOut, Copy, Check, Settings, UserPlus, ExternalLink } from 'lucide-react';
+import { Users, Download, Smartphone, LogOut, Copy, Check, Settings, UserPlus, ExternalLink, Crown, CreditCard } from 'lucide-react';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { FamilyMembers } from '@/components/FamilyMembers';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { sv } from 'date-fns/locale';
 import type { Tables } from '@/integrations/supabase/types';
+import { useSubscription } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 type Child = Tables<'children'>;
 
@@ -23,6 +26,8 @@ export default function FamilyPage() {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const { children, homework, family, loading, refetch } = useFamily();
   const { signOut, user } = useAuth();
+  const { subscribed, status: subStatus, subscriptionEnd, openCustomerPortal } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
   // Listen for install prompt
