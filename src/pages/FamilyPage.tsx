@@ -127,6 +127,7 @@ export default function FamilyPage() {
               </h3>
               <p className="text-xs text-muted-foreground">
                 {subscribed && subStatus === 'active' && 'Aktiv prenumeration'}
+                {subscribed && subStatus === 'gifted' && '🎁 Premium-gåva'}
                 {subscribed && subStatus === 'canceled' && subscriptionEnd && (
                   <>Aktiv till {format(new Date(subscriptionEnd), 'd MMMM yyyy', { locale: sv })}</>
                 )}
@@ -134,12 +135,12 @@ export default function FamilyPage() {
               </p>
             </div>
           </div>
-          {subscribed ? (
+          {subscribed && subStatus !== 'gifted' ? (
             <Button variant="outline" size="sm" className="w-full" onClick={() => openCustomerPortal()}>
               <CreditCard className="w-4 h-4 mr-2" />
               Hantera prenumeration
             </Button>
-          ) : (
+          ) : !subscribed ? (
             <Button size="sm" className="w-full" onClick={() => setShowUpgrade(true)}>
               <Crown className="w-4 h-4 mr-2" />
               Uppgradera till Premium
