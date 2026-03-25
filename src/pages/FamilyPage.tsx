@@ -318,6 +318,7 @@ export default function FamilyPage() {
           onUpdate={refetch}
         />
       )}
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />
     </div>
   );
 }
