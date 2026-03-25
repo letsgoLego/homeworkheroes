@@ -1,42 +1,55 @@
 
 
-## Plan: Reduce Backend Consumption
+## Plan: Stripe-prenumeration med Free Tier, Avbokningshantering & Prissida
 
-### Problem Summary
-Each user interaction triggers 6+ DB queries via `fetchFamilyData()`, often doubled by realtime echo. A single task completion = ~12 queries. Multiply by family members and daily usage.
+### Status: ✅ Implementerad
 
-### Optimizations (ordered by impact)
+### Prenumerationsmodell
 
-**1. Debounce realtime refetches**
-- Add a 1-second debounce to the realtime handler so rapid changes (e.g. checking off multiple tasks) batch into one refetch instead of one per change.
-- Prevents the "mutation + realtime echo" double-fetch problem.
+| | Gratis | Betald (49 kr/mån eller 490 kr/år) |
+|---|---|---|
+| Max familjemedlemmar | 6 | 6 |
+| Läxor per barn | Max 3 aktiva | Obegränsat |
+| Alla övriga funktioner | Ja | Ja |
 
-**2. Optimistic local state updates instead of full refetch**
-- For `toggleTask`, `deleteTask`, `snoozeTask`, `toggleAdhocTask`, `deleteAdhocTask`: update the local state arrays directly after a successful mutation.
-- Remove the `await fetchFamilyData()` calls from these mutation functions.
-- Realtime subscription remains as a safety net but with debounce from step 1.
-- This eliminates ~6 queries per user action.
+### Subscription Status-flöde
 
-**3. Filter homework by date range**
-- Add `.gte('due_date', thirtyDaysAgo)` to the homework query so you don't fetch ancient completed homework.
-- Reduces payload size and query cost as data grows.
+```text
+[Ny familj] → free (kontrolleras via Stripe, ingen lokal DB-status)
+[Betalar] → active (Stripe subscription active)
+[Avbryter] → canceled (behåller access till current_period_end)
+[Period slut] → free (ingen aktiv subscription i Stripe)
+```
 
-**4. Combine queries where possible**
-- Fetch homework with tasks in a single query using Supabase's relation syntax: `.select('*, study_tasks(*)')` instead of two separate queries.
-- Reduces 2 queries to 1 per refetch.
+**Avbokningslogik:** Status `canceled` behandlas som `active` så länge `current_period_end` inte passerat. Därefter = `free` med max 3 läxor/barn.
 
-**5. Remove redundant realtime tables**
-- The `children` table rarely changes. Remove it from the realtime subscription. Child additions/deletions can trigger a manual refetch.
-- Saves 1 realtime channel subscription.
+### Arkitektur
 
-### Files to Change
-- `src/hooks/useFamily.ts` — All 5 optimizations live here
+Ingen databasändring behövs. Prenumerationsstatus hämtas direkt från Stripe via edge functions.
 
-### Expected Impact
-- ~70-80% reduction in database queries during normal usage
-- Each task toggle: from ~12 queries down to ~1 (the mutation itself)
-- Background realtime: batched to max 1 refetch per second instead of per-event
+### Stripe-produkter
 
-### No User-Facing Changes
-Everything works identically from the user's perspective. The UI updates faster (optimistic) and the backend does less work.
+- **Månadsplan**: prod_UDKJiGqRFWCPDr / price_1TEtfJ12mugrDSilvyDPiuYu (49 kr/mån)
+- **Årsplan**: prod_UDKKIobQvMkm3v / price_1TEtfk12mugrDSilFIUUA2HJ (490 kr/år)
 
+### Edge Functions
+
+1. **check-subscription** — Kontrollerar prenumerationsstatus via Stripe API (active + canceled med tid kvar)
+2. **create-checkout** — Skapar Stripe Checkout-session med valt pris
+3. **customer-portal** — Öppnar Stripe kundportal för hantering/avbokning
+
+### Frontend-implementering
+
+- **`src/hooks/useSubscription.ts`**: Hook som anropar check-subscription, exponerar `subscribed`, `status`, `subscriptionEnd`, `createCheckout`, `openCustomerPortal`
+- **`src/components/UpgradeModal.tsx`**: Prisval (månads/år), redirect till Stripe Checkout
+- **`src/components/AddHomework.tsx`**: Blockerar skapande vid ≥3 aktiva läxor + ej prenumerant, visar uppgradera-CTA
+- **`src/hooks/useFamily.ts`**: Exponerar `getActiveHomeworkCount(childId)`
+- **`src/pages/FamilyPage.tsx`**: Visar prenumerationsstatus, uppgradera/hantera-knapp
+- **`src/pages/LandingPage.tsx`**: Prissektion med tre kolumner (Gratis, Månads, Års) — årsplanen visuellt framhävd
+
+### Begränsningslogik
+
+```text
+subscribed = Stripe says active OR (canceled AND current_period_end > now)
+canCreateHomework = subscribed OR activeHomeworkCount < 3
+```
