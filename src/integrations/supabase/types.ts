@@ -117,18 +117,21 @@ export type Database = {
           id: string
           invite_code: string | null
           name: string
+          subscription_override: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           invite_code?: string | null
           name: string
+          subscription_override?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           invite_code?: string | null
           name?: string
+          subscription_override?: string | null
         }
         Relationships: []
       }
