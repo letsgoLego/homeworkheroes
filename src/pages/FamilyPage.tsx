@@ -111,6 +111,42 @@ export default function FamilyPage() {
           </motion.div>
         )}
         
+        {/* Subscription Status */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-4 rounded-2xl ${subscribed ? 'bg-gradient-to-br from-celebration/10 to-primary/10 border-2 border-celebration/20' : 'bg-secondary'}`}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${subscribed ? 'bg-celebration/20' : 'bg-muted'}`}>
+              <Crown className={`w-5 h-5 ${subscribed ? 'text-celebration' : 'text-muted-foreground'}`} />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold">
+                {subscribed ? 'Premium' : 'Gratisplan'}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                {subscribed && subStatus === 'active' && 'Aktiv prenumeration'}
+                {subscribed && subStatus === 'canceled' && subscriptionEnd && (
+                  <>Aktiv till {format(new Date(subscriptionEnd), 'd MMMM yyyy', { locale: sv })}</>
+                )}
+                {!subscribed && 'Max 3 aktiva läxor per barn'}
+              </p>
+            </div>
+          </div>
+          {subscribed ? (
+            <Button variant="outline" size="sm" className="w-full" onClick={() => openCustomerPortal()}>
+              <CreditCard className="w-4 h-4 mr-2" />
+              Hantera prenumeration
+            </Button>
+          ) : (
+            <Button size="sm" className="w-full" onClick={() => setShowUpgrade(true)}>
+              <Crown className="w-4 h-4 mr-2" />
+              Uppgradera till Premium
+            </Button>
+          )}
+        </motion.div>
+
         {/* Family Members Management */}
         {family && (
           <FamilyMembers familyId={family.id} children={children} />
