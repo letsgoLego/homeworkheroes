@@ -11,8 +11,10 @@ import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, addWeeks, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay, subDays, getDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag } from 'lucide-react';
+import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSubscription } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 interface AddHomeworkProps {
   open: boolean;
@@ -32,7 +34,9 @@ const WEEKDAYS = [
 ];
 
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
-  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework } = useFamily();
+  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework, getActiveHomeworkCount } = useFamily();
+  const { subscribed } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -181,9 +185,18 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     return dates;
   };
   
+  const FREE_LIMIT = 3;
+  const activeCount = targetChildId ? getActiveHomeworkCount(targetChildId) : 0;
+  const isAtLimit = !subscribed && activeCount >= FREE_LIMIT;
+
   const handleSubmit = async () => {
     if (!targetChildId) {
       toast.error("Välj ett barn först");
+      return;
+    }
+
+    if (isAtLimit) {
+      setShowUpgrade(true);
       return;
     }
     
@@ -255,6 +268,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const canProceedStep1 = title.trim() && (isRecurring ? recurrenceDays.length > 0 : dueDate);
   
   return (
+    <>
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
         <DialogHeader>
@@ -262,6 +276,22 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
             {step === 1 ? 'Ny läxa' : 'När ska du plugga?'}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Free tier limit warning */}
+        {isAtLimit && (
+          <div className="p-3 rounded-xl bg-celebration/10 border border-celebration/20">
+            <div className="flex items-center gap-2 mb-1">
+              <Lock className="w-4 h-4 text-celebration" />
+              <p className="text-sm font-bold text-celebration-foreground">Max {FREE_LIMIT} aktiva läxor</p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Uppgradera till Premium för obegränsat antal läxor.
+            </p>
+            <Button size="sm" className="mt-2 w-full" onClick={() => setShowUpgrade(true)}>
+              Uppgradera nu
+            </Button>
+          </div>
+        )}
         
         <AnimatePresence mode="wait">
           {step === 1 ? (
@@ -758,5 +788,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
         </AnimatePresence>
       </DialogContent>
     </Dialog>
+    <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />
+    </>
   );
 }

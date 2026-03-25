@@ -5,7 +5,7 @@ import {
   BookOpen, Calendar, CheckCircle2, Backpack, Users, 
   ArrowRight, Sparkles, Bell, BarChart3, ChevronDown,
   Plus, Flag, Repeat, Moon, Smartphone, UserPlus, Eye,
-  Clock, Star, Zap, Heart, Shield
+  Clock, Star, Zap, Heart, Shield, Crown
 } from 'lucide-react';
 import screenshotToday from '@/assets/screenshot-today.png';
 import screenshotAdd from '@/assets/screenshot-add.png';
@@ -60,7 +60,7 @@ export default function LandingPage() {
             >
               <motion.div variants={fadeUp} className="inline-flex items-center gap-2 bg-celebration/15 text-celebration-foreground px-4 py-1.5 rounded-full text-sm font-bold mb-6">
                 <Sparkles className="w-4 h-4 text-celebration" />
-                Gratis att använda
+                Gratis att komma igång
               </motion.div>
               <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight mb-6">
                 Läxläsning som{' '}
@@ -384,8 +384,101 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ============ PRICING SECTION ============ */}
+      <section id="pricing" className="py-16 sm:py-24 bg-primary/5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-12"
+          >
+            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
+              Välj din plan
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Kom igång gratis – uppgradera när du behöver mer
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid md:grid-cols-3 gap-6 items-stretch"
+          >
+            {/* Free plan */}
+            <motion.div variants={fadeUp} className="bg-card rounded-3xl p-6 border border-border shadow-card flex flex-col">
+              <h3 className="text-xl font-bold text-foreground mb-1">Gratis</h3>
+              <p className="text-3xl font-extrabold mb-1">0 kr</p>
+              <p className="text-sm text-muted-foreground mb-6">Perfekt för att testa</p>
+              <ul className="space-y-3 flex-1 mb-6">
+                {['Max 3 aktiva läxor/barn', 'Alla ämnen & läxtyper', 'Packlistor', 'Streaks & konfetti', 'Familjemedlemmar (max 6)'].map(f => (
+                  <li key={f} className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/auth">
+                <Button variant="outline" className="w-full font-bold">
+                  Kom igång gratis
+                </Button>
+              </Link>
+            </motion.div>
+
+            {/* Monthly plan */}
+            <motion.div variants={fadeUp} className="bg-card rounded-3xl p-6 border border-border shadow-card flex flex-col">
+              <h3 className="text-xl font-bold text-foreground mb-1">Månadsplan</h3>
+              <p className="text-3xl font-extrabold mb-1">49 kr<span className="text-base font-normal text-muted-foreground">/mån</span></p>
+              <p className="text-sm text-muted-foreground mb-6">Flexibelt, avsluta när du vill</p>
+              <ul className="space-y-3 flex-1 mb-6">
+                {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)'].map(f => (
+                  <li key={f} className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/auth">
+                <Button variant="outline" className="w-full font-bold">
+                  Välj månadsplan
+                </Button>
+              </Link>
+            </motion.div>
+
+            {/* Yearly plan - HIGHLIGHTED */}
+            <motion.div variants={fadeUp} className="relative bg-card rounded-3xl p-6 border-2 border-primary shadow-elevated flex flex-col ring-2 ring-primary/20">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-celebration text-celebration-foreground text-xs font-bold px-4 py-1 rounded-full flex items-center gap-1.5 whitespace-nowrap">
+                <Sparkles className="w-3.5 h-3.5" />
+                Bäst värde – spara 2 månader!
+              </div>
+              <h3 className="text-xl font-bold text-primary mb-1 mt-2">Årsplan</h3>
+              <p className="text-3xl font-extrabold mb-1">490 kr<span className="text-base font-normal text-muted-foreground">/år</span></p>
+              <p className="text-sm text-muted-foreground mb-6">Bara ~41 kr/mån</p>
+              <ul className="space-y-3 flex-1 mb-6">
+                {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)', 'Bäst pris – 2 månader gratis'].map(f => (
+                  <li key={f} className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className={f.includes('gratis') ? 'font-bold text-primary' : ''}>{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/auth">
+                <Button className="w-full font-bold shadow-glow-primary">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Välj årsplan
+                </Button>
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ============ FINAL CTA ============ */}
-      <section className="py-16 sm:py-24 bg-primary/5">
+      <section className="py-16 sm:py-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <motion.div
             initial="hidden"

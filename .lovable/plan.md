@@ -2,6 +2,8 @@
 
 ## Plan: Stripe-prenumeration med Free Tier, Avbokningshantering & Prissida
 
+### Status: ✅ Implementerad
+
 ### Prenumerationsmodell
 
 | | Gratis | Betald (49 kr/mån eller 490 kr/år) |
@@ -13,62 +15,41 @@
 ### Subscription Status-flöde
 
 ```text
-[Ny familj] → free
-[Betalar] → active
-[Avbryter] → canceled (behåller access till period slutar)
-[Period slut] → free (begränsningar aktiveras)
-[Manuellt gratis] → gifted (behandlas som active)
+[Ny familj] → free (kontrolleras via Stripe, ingen lokal DB-status)
+[Betalar] → active (Stripe subscription active)
+[Avbryter] → canceled (behåller access till current_period_end)
+[Period slut] → free (ingen aktiv subscription i Stripe)
 ```
 
-**Avbokningslogik:** Status `canceled` behandlas som `free` efter `subscription_end_date` passerat.
+**Avbokningslogik:** Status `canceled` behandlas som `active` så länge `current_period_end` inte passerat. Därefter = `free` med max 3 läxor/barn.
 
-### Databasändringar
+### Arkitektur
 
-Nya kolumner på `families`:
-- `subscription_status` (text, default `'free'`)
-- `stripe_customer_id` (text, nullable)
-- `stripe_subscription_id` (text, nullable)
-- `subscription_end_date` (timestamptz, nullable)
+Ingen databasändring behövs. Prenumerationsstatus hämtas direkt från Stripe via edge functions.
+
+### Stripe-produkter
+
+- **Månadsplan**: prod_UDKJiGqRFWCPDr / price_1TEtfJ12mugrDSilvyDPiuYu (49 kr/mån)
+- **Årsplan**: prod_UDKKIobQvMkm3v / price_1TEtfk12mugrDSilFIUUA2HJ (490 kr/år)
 
 ### Edge Functions
 
-1. **create-checkout-session** — Stripe Checkout med månads/årspris i SEK
-2. **stripe-webhook** — Hanterar betalning klar, avbruten, misslyckad
-3. **cancel-subscription** — Avbryter via Stripe API
-4. **customer-portal** — Stripe kundportal
+1. **check-subscription** — Kontrollerar prenumerationsstatus via Stripe API (active + canceled med tid kvar)
+2. **create-checkout** — Skapar Stripe Checkout-session med valt pris
+3. **customer-portal** — Öppnar Stripe kundportal för hantering/avbokning
 
-### Landningssida — Prissektion
+### Frontend-implementering
 
-Uppdatera `/landing` (`src/pages/LandingPage.tsx`) med en tydlig prissektion:
+- **`src/hooks/useSubscription.ts`**: Hook som anropar check-subscription, exponerar `subscribed`, `status`, `subscriptionEnd`, `createCheckout`, `openCustomerPortal`
+- **`src/components/UpgradeModal.tsx`**: Prisval (månads/år), redirect till Stripe Checkout
+- **`src/components/AddHomework.tsx`**: Blockerar skapande vid ≥3 aktiva läxor + ej prenumerant, visar uppgradera-CTA
+- **`src/hooks/useFamily.ts`**: Exponerar `getActiveHomeworkCount(childId)`
+- **`src/pages/FamilyPage.tsx`**: Visar prenumerationsstatus, uppgradera/hantera-knapp
+- **`src/pages/LandingPage.tsx`**: Prissektion med tre kolumner (Gratis, Månads, Års) — årsplanen visuellt framhävd
 
-- **Tre kolumner/kort**: Gratis, Månadsplan, Årsplan
-- **Gratis-kortet**: Visar begränsningar (3 läxor/barn), ingen knapp eller "Kom igång gratis"
-- **Månadskortet**: 49 kr/mån, obegränsat, enkel CTA
-- **Årskortet**: 490 kr/år, markerat som "Bäst värde" / "Spara 2 månader", visuellt framhävt med border/badge/bakgrund, primär CTA-knapp
-- Årskortet ska vara det visuellt dominanta (större, annan färg, "Populärast"-badge)
-- Kort lista med vad som ingår i betalversionen vs gratis
-- CTA-knappar leder till registrering (om utloggad) eller Stripe Checkout (om inloggad)
+### Begränsningslogik
 
-### Frontend-ändringar (övrigt)
-
-- **`src/hooks/useFamily.ts`**: Exponera `isSubscribed`, räkna aktiva läxor
-- **`src/components/AddHomework.tsx`**: Blockera vid ≥3 aktiva + ej prenumerant, visa uppgradera-CTA
-- **`src/components/UpgradeModal.tsx`**: Ny — prisval med redirect till Stripe Checkout
-- **`src/pages/FamilyPage.tsx`**: Visa status, uppgradera/avsluta-knapp
-
-### Filer att skapa/ändra
-- `supabase/migrations/` — families-kolumner
-- `supabase/functions/create-checkout-session/index.ts`
-- `supabase/functions/stripe-webhook/index.ts`
-- `supabase/functions/cancel-subscription/index.ts`
-- `src/hooks/useFamily.ts`
-- `src/components/UpgradeModal.tsx` (ny)
-- `src/components/AddHomework.tsx`
-- `src/pages/FamilyPage.tsx`
-- `src/pages/LandingPage.tsx` — ny prissektion
-
-### Första steg
-1. Aktivera Stripe-integrationen i Lovable
-2. Skapa databaskolumner
-3. Implementera edge functions + frontend + prissida
-
+```text
+subscribed = Stripe says active OR (canceled AND current_period_end > now)
+canCreateHomework = subscribed OR activeHomeworkCount < 3
+```
