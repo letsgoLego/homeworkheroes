@@ -271,25 +271,6 @@ export default function AuthPage() {
                 Barnkonto
               </Button>
             </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/join-family-start')}
-                className="h-12"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Gå med i familj
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/child-login')}
-                className="h-12"
-              >
-                <User className="w-4 h-4 mr-2" />
-                Barnkonto
-              </Button>
-            </div>
           </div>
         </motion.div>
       </div>
