@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AdBanner } from '@/components/AdBanner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, addDays, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -541,6 +542,8 @@ export default function TodayPage() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <AdBanner className="px-4" />
       
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
