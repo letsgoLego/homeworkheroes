@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AdBanner } from '@/components/AdBanner';
 import { motion } from 'framer-motion';
 import { format, addWeeks, subWeeks } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -87,6 +88,8 @@ export default function WeekPage() {
           activeChildId={activeChildId}
         />
       </main>
+
+      <AdBanner className="px-4" />
       
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
