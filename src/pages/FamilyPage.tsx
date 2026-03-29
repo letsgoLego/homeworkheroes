@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AdBanner } from '@/components/AdBanner';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
@@ -308,6 +309,8 @@ export default function FamilyPage() {
           </a>
         </motion.div>
       </main>
+
+      <AdBanner className="px-4" />
       
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
