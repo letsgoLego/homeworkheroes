@@ -10,12 +10,12 @@ interface SubscriptionState {
   loading: boolean;
 }
 
-const MONTHLY_PRICE_ID = 'price_1TEtfJ12mugrDSilvyDPiuYu';
-const YEARLY_PRICE_ID = 'price_1TEtfk12mugrDSilFIUUA2HJ';
+const MONTHLY_PRICE_ID = 'price_1TGDHt12mugrDSilX1WEgjZZ';
+const YEARLY_PRICE_ID = 'price_1TGDIA12mugrDSilbUrBpQPE';
 
 export const STRIPE_PRICES = {
-  monthly: { priceId: MONTHLY_PRICE_ID, amount: 49, label: '49 kr/mån' },
-  yearly: { priceId: YEARLY_PRICE_ID, amount: 490, label: '490 kr/år' },
+  monthly: { priceId: MONTHLY_PRICE_ID, amount: 39, label: '39 kr/mån' },
+  yearly: { priceId: YEARLY_PRICE_ID, amount: 399, label: '399 kr/år' },
 } as const;
 
 export function useSubscription() {

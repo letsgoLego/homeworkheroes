@@ -71,7 +71,7 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
               )}
             >
               <p className="text-sm font-medium text-muted-foreground">Månadsvis</p>
-              <p className="text-2xl font-extrabold mt-1">49 kr</p>
+              <p className="text-2xl font-extrabold mt-1">39 kr</p>
               <p className="text-xs text-muted-foreground">/månad</p>
             </button>
 
@@ -89,7 +89,7 @@ export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                 Spara 2 mån
               </div>
               <p className="text-sm font-medium text-primary">Årsvis</p>
-              <p className="text-2xl font-extrabold mt-1">490 kr</p>
+              <p className="text-2xl font-extrabold mt-1">399 kr</p>
               <p className="text-xs text-muted-foreground">/år</p>
             </button>
           </div>
