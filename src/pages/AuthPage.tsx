@@ -277,6 +277,14 @@ export default function AuthPage() {
       
       {/* Footer */}
       <div className="text-center pb-8 space-y-2">
+        {!isLogin && (
+          <p className="text-xs text-muted-foreground px-6 mb-2">
+            Genom att skapa konto godkänner du våra{' '}
+            <Link to="/terms" className="text-primary underline underline-offset-2">användarvillkor</Link>{' '}
+            och{' '}
+            <Link to="/privacy" className="text-primary underline underline-offset-2">integritetspolicy</Link>.
+          </p>
+        )}
         <Link to="/landing" className="text-sm text-primary font-medium inline-flex items-center gap-1 hover:underline">
           <Info className="w-4 h-4" />
           Läs mer om Läxhjälpen

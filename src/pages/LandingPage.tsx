@@ -511,6 +511,15 @@ export default function LandingPage() {
             <span className="text-lg">📚</span>
             <span className="font-bold text-foreground">Homework Heroes</span>
           </div>
+          <div className="flex items-center gap-4 text-sm">
+            <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
+              Integritetspolicy
+            </Link>
+            <span className="text-border">·</span>
+            <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">
+              Användarvillkor
+            </Link>
+          </div>
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Homework Heroes. Gör läxläsning enklare.
           </p>

@@ -16,7 +16,10 @@ import JoinFamilyStartPage from "./pages/JoinFamilyStartPage";
 import ChildLoginPage from "./pages/ChildLoginPage";
 import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
 import ParentRouteGuard from "./components/ParentRouteGuard";
+import CookieBanner from "./components/CookieBanner";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +66,8 @@ function AppRoutes() {
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
       <Route path="/child-login" element={<PublicRoute><ChildLoginPage /></PublicRoute>} />
       <Route path="/landing" element={<LandingPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
       <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
       <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
@@ -84,6 +89,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <AppRoutes />
+          <CookieBanner />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
