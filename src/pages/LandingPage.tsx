@@ -415,7 +415,7 @@ export default function LandingPage() {
               <p className="text-3xl font-extrabold mb-1">0 kr</p>
               <p className="text-sm text-muted-foreground mb-6">Perfekt för att testa</p>
               <ul className="space-y-3 flex-1 mb-6">
-                {['Max 3 aktiva läxor/barn', 'Alla ämnen & läxtyper', 'Packlistor', 'Streaks & konfetti', 'Familjemedlemmar (max 6)'].map(f => (
+                {['Max 3 aktiva läxor/barn', 'Alla ämnen & läxtyper', 'Packlistor', 'Streaks & konfetti', 'Familjemedlemmar (max 6)', 'Innehåller annonser'].map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
                     {f}
@@ -435,7 +435,7 @@ export default function LandingPage() {
               <p className="text-3xl font-extrabold mb-1">39 kr<span className="text-base font-normal text-muted-foreground">/mån</span></p>
               <p className="text-sm text-muted-foreground mb-6">Flexibelt, avsluta när du vill</p>
               <ul className="space-y-3 flex-1 mb-6">
-                {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)'].map(f => (
+                {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)', 'Inga annonser'].map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
                     {f}
@@ -459,7 +459,7 @@ export default function LandingPage() {
               <p className="text-3xl font-extrabold mb-1">399 kr<span className="text-base font-normal text-muted-foreground">/år</span></p>
               <p className="text-sm text-muted-foreground mb-6">Bara ~33 kr/mån</p>
               <ul className="space-y-3 flex-1 mb-6">
-                {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)', 'Bäst pris – spara 69 kr'].map(f => (
+                {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)', 'Inga annonser', 'Bäst pris – spara 69 kr'].map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
                     <span className={f.includes('spara') ? 'font-bold text-primary' : ''}>{f}</span>
