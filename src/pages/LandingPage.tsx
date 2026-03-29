@@ -432,7 +432,7 @@ export default function LandingPage() {
             {/* Monthly plan */}
             <motion.div variants={fadeUp} className="bg-card rounded-3xl p-6 border border-border shadow-card flex flex-col">
               <h3 className="text-xl font-bold text-foreground mb-1">Månadsplan</h3>
-              <p className="text-3xl font-extrabold mb-1">49 kr<span className="text-base font-normal text-muted-foreground">/mån</span></p>
+              <p className="text-3xl font-extrabold mb-1">39 kr<span className="text-base font-normal text-muted-foreground">/mån</span></p>
               <p className="text-sm text-muted-foreground mb-6">Flexibelt, avsluta när du vill</p>
               <ul className="space-y-3 flex-1 mb-6">
                 {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)'].map(f => (
@@ -456,13 +456,13 @@ export default function LandingPage() {
                 Bäst värde – spara 2 månader!
               </div>
               <h3 className="text-xl font-bold text-primary mb-1 mt-2">Årsplan</h3>
-              <p className="text-3xl font-extrabold mb-1">490 kr<span className="text-base font-normal text-muted-foreground">/år</span></p>
-              <p className="text-sm text-muted-foreground mb-6">Bara ~41 kr/mån</p>
+              <p className="text-3xl font-extrabold mb-1">399 kr<span className="text-base font-normal text-muted-foreground">/år</span></p>
+              <p className="text-sm text-muted-foreground mb-6">Bara ~33 kr/mån</p>
               <ul className="space-y-3 flex-1 mb-6">
-                {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)', 'Bäst pris – 2 månader gratis'].map(f => (
+                {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)', 'Bäst pris – spara 69 kr'].map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className={f.includes('gratis') ? 'font-bold text-primary' : ''}>{f}</span>
+                    <span className={f.includes('spara') ? 'font-bold text-primary' : ''}>{f}</span>
                   </li>
                 ))}
               </ul>
