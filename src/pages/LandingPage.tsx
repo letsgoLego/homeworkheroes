@@ -462,7 +462,7 @@ export default function LandingPage() {
                 {['Obegränsat antal läxor', 'Alla ämnen & läxtyper', 'Packlistor & påminnelser', 'Streaks & konfetti', 'Familjemedlemmar (max 6)', 'Bäst pris – spara 69 kr'].map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className={f.includes('gratis') ? 'font-bold text-primary' : ''}>{f}</span>
+                    <span className={f.includes('spara') ? 'font-bold text-primary' : ''}>{f}</span>
                   </li>
                 ))}
               </ul>
