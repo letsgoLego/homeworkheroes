@@ -1,55 +1,58 @@
 
 
-## Plan: Stripe-prenumeration med Free Tier, Avbokningshantering & Prissida
+## Plan: Legal Compliance — Cookies, Privacy & Terms
 
-### Status: ✅ Implementerad
+### What You Need (Swedish/EU perspective)
 
-### Prenumerationsmodell
+For a Swedish app collecting personal data and processing payments, you need:
 
-| | Gratis | Betald (49 kr/mån eller 490 kr/år) |
-|---|---|---|
-| Max familjemedlemmar | 6 | 6 |
-| Läxor per barn | Max 3 aktiva | Obegränsat |
-| Alla övriga funktioner | Ja | Ja |
+1. **Cookie-banner (GDPR + ePrivacy)** — Inform users about cookies, get consent before non-essential cookies are set. Supabase auth uses essential cookies (no consent needed), but Stripe and any analytics would require consent.
 
-### Subscription Status-flöde
+2. **Integritetspolicy (Privacy Policy)** — Required by GDPR. Describes what data you collect, why, how long you keep it, and user rights (access, deletion, portability). Must be accessible before signup.
 
-```text
-[Ny familj] → free (kontrolleras via Stripe, ingen lokal DB-status)
-[Betalar] → active (Stripe subscription active)
-[Avbryter] → canceled (behåller access till current_period_end)
-[Period slut] → free (ingen aktiv subscription i Stripe)
-```
+3. **Användarvillkor (Terms of Service)** — Covers acceptable use, subscription terms, cancellation, liability limitations. Required for Stripe and app store compliance.
 
-**Avbokningslogik:** Status `canceled` behandlas som `active` så länge `current_period_end` inte passerat. Därefter = `free` med max 3 läxor/barn.
+### Implementation
 
-### Arkitektur
+#### 1. Cookie Consent Banner
+- New component `CookieBanner.tsx` — shown at bottom of screen on first visit
+- Stores consent in `localStorage` (no DB needed)
+- Two buttons: "Godkänn alla" and "Bara nödvändiga"
+- Only essential cookies (auth session) are used without consent; Stripe loads only after consent
+- Shown on all pages via `App.tsx`
 
-Ingen databasändring behövs. Prenumerationsstatus hämtas direkt från Stripe via edge functions.
+#### 2. Legal Pages
+- New page `src/pages/PrivacyPage.tsx` — Swedish privacy policy covering:
+  - Data controller (your info)
+  - What data is collected (email, name, child usernames, homework data)
+  - Legal basis (contract + consent)
+  - Data processors (Stripe for payments, hosting provider)
+  - Retention periods
+  - User rights (radera konto, exportera data, etc.)
+  - Contact information
+- New page `src/pages/TermsPage.tsx` — Swedish terms covering:
+  - Tjänstebeskrivning
+  - Konton och familjer
+  - Prenumeration, priser, förnyelse, avbokning
+  - Gratis vs betald plan
+  - Användarens ansvar
+  - Uppsägning
+  - Ansvarsbegränsning
 
-### Stripe-produkter
+#### 3. Links & Integration
+- Footer links on `LandingPage.tsx`: "Integritetspolicy" and "Användarvillkor"
+- Link on `AuthPage.tsx` signup: "Genom att skapa konto godkänner du våra villkor och integritetspolicy"
+- Routes added in `App.tsx` (public, no auth required)
+- Cookie banner rendered globally in `App.tsx`
 
-- **Månadsplan**: prod_UDKJiGqRFWCPDr / price_1TEtfJ12mugrDSilvyDPiuYu (49 kr/mån)
-- **Årsplan**: prod_UDKKIobQvMkm3v / price_1TEtfk12mugrDSilFIUUA2HJ (490 kr/år)
+### Files to Create/Modify
+- `src/components/CookieBanner.tsx` — new
+- `src/pages/PrivacyPage.tsx` — new
+- `src/pages/TermsPage.tsx` — new
+- `src/App.tsx` — add routes + cookie banner
+- `src/pages/LandingPage.tsx` — add footer links
+- `src/pages/AuthPage.tsx` — add consent text with links
 
-### Edge Functions
+### Important Note
+The legal texts will be solid templates in Swedish, but you should review them with a legal advisor before going live, especially the privacy policy which needs your actual company/contact details filled in.
 
-1. **check-subscription** — Kontrollerar prenumerationsstatus via Stripe API (active + canceled med tid kvar)
-2. **create-checkout** — Skapar Stripe Checkout-session med valt pris
-3. **customer-portal** — Öppnar Stripe kundportal för hantering/avbokning
-
-### Frontend-implementering
-
-- **`src/hooks/useSubscription.ts`**: Hook som anropar check-subscription, exponerar `subscribed`, `status`, `subscriptionEnd`, `createCheckout`, `openCustomerPortal`
-- **`src/components/UpgradeModal.tsx`**: Prisval (månads/år), redirect till Stripe Checkout
-- **`src/components/AddHomework.tsx`**: Blockerar skapande vid ≥3 aktiva läxor + ej prenumerant, visar uppgradera-CTA
-- **`src/hooks/useFamily.ts`**: Exponerar `getActiveHomeworkCount(childId)`
-- **`src/pages/FamilyPage.tsx`**: Visar prenumerationsstatus, uppgradera/hantera-knapp
-- **`src/pages/LandingPage.tsx`**: Prissektion med tre kolumner (Gratis, Månads, Års) — årsplanen visuellt framhävd
-
-### Begränsningslogik
-
-```text
-subscribed = Stripe says active OR (canceled AND current_period_end > now)
-canCreateHomework = subscribed OR activeHomeworkCount < 3
-```
