@@ -506,7 +506,7 @@ export default function LandingPage() {
 
       {/* ============ FOOTER ============ */}
       <footer className="py-8 border-t border-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-lg">📚</span>
             <span className="font-bold text-foreground">Homework Heroes</span>
