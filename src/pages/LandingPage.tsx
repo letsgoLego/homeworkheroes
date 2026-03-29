@@ -415,12 +415,16 @@ export default function LandingPage() {
               <p className="text-3xl font-extrabold mb-1">0 kr</p>
               <p className="text-sm text-muted-foreground mb-6">Perfekt för att testa</p>
               <ul className="space-y-3 flex-1 mb-6">
-                {['Max 3 aktiva läxor/barn', 'Alla ämnen & läxtyper', 'Packlistor', 'Streaks & konfetti', 'Familjemedlemmar (max 6)', 'Innehåller annonser'].map(f => (
+                {['Max 3 aktiva läxor/barn', 'Alla ämnen & läxtyper', 'Packlistor', 'Streaks & konfetti', 'Familjemedlemmar (max 6)'].map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
                     {f}
                   </li>
                 ))}
+                <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Eye className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  Innehåller annonser
+                </li>
               </ul>
               <Link to="/auth">
                 <Button variant="outline" className="w-full font-bold">
