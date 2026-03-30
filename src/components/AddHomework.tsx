@@ -13,7 +13,7 @@ import { format, addDays, addWeeks, parseISO, startOfDay, eachDayOfInterval, isW
 import { sv } from 'date-fns/locale';
 import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag, Lock } from 'lucide-react';
 import { toast } from 'sonner';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
 
 interface AddHomeworkProps {
@@ -35,7 +35,7 @@ const WEEKDAYS = [
 
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework, getActiveHomeworkCount } = useFamily();
-  const { subscribed } = useSubscription();
+  const { subscribed } = useSubscriptionContext();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);

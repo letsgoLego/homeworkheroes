@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { STRIPE_PRICES, useSubscription } from '@/hooks/useSubscription';
+import { STRIPE_PRICES, useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { Check, Crown, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,7 @@ interface UpgradeModalProps {
 }
 
 export function UpgradeModal({ open, onClose }: UpgradeModalProps) {
-  const { createCheckout } = useSubscription();
+  const { createCheckout } = useSubscriptionContext();
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleCheckout = async (priceId: string) => {
