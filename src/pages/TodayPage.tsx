@@ -214,6 +214,23 @@ export default function TodayPage() {
               </motion.section>
             )}
             
+            {/* Today's activities */}
+            {todayActivities.length > 0 && (
+              <section>
+                <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-lg bg-accent/30 flex items-center justify-center">
+                    🏃
+                  </span>
+                  Aktiviteter idag
+                </h2>
+                <div className="space-y-2">
+                  {todayActivities.map((act) => (
+                    <ActivityCard key={act.id} activity={act} onDelete={deleteActivity} />
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* Today's tasks */}
             <section>
               <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
