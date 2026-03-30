@@ -60,8 +60,8 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId, 
   };
 
   const hasAnyContent = weekDays.some((day) => {
-    const { deadlines, tasks } = getItemsForDay(day);
-    return deadlines.length > 0 || tasks.length > 0;
+    const { deadlines, tasks, activities: acts } = getItemsForDay(day);
+    return deadlines.length > 0 || tasks.length > 0 || acts.length > 0;
   });
 
   return (
