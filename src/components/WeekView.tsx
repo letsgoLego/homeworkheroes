@@ -27,7 +27,7 @@ interface WeekViewProps {
 
 type FilterType = 'all' | 'inlamning' | 'forhor';
 
-export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }: WeekViewProps) {
+export function WeekView({ selectedDate, onSelectDate, homework, activeChildId, getActivitiesForDate }: WeekViewProps) {
   const [filter, setFilter] = useState<FilterType>('all');
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
