@@ -1,74 +1,41 @@
 
 
-## Plan: Onboarding-flöde, Offline-stöd & React Query-optimering
+## Plan: Gör läxuppläggningen roligare och smartare
 
-### 1. Förbättrat onboarding-flöde
+### Problem idag
+1. **Uppgiftstiteln ("Vad ska du göra?") är onödig** — den blir alltid "Plugga" och varje studieuppgift får samma namn. Det ger inget värde.
+2. **Formuläret känns som ett tråkigt vuxen-formulär** — inte anpassat för barn/tonåringar.
+3. **Ingen smart hjälp** — barnet måste själv räkna ut vilka dagar som passar att plugga.
 
-Nuvarande onboarding har bara 2 steg (skapa familj → lägg till barn). Vi bygger ut det med:
+### Förändringar
 
-- **Steg-indikator (progress bar)** högst upp som visar 1/3, 2/3, 3/3
-- **Steg 1: Välkommen** — kort intro som förklarar vad appen gör (3 USP:er med ikoner)
-- **Steg 2: Skapa familj** — behåller nuvarande familjenamn-funktionalitet
-- **Steg 3: Lägg till barn** — behåller nuvarande barn-funktionalitet
+#### 1. Ta bort manuell uppgiftstitel
+Generera titeln automatiskt: `"Plugga {ämne}"` (t.ex. "Plugga Matte", "Öva Engelska"). Bort med textfältet i steg 2. Förhör får "Plugga inför förhör", inlämningar får "Jobba med {titel}".
 
-Dessutom: en **intro-tour för befintliga användare** som visas första gången man landar på TodayPage. En enkel tooltip-overlay som visar 3-4 steg ("Här ser du dagens uppgifter", "Byt barn här", "Lägg till läxor här"). Sparas i `localStorage` så den bara visas en gång.
+#### 2. Gör steg 1 mer visuellt och snabbt
+- **Snabbval-templates** högst upp: Tre knappar med emoji — "📖 Läsläxa", "✍️ Prov/Förhör", "📄 Inlämning" — som förfyller typ + föreslår ämne.
+- **Större, roligare ämnesväljare** med animerade emojis vid val.
+- **Uppmuntrande mikro-copy**: Byt "Fyll i titel" till "Vad handlar läxan om? 🤔", "Anteckningar" till "Vill du skriva något mer? 💭".
 
-**Filer:**
-- `src/pages/OnboardingPage.tsx` — lägg till välkomststeg + progress bar
-- `src/components/IntroTour.tsx` — ny komponent för tooltip-overlay
-- `src/pages/TodayPage.tsx` — visa IntroTour för nya användare
+#### 3. Smartare pluggschema (steg 2)
+- **Auto-föreslå dagar** baserat på arbetsbelastning: Markera automatiskt de dagar som har lägst belastning. Barnet kan justera men slipper börja från noll.
+- **Visuell belastningsindikator** med färger och text: "Lugnt 😎", "Lite att göra 📚", "Fullt schema! 🔥".
+- **Föreslå antal dagar**: "Du har 5 dagar på dig. Vi föreslår att plugga 3 av dem!" med en slider.
 
-### 2. Offline-stöd
+#### 4. Roligare interaktion
+- **Konfetti-burst** när man väljer ämne.
+- **Animerad progress** mellan steg med en liten karaktär/emoji som "vandrar" framåt.
+- **Uppmuntrande slutmeddelande** efter sparande: "Bra jobbat! Du har planerat {X} pluggdagar 💪"
 
-PWA med service worker finns redan (`vite-plugin-pwa` + `sw-push.js`). Vi förbättrar med:
-
-- **Runtime caching av API-anrop**: Lägg till `runtimeCaching` i workbox-konfigurationen för att cacha Supabase-anrop med en `NetworkFirst`-strategi (försök nätverk först, falla tillbaka till cache)
-- **Offline-indikator**: En liten banner som visas överst i appen när enheten tappar uppkoppling (`navigator.onLine` + event listeners)
-- **Statiska tillgångar**: Redan cachade via `globPatterns`, men vi utökar med fonter och bilder
-- **Guard mot iframe/preview**: Lägg till registreringsguard i `main.tsx` så SW inte registreras i Lovable-editorn
-
-**Filer:**
-- `vite.config.ts` — lägg till `runtimeCaching` + `devOptions: { enabled: false }`
-- `src/main.tsx` — lägg till SW-registreringsguard
-- `src/components/OfflineBanner.tsx` — ny komponent
-- `src/App.tsx` — inkludera OfflineBanner
-
-### 3. React Query-optimering
-
-Appen har `@tanstack/react-query` installerad men använder den inte. `useFamily` gör all datahämtning manuellt med `useState`/`useEffect`. Vi migrerar till React Query för:
-
-- **Automatisk caching** — data behöver inte hämtas om vid navigering
-- **Stale-while-revalidate** — visar cachad data direkt, uppdaterar i bakgrunden
-- **Retry-logik** — automatisk omförsök vid nätverksfel
-- **Deduplicering** — flera komponenter som begär samma data gör bara ett anrop
-
-**Approach:** Refaktorera `useFamily` till att internt använda `useQuery` för datahämtning, men behålla samma externa API (return-värden). Alla sidor fortsätter importera `useFamily()` som förut.
-
-Delas upp i queries:
-- `useFamilyData(userId)` — hämtar roll, familj, barn
-- `useHomeworkData(childIds)` — hämtar läxor + study_tasks
-- `usePackItems(childIds)` — hämtar recurring pack items
-- `useAdhocTasks(childIds)` — hämtar adhoc tasks
-
-Mutationer (toggleTask, addHomework etc.) använder `useMutation` med optimistic updates.
-
-**Filer:**
-- `src/hooks/useFamily.ts` — stor refaktorering till React Query
-- `src/hooks/queries/useFamilyData.ts` — ny
-- `src/hooks/queries/useHomeworkData.ts` — ny
-
-### Sammanfattning av alla filer
+### Filer att ändra
 
 | Fil | Åtgärd |
 |---|---|
-| `src/pages/OnboardingPage.tsx` | Utöka med välkomststeg + progress |
-| `src/components/IntroTour.tsx` | Ny — tooltip-tour |
-| `src/pages/TodayPage.tsx` | Lägg till IntroTour |
-| `vite.config.ts` | Runtime caching + dev guard |
-| `src/main.tsx` | SW-registreringsguard |
-| `src/components/OfflineBanner.tsx` | Ny — offline-indikator |
-| `src/App.tsx` | Lägg till OfflineBanner |
-| `src/hooks/useFamily.ts` | Refaktorera till React Query |
-| `src/hooks/queries/useFamilyData.ts` | Ny — familjedata-query |
-| `src/hooks/queries/useHomeworkData.ts` | Ny — läxdata-query |
+| `src/components/AddHomework.tsx` | Stor refaktorering: ta bort taskTitle-fält, lägg till templates, smart auto-schema, roligare copy och animationer |
+
+### Teknisk sammanfattning
+- `taskTitle` state och fältet tas bort. Genereras automatiskt vid `handleSubmit` baserat på `homeworkType` + `subject`.
+- Ny funktion `suggestStudyDays(availableDays, taskCountsByDate)` som returnerar optimalt fördelade dagar.
+- Templates-knapparna sätter `homeworkType`, `subject` och fokuserar titel-fältet i ett klick.
+- Framer Motion-animationer för ämnesval och stegbyte.
 
