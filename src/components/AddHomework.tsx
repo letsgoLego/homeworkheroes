@@ -70,14 +70,16 @@ function generateAutoTitle(homeworkType: HomeworkType, subject: Subject, title: 
 function suggestStudyDays(
   availableDays: Date[],
   taskCountsByDate: Record<string, number>,
+  activityCountsByDate: Record<string, number>,
   suggestedCount: number
 ): string[] {
-  // Sort days by workload (ascending), prefer weekdays
+  // Sort days by workload (ascending), prefer weekdays, penalize days with activities
   const scored = availableDays.map(day => {
     const dateStr = format(day, 'yyyy-MM-dd');
     const load = taskCountsByDate[dateStr] || 0;
+    const activityLoad = activityCountsByDate[dateStr] || 0;
     const weekendPenalty = isWeekend(day) ? 2 : 0;
-    return { dateStr, score: load + weekendPenalty };
+    return { dateStr, score: load + activityLoad * 2 + weekendPenalty };
   });
   scored.sort((a, b) => a.score - b.score);
   return scored.slice(0, suggestedCount).map(s => s.dateStr);
