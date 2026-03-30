@@ -18,6 +18,9 @@ export const STRIPE_PRICES = {
   yearly: { priceId: YEARLY_PRICE_ID, amount: 399, label: '399 kr/år' },
 } as const;
 
+const CACHE_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
+const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
 export function useSubscription() {
   const { user } = useAuth();
   const [state, setState] = useState<SubscriptionState>({
@@ -35,7 +38,7 @@ export function useSubscription() {
     }
 
     try {
-      // First check if the family has a gifted override
+      // First read cached data from the families table
       const { data: roles } = await supabase
         .from('user_roles')
         .select('family_id')
@@ -43,12 +46,14 @@ export function useSubscription() {
         .limit(1);
 
       if (roles && roles.length > 0 && roles[0].family_id) {
+        const familyId = roles[0].family_id;
         const { data: familyData } = await supabase
           .from('families')
-          .select('subscription_override')
-          .eq('id', roles[0].family_id)
+          .select('subscription_override, subscription_status, subscription_end, subscription_interval, subscription_checked_at')
+          .eq('id', familyId)
           .maybeSingle();
 
+        // Gifted → done
         if (familyData?.subscription_override === 'gifted') {
           setState({
             subscribed: true,
@@ -59,9 +64,28 @@ export function useSubscription() {
           });
           return;
         }
+
+        // If cache is fresh, use it without calling the Edge Function
+        if (familyData?.subscription_checked_at) {
+          const age = Date.now() - new Date(familyData.subscription_checked_at).getTime();
+          if (age < CACHE_MAX_AGE_MS) {
+            const cachedStatus = (familyData.subscription_status || 'free') as SubscriptionState['status'];
+            const cachedEnd = familyData.subscription_end;
+            const isSubscribed = cachedStatus === 'active' ||
+              (cachedStatus === 'canceled' && !!cachedEnd && new Date(cachedEnd) > new Date());
+            setState({
+              subscribed: isSubscribed,
+              status: cachedStatus,
+              subscriptionEnd: cachedEnd,
+              interval: familyData.subscription_interval,
+              loading: false,
+            });
+            return;
+          }
+        }
       }
 
-      // Otherwise check Stripe
+      // Cache is stale or missing — invoke Edge Function (which will also update cache)
       const { data, error } = await supabase.functions.invoke('check-subscription');
       if (error) throw error;
 
@@ -81,8 +105,7 @@ export function useSubscription() {
   useEffect(() => {
     checkSubscription();
 
-    // Refresh every 60 seconds
-    const interval = setInterval(checkSubscription, 60000);
+    const interval = setInterval(checkSubscription, POLL_INTERVAL);
     return () => clearInterval(interval);
   }, [checkSubscription]);
 
