@@ -38,7 +38,7 @@ async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult
 
   const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
 
-  const [hwRes, packRes, adhocRes] = await Promise.all([
+  const [hwRes, packRes, adhocRes, actRes] = await Promise.all([
     supabase
       .from('homework')
       .select('*, study_tasks(*)')
@@ -52,11 +52,16 @@ async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult
       .from('adhoc_tasks')
       .select('*')
       .in('child_id', childIds),
+    supabase
+      .from('activities')
+      .select('*')
+      .in('child_id', childIds),
   ]);
 
   if (hwRes.error) throw hwRes.error;
   if (packRes.error) throw packRes.error;
   if (adhocRes.error) throw adhocRes.error;
+  if (actRes.error) throw actRes.error;
 
   const homework: HomeworkWithTasks[] = (hwRes.data || []).map((hw: any) => ({
     ...hw,
