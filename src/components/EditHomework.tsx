@@ -7,12 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useFamily } from '@/hooks/useFamily';
-import { format, parseISO, addDays, isBefore, isSameDay, startOfDay, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
+import { format, parseISO, addDays, isSameDay, startOfDay, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, Calendar, Trash2, Bell, Repeat, Check, Flag } from 'lucide-react';
+import { Plus, X, Calendar, Trash2, Bell, Repeat, Check, Flag, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
+import { celebrateTask } from '@/lib/confetti';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Homework = Tables<'homework'>;
@@ -40,10 +41,25 @@ const WEEKDAYS = [
   { value: 0, label: 'Sön' },
 ];
 
+function getLoadEmoji(count: number): string {
+  if (count === 0) return '';
+  if (count <= 1) return '📚';
+  if (count <= 2) return '📝';
+  return '🔥';
+}
+
+function generateAutoTitle(homeworkType: HomeworkType, subject: Subject, title: string): string {
+  const subjectLabel = SUBJECT_LABELS[subject];
+  if (homeworkType === 'forhor') return `Plugga inför förhör – ${subjectLabel}`;
+  if (title.trim()) return `Jobba med ${title.trim()}`;
+  return `Plugga ${subjectLabel}`;
+}
+
 export function EditHomework({ open, onClose, homework: editingHomework }: EditHomeworkProps) {
   const { addTask, deleteTask, updateHomework, refetch, homework: allHomework } = useFamily();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'details' | 'tasks'>('details');
+  const [subjectAnimKey, setSubjectAnimKey] = useState(0);
   
   // Details state
   const [title, setTitle] = useState(editingHomework.title);
@@ -58,13 +74,11 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
   const [recurrenceDays, setRecurrenceDays] = useState<number[]>(editingHomework.recurrence_days || [1, 2, 3, 4, 5]);
   
   // Task state
-  const [taskTitle, setTaskTitle] = useState('Plugga');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   const today = startOfDay(new Date());
   const minDate = format(today, 'yyyy-MM-dd');
 
-  // Generate available days between today and day before due date
   const availableDays = useMemo(() => {
     if (editingHomework.is_recurring) return [];
     const dueDateParsed = parseISO(editingHomework.due_date);
@@ -73,30 +87,24 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
     return eachDayOfInterval({ start: today, end: endDate });
   }, [editingHomework.due_date, editingHomework.is_recurring, today]);
 
-  // Get existing task dates to show which are already scheduled
   const existingTaskDates = useMemo(() => {
     return editingHomework.tasks.map(t => t.task_date);
   }, [editingHomework.tasks]);
 
-  // Calculate task counts per day for this child (for workload indicator)
   const taskCountsByDate = useMemo(() => {
     const counts: Record<string, number> = {};
-    
     allHomework
       .filter(hw => hw.child_id === editingHomework.child_id)
       .forEach(hw => {
         hw.tasks.forEach(task => {
-          // Don't count tasks from the homework we're editing, or completed tasks
           if (hw.id !== editingHomework.id && !task.completed) {
             counts[task.task_date] = (counts[task.task_date] || 0) + 1;
           }
         });
       });
-    
     return counts;
   }, [allHomework, editingHomework.child_id, editingHomework.id]);
 
-  // Reset state when homework changes
   useEffect(() => {
     setTitle(editingHomework.title);
     setSubject(editingHomework.subject as Subject);
@@ -118,6 +126,11 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
 
   const removeBringItem = (index: number) => {
     setBringItems(bringItems.filter((_, i) => i !== index));
+  };
+
+  const handleSelectSubject = (s: Subject) => {
+    setSubject(s);
+    setSubjectAnimKey(prev => prev + 1);
   };
 
   const handleSaveDetails = async () => {
@@ -147,6 +160,8 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
 
     if (success) {
       await refetch();
+      toast.success('Ändringar sparade ✨');
+      celebrateTask();
     }
     
     setLoading(false);
@@ -160,39 +175,24 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
     );
   };
 
-  const selectAllDays = () => {
-    const allDates = availableDays
-      .filter(d => !existingTaskDates.includes(format(d, 'yyyy-MM-dd')))
-      .map(d => format(d, 'yyyy-MM-dd'));
-    setSelectedDays(allDates);
-  };
-
-  const selectWeekdaysOnly = () => {
-    const weekdayDates = availableDays
-      .filter(day => !isWeekend(day) && !existingTaskDates.includes(format(day, 'yyyy-MM-dd')))
-      .map(d => format(d, 'yyyy-MM-dd'));
-    setSelectedDays(weekdayDates);
-  };
-
-  const selectEveryOtherDay = () => {
-    const availableNonExisting = availableDays.filter(d => !existingTaskDates.includes(format(d, 'yyyy-MM-dd')));
-    const everyOther = availableNonExisting
-      .filter((_, i) => i % 2 === 0)
-      .map(d => format(d, 'yyyy-MM-dd'));
-    setSelectedDays(everyOther);
-  };
-
   const handleAddSelectedDays = async () => {
     if (selectedDays.length === 0) return;
 
     setLoading(true);
+    const autoTitle = generateAutoTitle(homeworkType, subject, title);
     for (const dateStr of selectedDays.sort()) {
-      await addTask(editingHomework.id, taskTitle || 'Plugga', dateStr);
+      await addTask(editingHomework.id, autoTitle, dateStr);
     }
     setSelectedDays([]);
     await refetch();
     setLoading(false);
-    toast.success(`${selectedDays.length} uppgift${selectedDays.length > 1 ? 'er' : ''} tillagda`);
+    toast.success(
+      <div className="flex flex-col">
+        <span className="font-bold">Klart! 🎉</span>
+        <span className="text-sm">{selectedDays.length} pluggdag{selectedDays.length > 1 ? 'ar' : ''} tillagda</span>
+      </div>
+    );
+    celebrateTask();
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -206,77 +206,103 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
     (a, b) => new Date(a.task_date).getTime() - new Date(b.task_date).getTime()
   );
 
+  const completedCount = sortedTasks.filter(t => t.completed).length;
+  const progressPercent = sortedTasks.length > 0 ? (completedCount / sortedTasks.length) * 100 : 0;
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            Redigera läxa
-            {editingHomework.is_recurring && (
-              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
-                <Repeat className="w-3 h-3" />
-                Återkommande
-              </span>
-            )}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              ✏️ Redigera läxa
+              {editingHomework.is_recurring && (
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Repeat className="w-3 h-3" />
+                  Återkommande
+                </span>
+              )}
+            </DialogTitle>
+          </div>
+          {/* Progress bar */}
+          {sortedTasks.length > 0 && (
+            <div className="mt-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                <span>{completedCount}/{sortedTasks.length} klara</span>
+                <span>{Math.round(progressPercent)}%</span>
+              </div>
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className="h-full bg-success rounded-full"
+                />
+              </div>
+            </div>
+          )}
         </DialogHeader>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-4">
-          <button
+        <div className="flex gap-2 mb-2">
+          <motion.button
+            whileTap={{ scale: 0.97 }}
             onClick={() => setActiveTab('details')}
             className={cn(
-              'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all',
+              'flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all',
               activeTab === 'details'
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-primary text-primary-foreground shadow-glow-primary'
                 : 'bg-muted hover:bg-muted/80'
             )}
           >
-            Detaljer
-          </button>
-          <button
+            📋 Detaljer
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
             onClick={() => setActiveTab('tasks')}
             className={cn(
-              'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all',
+              'flex-1 py-2.5 px-4 rounded-xl text-sm font-medium transition-all',
               activeTab === 'tasks'
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-primary text-primary-foreground shadow-glow-primary'
                 : 'bg-muted hover:bg-muted/80'
             )}
           >
-            Uppgifter ({editingHomework.tasks.length})
-          </button>
+            📅 Uppgifter ({editingHomework.tasks.length})
+          </motion.button>
         </div>
 
         <AnimatePresence mode="wait">
           {activeTab === 'details' ? (
             <motion.div
               key="details"
-              initial={{ opacity: 0, x: -10 }}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
+              exit={{ opacity: 0, x: -20 }}
               className="space-y-4"
             >
               {/* Title */}
-              <div>
-                <Label htmlFor="edit-title" className="text-sm font-medium">
-                  Titel
+              <div className="p-4 -mx-4 bg-primary/5 border-l-4 border-primary rounded-r-xl">
+                <Label htmlFor="edit-title" className="text-base font-bold text-primary flex items-center gap-2">
+                  <span className="text-lg">🤔</span>
+                  Vad handlar läxan om?
                 </Label>
                 <Input
                   id="edit-title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="mt-1.5"
+                  className="mt-2 h-12 text-base border-2 border-primary/30 focus:border-primary bg-background"
                 />
               </div>
 
-              {/* Subject */}
+              {/* Subject with animation */}
               <div>
                 <Label className="text-sm font-medium">Ämne</Label>
                 <div className="grid grid-cols-4 gap-2 mt-1.5">
                   {subjects.map((s) => (
-                    <button
+                    <motion.button
                       key={s}
-                      onClick={() => setSubject(s)}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSelectSubject(s)}
                       className={cn(
                         'flex flex-col items-center gap-1 p-2 rounded-xl transition-all',
                         subject === s
@@ -284,9 +310,17 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                           : 'bg-muted hover:bg-muted/80'
                       )}
                     >
-                      <span className="text-xl">{SUBJECT_ICONS[s]}</span>
+                      <motion.span
+                        key={`${s}-${subjectAnimKey}`}
+                        initial={subject === s ? { scale: 1.5, rotate: 15 } : {}}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                        className="text-xl"
+                      >
+                        {SUBJECT_ICONS[s]}
+                      </motion.span>
                       <span className="text-xs font-medium">{SUBJECT_LABELS[s]}</span>
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -299,8 +333,9 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                 </Label>
                 <div className="grid grid-cols-2 gap-2 mt-1.5">
                   {(['inlamning', 'forhor'] as HomeworkType[]).map((type) => (
-                    <button
+                    <motion.button
                       key={type}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setHomeworkType(type)}
                       className={cn(
                         'flex items-center justify-center gap-2 p-3 rounded-xl transition-all',
@@ -311,7 +346,7 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                     >
                       <span className="text-lg">{HOMEWORK_TYPE_ICONS[type]}</span>
                       <span className="text-sm font-medium">{HOMEWORK_TYPE_LABELS[type]}</span>
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -320,7 +355,7 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
               {!editingHomework.is_recurring && (
                 <div>
                   <Label htmlFor="edit-dueDate" className="text-sm font-medium">
-                    Inlämningsdatum
+                    {homeworkType === 'forhor' ? 'När är förhöret? 📅' : 'När ska den lämnas in? 📅'}
                   </Label>
                   <Input
                     id="edit-dueDate"
@@ -333,15 +368,16 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                 </div>
               )}
 
-              {/* Recurring days - only for recurring */}
+              {/* Recurring days */}
               {editingHomework.is_recurring && (
                 <>
                   <div>
                     <Label className="text-sm font-medium">Vilka dagar i veckan?</Label>
                     <div className="flex flex-wrap gap-2 mt-1.5">
                       {WEEKDAYS.map((day) => (
-                        <button
+                        <motion.button
                           key={day.value}
+                          whileTap={{ scale: 0.9 }}
                           onClick={() => setRecurrenceDays(prev =>
                             prev.includes(day.value)
                               ? prev.filter(d => d !== day.value)
@@ -355,12 +391,11 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                           )}
                         >
                           {day.label}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   </div>
 
-                  {/* Submission day */}
                   <div>
                     <Label className="text-sm font-medium">Inlämningsdag</Label>
                     <p className="text-xs text-muted-foreground mb-1.5">
@@ -368,8 +403,9 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {WEEKDAYS.map((day) => (
-                        <button
+                        <motion.button
                           key={day.value}
+                          whileTap={{ scale: 0.9 }}
                           onClick={() => setSubmissionDay(day.value)}
                           className={cn(
                             'px-3 py-2 rounded-lg text-sm font-medium transition-all',
@@ -379,7 +415,7 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                           )}
                         >
                           {day.label}
-                        </button>
+                        </motion.button>
                       ))}
                     </div>
                   </div>
@@ -389,12 +425,13 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
               {/* Description */}
               <div>
                 <Label htmlFor="edit-description" className="text-sm font-medium">
-                  Anteckningar
+                  Vill du skriva något mer? 💭
                 </Label>
                 <Textarea
                   id="edit-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Extra detaljer..."
                   className="mt-1.5 resize-none"
                   rows={2}
                 />
@@ -402,7 +439,7 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
 
               {/* Bring to school */}
               <div>
-                <Label className="text-sm font-medium">Ta med till skolan</Label>
+                <Label className="text-sm font-medium">Vad ska tas med till skolan? 🎒</Label>
                 <div className="flex gap-2 mt-1.5">
                   <Input
                     value={newItem}
@@ -417,21 +454,23 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                 {bringItems.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {bringItems.map((item, i) => (
-                      <span
+                      <motion.span
                         key={i}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
                         className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-accent text-sm"
                       >
                         {item}
                         <button onClick={() => removeBringItem(i)}>
                           <X className="w-3 h-3" />
                         </button>
-                      </span>
+                      </motion.span>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Reminder - only for non-recurring */}
+              {/* Reminder */}
               {!editingHomework.is_recurring && (
                 <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
                   <div className="flex items-center gap-2">
@@ -454,76 +493,29 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                 onClick={handleSaveDetails}
                 disabled={loading}
                 className="w-full"
+                size="lg"
               >
-                {loading ? 'Sparar...' : 'Spara ändringar'}
+                {loading ? 'Sparar...' : 'Spara ändringar ✨'}
               </Button>
             </motion.div>
           ) : (
             <motion.div
               key="tasks"
-              initial={{ opacity: 0, x: 10 }}
+              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
+              exit={{ opacity: 0, x: 20 }}
               className="space-y-4"
             >
-              <p className="text-sm text-muted-foreground">
-                Välj dagar att lägga till eller ta bort befintliga uppgifter. 
-                Inlämning: {format(parseISO(editingHomework.due_date), 'd MMMM', { locale: sv })}
-              </p>
-
-              {/* Task title */}
-              <div>
-                <Label className="text-sm font-medium">Vad ska göras?</Label>
-                <Input
-                  value={taskTitle}
-                  onChange={(e) => setTaskTitle(e.target.value)}
-                  placeholder="t.ex. Plugga, Läs, Öva"
-                  className="mt-1.5"
-                  disabled={loading}
-                />
+              {/* Smart info header */}
+              <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Lägg till eller ta bort pluggdagar
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {homeworkType === 'forhor' ? 'Förhör' : 'Inlämning'}: {format(parseISO(editingHomework.due_date), 'd MMMM', { locale: sv })}
+                </p>
               </div>
-
-              {/* Quick select buttons */}
-              {availableDays.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={selectAllDays}
-                    className="flex-1"
-                    disabled={loading}
-                  >
-                    Alla
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={selectWeekdaysOnly}
-                    className="flex-1"
-                    disabled={loading}
-                  >
-                    Vardagar
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={selectEveryOtherDay}
-                    className="flex-1"
-                    disabled={loading}
-                  >
-                    Varannan
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setSelectedDays([])}
-                    className="flex-1"
-                    disabled={loading}
-                  >
-                    Rensa
-                  </Button>
-                </div>
-              )}
 
               {/* Day picker */}
               {availableDays.length > 0 ? (
@@ -535,16 +527,18 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                     const isToday = isSameDay(day, today);
                     const isWeekendDay = isWeekend(day);
                     const otherTaskCount = taskCountsByDate[dateStr] || 0;
+                    const loadEmoji = getLoadEmoji(otherTaskCount);
                     
                     return (
-                      <button
+                      <motion.button
                         key={dateStr}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => !hasExistingTask && toggleDay(dateStr)}
                         disabled={hasExistingTask || loading}
                         className={cn(
                           'relative p-3 rounded-xl text-center transition-all',
                           hasExistingTask
-                            ? 'bg-success/20 cursor-not-allowed opacity-70'
+                            ? 'bg-success/20 cursor-not-allowed'
                             : isSelected 
                               ? 'bg-primary text-primary-foreground shadow-glow-primary' 
                               : isWeekendDay
@@ -565,17 +559,10 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                         <div className="text-xs opacity-70">
                           {format(day, 'MMM', { locale: sv })}
                         </div>
-                        {/* Workload indicator for other homework */}
+                        {/* Workload emoji */}
                         {otherTaskCount > 0 && !isSelected && !hasExistingTask && (
-                          <div className={cn(
-                            "absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium px-1.5 py-0.5 rounded-full",
-                            otherTaskCount >= 3 
-                              ? "bg-destructive/20 text-destructive"
-                              : otherTaskCount >= 2 
-                                ? "bg-warning/20 text-warning-foreground"
-                                : "bg-muted-foreground/20 text-muted-foreground"
-                          )}>
-                            {otherTaskCount} uppg
+                          <div className="text-[10px] mt-0.5 opacity-70">
+                            {loadEmoji}
                           </div>
                         )}
                         {(isSelected || hasExistingTask) && (
@@ -590,42 +577,57 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                             <Check className="w-3 h-3" />
                           </motion.div>
                         )}
-                      </button>
+                      </motion.button>
                     );
                   })}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Inga dagar kvar att lägga till före inlämningsdagen
+                  Inga dagar kvar att lägga till 📭
                 </p>
+              )}
+
+              {/* Legend */}
+              {availableDays.length > 0 && (
+                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground justify-center">
+                  <span>😎 Lugnt</span>
+                  <span>📚 Lite</span>
+                  <span>🔥 Fullt</span>
+                  <span className="text-success">✓ Redan planerad</span>
+                </div>
               )}
 
               {selectedDays.length > 0 && (
                 <div className="space-y-2">
-                  <div className="text-center text-sm text-muted-foreground">
-                    {selectedDays.length} ny{selectedDays.length > 1 ? 'a' : ''} dag{selectedDays.length > 1 ? 'ar' : ''} vald{selectedDays.length > 1 ? 'a' : ''}
+                  <div className="text-center text-sm font-medium text-primary">
+                    {selectedDays.length} ny{selectedDays.length > 1 ? 'a' : ''} pluggdag{selectedDays.length > 1 ? 'ar' : ''} ✨
                   </div>
                   <Button
                     onClick={handleAddSelectedDays}
                     disabled={loading}
                     className="w-full"
+                    size="lg"
                   >
-                    {loading ? 'Lägger till...' : `Lägg till ${selectedDays.length} uppgift${selectedDays.length > 1 ? 'er' : ''}`}
+                    {loading ? 'Lägger till...' : `Lägg till ${selectedDays.length} pluggdag${selectedDays.length > 1 ? 'ar' : ''} 🎉`}
                   </Button>
                 </div>
               )}
 
               {/* Existing tasks */}
               <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  Befintliga uppgifter ({sortedTasks.length})
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  📋 Befintliga uppgifter ({sortedTasks.length})
                 </h3>
                 
                 <AnimatePresence mode="popLayout">
                   {sortedTasks.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      Inga uppgifter ännu. Välj dagar ovan!
-                    </p>
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-sm text-muted-foreground text-center py-4"
+                    >
+                      Inga uppgifter ännu. Välj dagar ovan! ☝️
+                    </motion.p>
                   ) : (
                     sortedTasks.map((task) => (
                       <motion.div
@@ -652,21 +654,22 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                             {task.completed && ' ✓'}
                           </p>
                         </div>
-                        <button
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
                           onClick={() => handleDeleteTask(task.id)}
                           disabled={loading}
                           className="p-2 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </motion.button>
                       </motion.div>
                     ))
                   )}
                 </AnimatePresence>
               </div>
 
-              <Button onClick={onClose} className="w-full" variant="outline">
-                Klar
+              <Button onClick={onClose} className="w-full" variant="outline" size="lg">
+                Klar 👍
               </Button>
             </motion.div>
           )}
