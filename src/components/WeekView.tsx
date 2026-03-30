@@ -230,6 +230,26 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId, 
                       )}
                     </motion.div>
                   ))}
+
+                  {/* Activities */}
+                  {dayActivities.map((act) => (
+                    <motion.div
+                      key={act.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-accent/20 border border-accent/30"
+                    >
+                      <span className="text-xl">{act.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{act.title}</p>
+                        {(act.start_time || act.end_time) && (
+                          <p className="text-xs text-muted-foreground">
+                            {[act.start_time?.slice(0, 5), act.end_time?.slice(0, 5)].filter(Boolean).join('–')}
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </motion.div>
             );
