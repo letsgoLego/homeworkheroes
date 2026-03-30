@@ -8,6 +8,7 @@ import { Flag, FileCheck, Filter } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 import { Subject, HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 import { Button } from './ui/button';
+import type { Activity } from '@/hooks/queries/useHomeworkData';
 
 type Homework = Tables<'homework'>;
 type StudyTask = Tables<'study_tasks'>;
@@ -21,6 +22,7 @@ interface WeekViewProps {
   onSelectDate: (date: Date) => void;
   homework: HomeworkWithTasks[];
   activeChildId: string | null;
+  getActivitiesForDate?: (childId: string, date: Date) => Activity[];
 }
 
 type FilterType = 'all' | 'inlamning' | 'forhor';
