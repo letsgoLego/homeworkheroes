@@ -84,7 +84,7 @@ function suggestStudyDays(
 }
 
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
-  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework, getActiveHomeworkCount } = useFamily();
+  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework, getActiveHomeworkCount, getActivitiesForDate } = useFamily();
   const { subscribed } = useSubscriptionContext();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [step, setStep] = useState(1);
