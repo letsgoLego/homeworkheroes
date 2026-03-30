@@ -140,11 +140,23 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     return counts;
   }, [homework, targetChildId]);
 
+  const activityCountsByDate = useMemo(() => {
+    if (!targetChildId) return {};
+    const counts: Record<string, number> = {};
+    availableDays.forEach(day => {
+      const acts = getActivitiesForDate(targetChildId, day);
+      if (acts.length > 0) {
+        counts[format(day, 'yyyy-MM-dd')] = acts.length;
+      }
+    });
+    return counts;
+  }, [availableDays, targetChildId, getActivitiesForDate]);
+
   // Auto-suggest days when available days or suggested count changes
   useEffect(() => {
     if (availableDays.length > 0 && step === 2 && selectedDays.length === 0) {
       const count = Math.min(suggestedDayCount, availableDays.length);
-      const suggested = suggestStudyDays(availableDays, taskCountsByDate, count);
+      const suggested = suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count);
       setSelectedDays(suggested);
     }
   }, [step]); // Only run when entering step 2
