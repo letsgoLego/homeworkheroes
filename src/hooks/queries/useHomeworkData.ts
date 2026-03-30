@@ -73,6 +73,7 @@ async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult
     homework,
     recurringPackItems: packRes.data || [],
     adhocTasks: adhocRes.data || [],
+    activities: (actRes.data || []) as Activity[],
   };
 }
 
