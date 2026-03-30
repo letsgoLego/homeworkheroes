@@ -8,6 +8,18 @@ type StudyTask = Tables<'study_tasks'>;
 type RecurringPackItem = Tables<'recurring_pack_items'>;
 type AdhocTask = Tables<'adhoc_tasks'>;
 
+export interface Activity {
+  id: string;
+  child_id: string;
+  title: string;
+  emoji: string;
+  weekdays: number[];
+  specific_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  created_at: string;
+}
+
 export interface HomeworkWithTasks extends Homework {
   tasks: StudyTask[];
 }
@@ -16,6 +28,7 @@ interface HomeworkDataResult {
   homework: HomeworkWithTasks[];
   recurringPackItems: RecurringPackItem[];
   adhocTasks: AdhocTask[];
+  activities: Activity[];
 }
 
 async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult> {
