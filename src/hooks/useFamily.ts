@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { format, addDays, getDay, subDays } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { useFamilyData } from './queries/useFamilyData';
-import { useHomeworkData, type HomeworkWithTasks } from './queries/useHomeworkData';
+import { useHomeworkData, type HomeworkWithTasks, type Activity } from './queries/useHomeworkData';
 
 type Child = Tables<'children'>;
 type Family = Tables<'families'>;
