@@ -46,10 +46,10 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
           .map((task) => ({ task, homework: hw }))
       );
 
-    // Apply filter
+    // Apply filter — when filtering by type, only show deadlines of that type (not study tasks)
     if (filter !== 'all') {
       deadlines = deadlines.filter((hw) => hw.homework_type === filter);
-      tasks = tasks.filter(({ homework: hw }) => hw.homework_type === filter);
+      tasks = []; // Hide study tasks when filtering by deadline type
     }
 
     return { deadlines, tasks };
