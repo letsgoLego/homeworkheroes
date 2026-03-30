@@ -110,6 +110,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [recurringBringDays, setRecurringBringDays] = useState<number[]>([]);
   const [suggestedDayCount, setSuggestedDayCount] = useState(3);
   const [subjectAnimKey, setSubjectAnimKey] = useState(0);
+  const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   
   const today = startOfDay(new Date());
   const minDate = format(today, 'yyyy-MM-dd');
