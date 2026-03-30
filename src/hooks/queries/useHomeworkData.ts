@@ -33,7 +33,7 @@ interface HomeworkDataResult {
 
 async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult> {
   if (childIds.length === 0) {
-    return { homework: [], recurringPackItems: [], adhocTasks: [] };
+    return { homework: [], recurringPackItems: [], adhocTasks: [], activities: [] };
   }
 
   const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
