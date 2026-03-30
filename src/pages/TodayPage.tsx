@@ -19,6 +19,7 @@ import { Subject } from '@/types/homework';
 import { RecurringPackItems } from '@/components/RecurringPackItems';
 import { AddAdhocTask } from '@/components/AddAdhocTask';
 import { AdhocTaskCard } from '@/components/AdhocTaskCard';
+import { ActivityCard } from '@/components/ActivityCard';
 import { IntroTour } from '@/components/IntroTour';
 
 export default function TodayPage() {
