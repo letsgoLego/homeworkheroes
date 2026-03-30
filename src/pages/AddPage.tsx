@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { Navigation } from '@/components/Navigation';
 import { AddHomework } from '@/components/AddHomework';
 import { EditHomework } from '@/components/EditHomework';
+import { AddActivity } from '@/components/AddActivity';
+import { ActivityCard } from '@/components/ActivityCard';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { useFamily } from '@/hooks/useFamily';
@@ -25,9 +27,10 @@ interface HomeworkWithTasks extends Homework {
 
 export default function AddPage() {
   const [showAddHomework, setShowAddHomework] = useState(false);
+  const [showAddActivity, setShowAddActivity] = useState(false);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
-  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading } = useFamily();
+  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, deleteActivity } = useFamily();
   
   const today = startOfDay(new Date());
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
