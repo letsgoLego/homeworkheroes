@@ -91,6 +91,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <SubscriptionProvider>
+            <OfflineBanner />
             <AppRoutes />
             <CookieBanner />
           </SubscriptionProvider>

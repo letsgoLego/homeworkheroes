@@ -548,6 +548,7 @@ export default function TodayPage() {
       
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
+      <IntroTour />
     </div>
   );
 }
