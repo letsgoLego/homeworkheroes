@@ -165,6 +165,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setHomeworkType('inlamning');
     setRecurringBringDays([]);
     setSuggestedDayCount(3);
+    setActiveTemplate(null);
   };
   
   const handleClose = () => {
