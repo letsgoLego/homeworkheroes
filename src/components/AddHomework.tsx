@@ -760,7 +760,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                     onValueChange={(val) => {
                       const count = val[0];
                       setSuggestedDayCount(count);
-                      const suggested = suggestStudyDays(availableDays, taskCountsByDate, count);
+                      const suggested = suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count);
                       setSelectedDays(suggested);
                     }}
                     min={1}
