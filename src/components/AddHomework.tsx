@@ -425,7 +425,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       onClick={() => applyTemplate(tpl)}
                       className={cn(
                         'flex flex-col items-center gap-1 p-3 rounded-xl transition-all border-2',
-                        homeworkType === tpl.type && (tpl.isRecurring ? isRecurring : !isRecurring)
+                        activeTemplate === tpl.label
                           ? 'border-primary bg-primary/10 shadow-md'
                           : 'border-transparent bg-muted hover:bg-muted/80'
                       )}
