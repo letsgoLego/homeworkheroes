@@ -781,11 +781,12 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isSelected = selectedDays.includes(dateStr);
                   const isToday = isSameDay(day, today);
-                  const isWeekendDay = isWeekend(day);
-                  const existingTaskCount = taskCountsByDate[dateStr] || 0;
-                  const load = getLoadLabel(existingTaskCount);
-                  
-                  return (
+                   const isWeekendDay = isWeekend(day);
+                   const existingTaskCount = taskCountsByDate[dateStr] || 0;
+                   const load = getLoadLabel(existingTaskCount);
+                   const dayActivities = targetChildId ? getActivitiesForDate(targetChildId, day) : [];
+                   
+                   return (
                     <motion.button
                       key={dateStr}
                       whileTap={{ scale: 0.95 }}
@@ -812,8 +813,14 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       <div className="text-xs opacity-70">
                         {format(day, 'MMM', { locale: sv })}
                       </div>
+                      {/* Activities indicator */}
+                      {dayActivities.length > 0 && !isSelected && (
+                        <div className="text-[10px] mt-0.5 truncate opacity-80">
+                          {dayActivities.map(a => a.emoji).join('')} {dayActivities[0]?.start_time?.slice(0, 5) || ''}
+                        </div>
+                      )}
                       {/* Workload label */}
-                      {existingTaskCount > 0 && !isSelected && (
+                      {existingTaskCount > 0 && !isSelected && dayActivities.length === 0 && (
                         <div className="text-[10px] mt-0.5 opacity-70">
                           {load.emoji}
                         </div>
