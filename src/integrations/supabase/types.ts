@@ -117,21 +117,33 @@ export type Database = {
           id: string
           invite_code: string | null
           name: string
+          subscription_checked_at: string | null
+          subscription_end: string | null
+          subscription_interval: string | null
           subscription_override: string | null
+          subscription_status: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           invite_code?: string | null
           name: string
+          subscription_checked_at?: string | null
+          subscription_end?: string | null
+          subscription_interval?: string | null
           subscription_override?: string | null
+          subscription_status?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           invite_code?: string | null
           name?: string
+          subscription_checked_at?: string | null
+          subscription_end?: string | null
+          subscription_interval?: string | null
           subscription_override?: string | null
+          subscription_status?: string | null
         }
         Relationships: []
       }
