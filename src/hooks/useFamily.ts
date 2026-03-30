@@ -68,6 +68,7 @@ export function useFamily() {
   const homework = hwData?.homework ?? [];
   const recurringPackItems = hwData?.recurringPackItems ?? [];
   const adhocTasks = hwData?.adhocTasks ?? [];
+  const activities = hwData?.activities ?? [];
 
   const loading = familyLoading || (childIds.length > 0 && hwLoading);
 
