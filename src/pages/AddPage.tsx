@@ -289,6 +289,13 @@ export default function AddPage() {
       <Navigation />
       <AddHomework open={showAddHomework} onClose={() => setShowAddHomework(false)} />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
+      {activeChildId && (
+        <AddActivity
+          open={showAddActivity}
+          onClose={() => setShowAddActivity(false)}
+          onAdd={(data) => addActivity(activeChildId, data)}
+        />
+      )}
       {editingHomework && (
         <EditHomework 
           open={true} 
