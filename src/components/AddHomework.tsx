@@ -217,13 +217,16 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const isAtLimit = !subscribed && activeCount >= FREE_LIMIT;
 
   const applyTemplate = (template: QuickTemplate) => {
+    setActiveTemplate(template.label);
     setHomeworkType(template.type);
+    setIsRecurring(!!template.isRecurring);
+    if (template.isRecurring) {
+      setDueDate('');
+      setSelectedDays([]);
+    }
     if (template.suggestedSubject) {
       setSubject(template.suggestedSubject);
       setSubjectAnimKey(prev => prev + 1);
-    }
-    if (template.isRecurring) {
-      setIsRecurring(true);
     }
     celebrateTask();
   };
