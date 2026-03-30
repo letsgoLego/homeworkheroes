@@ -1,36 +1,74 @@
 
 
-## Plan: Optimize Cloud Costs
+## Plan: Onboarding-flöde, Offline-stöd & React Query-optimering
 
-### Problem
-The `check-subscription` Edge Function runs every 60 seconds per user, each time making 2-3 Stripe API calls. This is the dominant cost driver. Additionally, multiple components independently call `useSubscription`, potentially multiplying the polling.
+### 1. Förbättrat onboarding-flöde
 
-### Changes
+Nuvarande onboarding har bara 2 steg (skapa familj → lägg till barn). Vi bygger ut det med:
 
-#### 1. Cache subscription status in the database
-Instead of polling Stripe every 60 seconds, store subscription status on the `families` table (fields already partially exist with `subscription_override`). Add columns: `subscription_status`, `subscription_end`, `subscription_interval`, `subscription_checked_at`.
+- **Steg-indikator (progress bar)** högst upp som visar 1/3, 2/3, 3/3
+- **Steg 1: Välkommen** — kort intro som förklarar vad appen gör (3 USP:er med ikoner)
+- **Steg 2: Skapa familj** — behåller nuvarande familjenamn-funktionalitet
+- **Steg 3: Lägg till barn** — behåller nuvarande barn-funktionalitet
 
-The Edge Function only queries Stripe if the cached data is older than 1 hour (or on explicit refresh). This reduces Stripe API calls from ~1440/user/day to ~24/user/day.
+Dessutom: en **intro-tour för befintliga användare** som visas första gången man landar på TodayPage. En enkel tooltip-overlay som visar 3-4 steg ("Här ser du dagens uppgifter", "Byt barn här", "Lägg till läxor här"). Sparas i `localStorage` så den bara visas en gång.
 
-#### 2. Increase polling interval to 5 minutes + use cached DB data
-Change the `setInterval` in `useSubscription` from 60s to 300s. On each check, first read the cached status from the `families` table. Only invoke the Edge Function if the cache is stale (>1 hour old).
+**Filer:**
+- `src/pages/OnboardingPage.tsx` — lägg till välkomststeg + progress bar
+- `src/components/IntroTour.tsx` — ny komponent för tooltip-overlay
+- `src/pages/TodayPage.tsx` — visa IntroTour för nya användare
 
-#### 3. Deduplicate useSubscription with React Context
-Wrap subscription state in a `SubscriptionProvider` context so that all 4 components share a single polling instance instead of potentially running separate ones.
+### 2. Offline-stöd
 
-#### 4. Skip Stripe check for gifted families early
-Already partially done — but currently it still makes 2 DB queries before short-circuiting. Move the gifted check into the initial `fetchFamilyData` flow so no extra queries are needed.
+PWA med service worker finns redan (`vite-plugin-pwa` + `sw-push.js`). Vi förbättrar med:
 
-### Files to modify
-- `supabase/migrations/` — add caching columns to `families`
-- `supabase/functions/check-subscription/index.ts` — add cache read/write logic
-- `src/hooks/useSubscription.ts` — increase interval, read from DB cache, skip Edge Function when fresh
-- `src/contexts/SubscriptionContext.tsx` — new context provider
-- `src/App.tsx` — add SubscriptionProvider
-- Components using `useSubscription` — switch to context
+- **Runtime caching av API-anrop**: Lägg till `runtimeCaching` i workbox-konfigurationen för att cacha Supabase-anrop med en `NetworkFirst`-strategi (försök nätverk först, falla tillbaka till cache)
+- **Offline-indikator**: En liten banner som visas överst i appen när enheten tappar uppkoppling (`navigator.onLine` + event listeners)
+- **Statiska tillgångar**: Redan cachade via `globPatterns`, men vi utökar med fonter och bilder
+- **Guard mot iframe/preview**: Lägg till registreringsguard i `main.tsx` så SW inte registreras i Lovable-editorn
 
-### Expected impact
-- Edge Function invocations reduced by ~90-95%
-- Stripe API calls reduced by ~95%
-- Realtime and DB query costs stay the same (already optimized)
+**Filer:**
+- `vite.config.ts` — lägg till `runtimeCaching` + `devOptions: { enabled: false }`
+- `src/main.tsx` — lägg till SW-registreringsguard
+- `src/components/OfflineBanner.tsx` — ny komponent
+- `src/App.tsx` — inkludera OfflineBanner
+
+### 3. React Query-optimering
+
+Appen har `@tanstack/react-query` installerad men använder den inte. `useFamily` gör all datahämtning manuellt med `useState`/`useEffect`. Vi migrerar till React Query för:
+
+- **Automatisk caching** — data behöver inte hämtas om vid navigering
+- **Stale-while-revalidate** — visar cachad data direkt, uppdaterar i bakgrunden
+- **Retry-logik** — automatisk omförsök vid nätverksfel
+- **Deduplicering** — flera komponenter som begär samma data gör bara ett anrop
+
+**Approach:** Refaktorera `useFamily` till att internt använda `useQuery` för datahämtning, men behålla samma externa API (return-värden). Alla sidor fortsätter importera `useFamily()` som förut.
+
+Delas upp i queries:
+- `useFamilyData(userId)` — hämtar roll, familj, barn
+- `useHomeworkData(childIds)` — hämtar läxor + study_tasks
+- `usePackItems(childIds)` — hämtar recurring pack items
+- `useAdhocTasks(childIds)` — hämtar adhoc tasks
+
+Mutationer (toggleTask, addHomework etc.) använder `useMutation` med optimistic updates.
+
+**Filer:**
+- `src/hooks/useFamily.ts` — stor refaktorering till React Query
+- `src/hooks/queries/useFamilyData.ts` — ny
+- `src/hooks/queries/useHomeworkData.ts` — ny
+
+### Sammanfattning av alla filer
+
+| Fil | Åtgärd |
+|---|---|
+| `src/pages/OnboardingPage.tsx` | Utöka med välkomststeg + progress |
+| `src/components/IntroTour.tsx` | Ny — tooltip-tour |
+| `src/pages/TodayPage.tsx` | Lägg till IntroTour |
+| `vite.config.ts` | Runtime caching + dev guard |
+| `src/main.tsx` | SW-registreringsguard |
+| `src/components/OfflineBanner.tsx` | Ny — offline-indikator |
+| `src/App.tsx` | Lägg till OfflineBanner |
+| `src/hooks/useFamily.ts` | Refaktorera till React Query |
+| `src/hooks/queries/useFamilyData.ts` | Ny — familjedata-query |
+| `src/hooks/queries/useHomeworkData.ts` | Ny — läxdata-query |
 
