@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,15 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, addWeeks, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay, subDays, getDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag, Lock } from 'lucide-react';
+import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag, Lock, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
+import { celebrateTask } from '@/lib/confetti';
 
 interface AddHomeworkProps {
   open: boolean;
@@ -33,6 +35,54 @@ const WEEKDAYS = [
   { value: 0, label: 'Sön' },
 ];
 
+interface QuickTemplate {
+  label: string;
+  emoji: string;
+  type: HomeworkType;
+  suggestedSubject?: Subject;
+  isRecurring?: boolean;
+}
+
+const QUICK_TEMPLATES: QuickTemplate[] = [
+  { label: 'Läsläxa', emoji: '📖', type: 'inlamning', suggestedSubject: 'language', isRecurring: true },
+  { label: 'Prov / Förhör', emoji: '✍️', type: 'forhor' },
+  { label: 'Inlämning', emoji: '📄', type: 'inlamning' },
+];
+
+function getLoadLabel(count: number): { text: string; emoji: string } {
+  if (count === 0) return { text: 'Lugnt', emoji: '😎' };
+  if (count === 1) return { text: 'Lite att göra', emoji: '📚' };
+  if (count === 2) return { text: 'En del', emoji: '📝' };
+  return { text: 'Fullt schema!', emoji: '🔥' };
+}
+
+function generateAutoTitle(homeworkType: HomeworkType, subject: Subject, title: string): string {
+  const subjectLabel = SUBJECT_LABELS[subject];
+  if (homeworkType === 'forhor') {
+    return `Plugga inför förhör – ${subjectLabel}`;
+  }
+  if (title.trim()) {
+    return `Jobba med ${title.trim()}`;
+  }
+  return `Plugga ${subjectLabel}`;
+}
+
+function suggestStudyDays(
+  availableDays: Date[],
+  taskCountsByDate: Record<string, number>,
+  suggestedCount: number
+): string[] {
+  // Sort days by workload (ascending), prefer weekdays
+  const scored = availableDays.map(day => {
+    const dateStr = format(day, 'yyyy-MM-dd');
+    const load = taskCountsByDate[dateStr] || 0;
+    const weekendPenalty = isWeekend(day) ? 2 : 0;
+    return { dateStr, score: load + weekendPenalty };
+  });
+  scored.sort((a, b) => a.score - b.score);
+  return scored.slice(0, suggestedCount).map(s => s.dateStr);
+}
+
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework, getActiveHomeworkCount } = useFamily();
   const { subscribed } = useSubscriptionContext();
@@ -41,7 +91,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [loading, setLoading] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   
-  // Use selected child or fallback to active child
   const targetChildId = selectedChildId || activeChildId;
   const targetChild = children.find(c => c.id === targetChildId);
   
@@ -52,39 +101,30 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [bringItems, setBringItems] = useState<string[]>([]);
   const [newItem, setNewItem] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [taskTitle, setTaskTitle] = useState('Plugga');
   const [enableReminder, setEnableReminder] = useState(true);
-  
-  // Homework type (inlämning or förhör)
   const [homeworkType, setHomeworkType] = useState<HomeworkType>('inlamning');
-  
-  // Recurring homework state
   const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrenceDays, setRecurrenceDays] = useState<number[]>([1, 2, 3, 4, 5]); // Mon-Fri by default
-  const [recurrenceWeeks, setRecurrenceWeeks] = useState(4); // Default 4 weeks
-  const [submissionDay, setSubmissionDay] = useState<number>(5); // Friday by default
-  
-  // Recurring pack items for recurring homework
+  const [recurrenceDays, setRecurrenceDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [recurrenceWeeks, setRecurrenceWeeks] = useState(4);
+  const [submissionDay, setSubmissionDay] = useState<number>(5);
   const [recurringBringDays, setRecurringBringDays] = useState<number[]>([]);
+  const [suggestedDayCount, setSuggestedDayCount] = useState(3);
+  const [subjectAnimKey, setSubjectAnimKey] = useState(0);
   
   const today = startOfDay(new Date());
   const minDate = format(today, 'yyyy-MM-dd');
   
-  // Generate available days between today and day before due date (inclusive)
   const availableDays = useMemo(() => {
     if (!dueDate || isRecurring) return [];
     const dueDateParsed = parseISO(dueDate);
-    // Include all days from today up to and including the day before due date
     const endDate = subDays(dueDateParsed, 1);
     if (endDate < today) return [];
     return eachDayOfInterval({ start: today, end: endDate });
   }, [dueDate, today, isRecurring]);
   
-  // Calculate task counts per day for the target child (for workload indicator)
   const taskCountsByDate = useMemo(() => {
     if (!targetChildId) return {};
     const counts: Record<string, number> = {};
-    
     homework
       .filter(hw => hw.child_id === targetChildId)
       .forEach(hw => {
@@ -94,9 +134,17 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
           }
         });
       });
-    
     return counts;
   }, [homework, targetChildId]);
+
+  // Auto-suggest days when available days or suggested count changes
+  useEffect(() => {
+    if (availableDays.length > 0 && step === 2 && selectedDays.length === 0) {
+      const count = Math.min(suggestedDayCount, availableDays.length);
+      const suggested = suggestStudyDays(availableDays, taskCountsByDate, count);
+      setSelectedDays(suggested);
+    }
+  }, [step]); // Only run when entering step 2
 
   const resetForm = () => {
     setStep(1);
@@ -107,7 +155,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setBringItems([]);
     setNewItem('');
     setSelectedDays([]);
-    setTaskTitle('Plugga');
     setSelectedChildId(null);
     setEnableReminder(true);
     setIsRecurring(false);
@@ -116,6 +163,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setSubmissionDay(5);
     setHomeworkType('inlamning');
     setRecurringBringDays([]);
+    setSuggestedDayCount(3);
   };
   
   const handleClose = () => {
@@ -142,25 +190,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     );
   };
   
-  const selectAllDays = () => {
-    const allDates = availableDays.map(d => format(d, 'yyyy-MM-dd'));
-    setSelectedDays(allDates);
-  };
-  
-  const selectWeekdaysOnly = () => {
-    const weekdayDates = availableDays
-      .filter(day => !isWeekend(day))
-      .map(d => format(d, 'yyyy-MM-dd'));
-    setSelectedDays(weekdayDates);
-  };
-  
-  const selectEveryOtherDay = () => {
-    const everyOther = availableDays
-      .filter((_, i) => i % 2 === 0)
-      .map(d => format(d, 'yyyy-MM-dd'));
-    setSelectedDays(everyOther);
-  };
-  
   const toggleRecurrenceDay = (day: number) => {
     setRecurrenceDays(prev =>
       prev.includes(day)
@@ -169,25 +198,39 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     );
   };
   
-  // Generate task dates for recurring homework
   const generateRecurringTaskDates = () => {
     const dates: string[] = [];
     const endDate = addWeeks(today, recurrenceWeeks);
     const allDays = eachDayOfInterval({ start: today, end: endDate });
-    
     for (const day of allDays) {
       const dayOfWeek = getDay(day);
       if (recurrenceDays.includes(dayOfWeek)) {
         dates.push(format(day, 'yyyy-MM-dd'));
       }
     }
-    
     return dates;
   };
   
   const FREE_LIMIT = 3;
   const activeCount = targetChildId ? getActiveHomeworkCount(targetChildId) : 0;
   const isAtLimit = !subscribed && activeCount >= FREE_LIMIT;
+
+  const applyTemplate = (template: QuickTemplate) => {
+    setHomeworkType(template.type);
+    if (template.suggestedSubject) {
+      setSubject(template.suggestedSubject);
+      setSubjectAnimKey(prev => prev + 1);
+    }
+    if (template.isRecurring) {
+      setIsRecurring(true);
+    }
+    celebrateTask();
+  };
+
+  const handleSelectSubject = (s: Subject) => {
+    setSubject(s);
+    setSubjectAnimKey(prev => prev + 1);
+  };
 
   const handleSubmit = async () => {
     if (!targetChildId) {
@@ -205,27 +248,24 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       return;
     }
     
-    // For recurring, we need recurrence days selected
     if (isRecurring && recurrenceDays.length === 0) {
       toast.error("Välj minst en dag för återkommande läxa");
       return;
     }
     
-    // For non-recurring, we need due date
     if (!isRecurring && !dueDate) {
-      toast.error("Välj ett inlämningsdatum");
+      toast.error("Välj ett datum");
       return;
     }
     
     setLoading(true);
     
-    // Calculate dates
     const recurrenceEndDate = isRecurring ? format(addWeeks(today, recurrenceWeeks), 'yyyy-MM-dd') : undefined;
     const effectiveDueDate = isRecurring ? recurrenceEndDate! : dueDate;
     const dueDateParsed = parseISO(effectiveDueDate);
     const reminderDate = enableReminder && !isRecurring ? format(subDays(dueDateParsed, 2), 'yyyy-MM-dd') : undefined;
     
-    const homework = await addHomework({
+    const hw = await addHomework({
       title: title.trim(),
       subject,
       description: description.trim() || undefined,
@@ -240,25 +280,31 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       homeworkType,
     });
     
-    // Add recurring pack items for bring days (for recurring homework)
     if (isRecurring && recurringBringDays.length > 0 && bringItems.length > 0) {
       for (const item of bringItems) {
         await addRecurringPackItem(targetChildId, item, recurringBringDays);
       }
     }
     
-    if (homework) {
-      // Generate and add tasks
+    if (hw) {
       const taskDates = isRecurring ? generateRecurringTaskDates() : selectedDays.sort();
+      const autoTitle = generateAutoTitle(homeworkType, subject, title);
       
       for (const dateStr of taskDates) {
-        await addTask(homework.id, taskTitle || 'Plugga', dateStr);
+        await addTask(hw.id, autoTitle, dateStr);
       }
       
-      // Update active child to match the one we just added homework for
       if (targetChildId !== activeChildId) {
         setActiveChildId(targetChildId);
       }
+      
+      toast.success(
+        <div className="flex flex-col">
+          <span className="font-bold">Bra jobbat! 💪</span>
+          <span className="text-sm">Du har planerat {taskDates.length} pluggdag{taskDates.length !== 1 ? 'ar' : ''}</span>
+        </div>
+      );
+      celebrateTask();
     }
     
     setLoading(false);
@@ -267,17 +313,35 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   
   const canProceedStep1 = title.trim() && (isRecurring ? recurrenceDays.length > 0 : dueDate);
   
+  // Progress indicator
+  const totalSteps = isRecurring ? 1 : 2;
+  const progressEmoji = step === 1 ? '🚀' : '🎯';
+  
   return (
     <>
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            {step === 1 ? 'Ny läxa' : 'När ska du plugga?'}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              {progressEmoji} {step === 1 ? 'Ny läxa' : 'Planera pluggdagar'}
+            </DialogTitle>
+            {!isRecurring && (
+              <div className="flex items-center gap-1">
+                {[1, 2].map(s => (
+                  <div 
+                    key={s}
+                    className={cn(
+                      "h-2 rounded-full transition-all duration-300",
+                      s <= step ? "bg-primary w-8" : "bg-muted w-4"
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </DialogHeader>
 
-        {/* Free tier limit warning */}
         {isAtLimit && (
           <div className="p-3 rounded-xl bg-celebration/10 border border-celebration/20">
             <div className="flex items-center gap-2 mb-1">
@@ -331,7 +395,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 </div>
               )}
               
-              {/* Show single child info */}
               {children.length === 1 && targetChild && (
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
                   <div 
@@ -343,12 +406,38 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   </span>
                 </div>
               )}
+
+              {/* Quick templates */}
+              <div>
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Snabbval
+                </Label>
+                <div className="grid grid-cols-3 gap-2 mt-1.5">
+                  {QUICK_TEMPLATES.map((tpl) => (
+                    <motion.button
+                      key={tpl.label}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => applyTemplate(tpl)}
+                      className={cn(
+                        'flex flex-col items-center gap-1 p-3 rounded-xl transition-all border-2',
+                        homeworkType === tpl.type && (tpl.isRecurring ? isRecurring : !isRecurring)
+                          ? 'border-primary bg-primary/10 shadow-md'
+                          : 'border-transparent bg-muted hover:bg-muted/80'
+                      )}
+                    >
+                      <span className="text-2xl">{tpl.emoji}</span>
+                      <span className="text-xs font-medium">{tpl.label}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
               
               {/* Title */}
               <div className="p-4 -mx-4 bg-primary/5 border-l-4 border-primary rounded-r-xl">
                 <Label htmlFor="title" className="text-base font-bold text-primary flex items-center gap-2">
-                  <span className="text-lg">📝</span>
-                  Vad är läxan?
+                  <span className="text-lg">🤔</span>
+                  Vad handlar läxan om?
                 </Label>
                 <Input
                   id="title"
@@ -357,19 +446,17 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   placeholder="t.ex. Matte kapitel 5"
                   className="mt-2 h-12 text-base border-2 border-primary/30 focus:border-primary bg-background"
                 />
-                <p className="text-xs text-muted-foreground mt-1.5">
-                  Skriv en kort titel för läxan
-                </p>
               </div>
               
-              {/* Subject */}
+              {/* Subject with animation */}
               <div>
                 <Label className="text-sm font-medium">Ämne</Label>
                 <div className="grid grid-cols-4 gap-2 mt-1.5">
                   {subjects.map((s) => (
-                    <button
+                    <motion.button
                       key={s}
-                      onClick={() => setSubject(s)}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSelectSubject(s)}
                       className={cn(
                         'flex flex-col items-center gap-1 p-2 rounded-xl transition-all',
                         subject === s
@@ -377,14 +464,22 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                           : 'bg-muted hover:bg-muted/80'
                       )}
                     >
-                      <span className="text-xl">{SUBJECT_ICONS[s]}</span>
+                      <motion.span
+                        key={`${s}-${subjectAnimKey}`}
+                        initial={subject === s ? { scale: 1.5, rotate: 15 } : {}}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                        className="text-xl"
+                      >
+                        {SUBJECT_ICONS[s]}
+                      </motion.span>
                       <span className="text-xs font-medium">{SUBJECT_LABELS[s]}</span>
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
               
-              {/* Homework type selector */}
+              {/* Homework type */}
               <div>
                 <Label className="text-sm font-medium flex items-center gap-2">
                   <Flag className="w-4 h-4" />
@@ -434,7 +529,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               
               {isRecurring ? (
                 <>
-                  {/* Recurring days selection */}
                   <div>
                     <Label className="text-sm font-medium">Vilka dagar i veckan?</Label>
                     <div className="flex flex-wrap gap-2 mt-1.5">
@@ -455,7 +549,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                     </div>
                   </div>
                   
-                  {/* Submission day */}
                   <div>
                     <Label className="text-sm font-medium">Vilken dag lämnas den in?</Label>
                     <p className="text-xs text-muted-foreground mb-1.5">
@@ -479,7 +572,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                     </div>
                   </div>
                   
-                  {/* Duration */}
                   <div>
                     <Label className="text-sm font-medium">Hur länge?</Label>
                     <div className="flex flex-wrap gap-2 mt-1.5">
@@ -509,10 +601,9 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   </div>
                 </>
               ) : (
-                /* Due Date for non-recurring */
                 <div>
                   <Label htmlFor="dueDate" className="text-sm font-medium">
-                    När ska den lämnas in?
+                    {homeworkType === 'forhor' ? 'När är förhöret? 📅' : 'När ska den lämnas in? 📅'}
                   </Label>
                   <Input
                     id="dueDate"
@@ -520,7 +611,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                     value={dueDate}
                     onChange={(e) => {
                       setDueDate(e.target.value);
-                      setSelectedDays([]); // Reset selected days when due date changes
+                      setSelectedDays([]);
                     }}
                     min={minDate}
                     className="mt-1.5"
@@ -531,7 +622,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               {/* Description */}
               <div>
                 <Label htmlFor="description" className="text-sm font-medium">
-                  Anteckningar (valfritt)
+                  Vill du skriva något mer? 💭 (valfritt)
                 </Label>
                 <Textarea
                   id="description"
@@ -546,7 +637,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               {/* Bring to school */}
               <div>
                 <Label className="text-sm font-medium">
-                  Vad ska tas med till skolan?
+                  Vad ska tas med till skolan? 🎒
                 </Label>
                 <div className="flex gap-2 mt-1.5">
                   <Input
@@ -576,7 +667,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 )}
               </div>
               
-              {/* Reminder toggle - only for non-recurring */}
+              {/* Reminder */}
               {!isRecurring && (
                 <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
                   <div className="flex items-center gap-2">
@@ -596,27 +687,14 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               )}
               
               {isRecurring ? (
-                /* For recurring, add task title here and go directly to submit */
-                <>
-                  <div>
-                    <Label className="text-sm font-medium">Vad ska göras varje dag?</Label>
-                    <Input
-                      value={taskTitle}
-                      onChange={(e) => setTaskTitle(e.target.value)}
-                      placeholder="t.ex. Läs, Öva, Plugga"
-                      className="mt-1.5"
-                    />
-                  </div>
-                  
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={loading || !canProceedStep1}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {loading ? 'Sparar...' : 'Skapa återkommande läxa'}
-                  </Button>
-                </>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading || !canProceedStep1}
+                  className="w-full"
+                  size="lg"
+                >
+                  {loading ? 'Sparar...' : 'Skapa återkommande läxa ✨'}
+                </Button>
               ) : (
                 <Button
                   onClick={() => setStep(2)}
@@ -624,7 +702,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   className="w-full"
                   size="lg"
                 >
-                  Nästa: Välj pluggdagar
+                  Nästa: Planera pluggdagar 📅
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               )}
@@ -637,58 +715,48 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               exit={{ opacity: 0, x: 20 }}
               className="space-y-4"
             >
-              <p className="text-sm text-muted-foreground">
-                Välj vilka dagar du vill plugga på läxan. Inlämning: {dueDate ? format(parseISO(dueDate), 'd MMMM', { locale: sv }) : ''}
-              </p>
-              
-              {/* Task title */}
-              <div>
-                <Label className="text-sm font-medium">Vad ska du göra?</Label>
-                <Input
-                  value={taskTitle}
-                  onChange={(e) => setTaskTitle(e.target.value)}
-                  placeholder="t.ex. Plugga, Läs, Öva"
-                  className="mt-1.5"
-                />
+              {/* Smart suggestion header */}
+              <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  {availableDays.length > 0 ? (
+                    <>Du har {availableDays.length} dagar på dig. Vi föreslår {Math.min(suggestedDayCount, availableDays.length)} pluggdagar!</>
+                  ) : (
+                    <>Inga dagar före deadline</>
+                  )}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {homeworkType === 'forhor' ? 'Förhör' : 'Inlämning'}: {dueDate ? format(parseISO(dueDate), 'd MMMM', { locale: sv }) : ''}
+                </p>
               </div>
+
+              {/* Day count slider */}
+              {availableDays.length > 1 && (
+                <div>
+                  <Label className="text-sm font-medium">
+                    Antal pluggdagar: <span className="text-primary font-bold">{Math.min(suggestedDayCount, availableDays.length)}</span>
+                  </Label>
+                  <Slider
+                    value={[suggestedDayCount]}
+                    onValueChange={(val) => {
+                      const count = val[0];
+                      setSuggestedDayCount(count);
+                      const suggested = suggestStudyDays(availableDays, taskCountsByDate, count);
+                      setSelectedDays(suggested);
+                    }}
+                    min={1}
+                    max={availableDays.length}
+                    step={1}
+                    className="mt-2"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>1 dag</span>
+                    <span>{availableDays.length} dagar</span>
+                  </div>
+                </div>
+              )}
               
-              {/* Quick select buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={selectAllDays}
-                  className="flex-1"
-                >
-                  Alla dagar
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={selectWeekdaysOnly}
-                  className="flex-1"
-                >
-                  Vardagar
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={selectEveryOtherDay}
-                  className="flex-1"
-                >
-                  Varannan
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setSelectedDays([])}
-                  className="flex-1"
-                >
-                  Rensa
-                </Button>
-              </div>
-              
-              {/* Day picker */}
+              {/* Day picker with workload */}
               <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
                 {availableDays.map((day) => {
                   const dateStr = format(day, 'yyyy-MM-dd');
@@ -696,10 +764,12 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   const isToday = isSameDay(day, today);
                   const isWeekendDay = isWeekend(day);
                   const existingTaskCount = taskCountsByDate[dateStr] || 0;
+                  const load = getLoadLabel(existingTaskCount);
                   
                   return (
-                    <button
+                    <motion.button
                       key={dateStr}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => toggleDay(dateStr)}
                       className={cn(
                         'relative p-3 rounded-xl text-center transition-all',
@@ -723,22 +793,10 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       <div className="text-xs opacity-70">
                         {format(day, 'MMM', { locale: sv })}
                       </div>
-                      {/* Workload indicator */}
+                      {/* Workload label */}
                       {existingTaskCount > 0 && !isSelected && (
-                        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-0.5">
-                          {Array.from({ length: Math.min(existingTaskCount, 5) }).map((_, i) => (
-                            <div
-                              key={i}
-                              className={cn(
-                                "w-1.5 h-1.5 rounded-full",
-                                existingTaskCount >= 3 
-                                  ? "bg-destructive"
-                                  : existingTaskCount >= 2 
-                                    ? "bg-warning"
-                                    : "bg-muted-foreground"
-                              )}
-                            />
-                          ))}
+                        <div className="text-[10px] mt-0.5 opacity-70">
+                          {load.emoji}
                         </div>
                       )}
                       {isSelected && (
@@ -750,7 +808,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                           <Check className="w-3 h-3" />
                         </motion.div>
                       )}
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -761,10 +819,19 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 </p>
               )}
               
-              <div className="text-center text-sm text-muted-foreground">
+              {/* Legend */}
+              {availableDays.length > 0 && (
+                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground justify-center">
+                  <span>😎 Lugnt</span>
+                  <span>📚 Lite</span>
+                  <span>🔥 Fullt</span>
+                </div>
+              )}
+              
+              <div className="text-center text-sm font-medium">
                 {selectedDays.length > 0 
-                  ? `${selectedDays.length} pluggdag${selectedDays.length > 1 ? 'ar' : ''} vald${selectedDays.length > 1 ? 'a' : ''}`
-                  : 'Inga dagar valda (valfritt)'}
+                  ? <span className="text-primary">{selectedDays.length} pluggdag{selectedDays.length > 1 ? 'ar' : ''} vald{selectedDays.length > 1 ? 'a' : ''} ✨</span>
+                  : <span className="text-muted-foreground">Inga dagar valda (valfritt)</span>}
               </div>
               
               <div className="flex gap-2 pt-2">
@@ -780,7 +847,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   disabled={loading}
                   className="flex-1"
                 >
-                  {loading ? 'Sparar...' : 'Spara läxa'}
+                  {loading ? 'Sparar...' : 'Spara läxa 🎉'}
                 </Button>
               </div>
             </motion.div>
