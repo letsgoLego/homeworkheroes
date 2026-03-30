@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import type { Tables } from '@/integrations/supabase/types';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
 
 type Child = Tables<'children'>;
@@ -27,7 +27,7 @@ export default function FamilyPage() {
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const { children, homework, family, loading, refetch } = useFamily();
   const { signOut, user } = useAuth();
-  const { subscribed, status: subStatus, subscriptionEnd, openCustomerPortal } = useSubscription();
+  const { subscribed, status: subStatus, subscriptionEnd, openCustomerPortal } = useSubscriptionContext();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
