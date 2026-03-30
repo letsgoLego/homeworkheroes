@@ -86,6 +86,7 @@ export default function WeekPage() {
           onSelectDate={setSelectedDate}
           homework={homework}
           activeChildId={activeChildId}
+          getActivitiesForDate={getActivitiesForDate}
         />
       </main>
 
