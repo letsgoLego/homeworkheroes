@@ -33,7 +33,7 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId, 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const getItemsForDay = (date: Date) => {
-    if (!activeChildId) return { deadlines: [] as HomeworkWithTasks[], tasks: [] as { task: StudyTask; homework: HomeworkWithTasks }[] };
+    if (!activeChildId) return { deadlines: [] as HomeworkWithTasks[], tasks: [] as { task: StudyTask; homework: HomeworkWithTasks }[], activities: [] as Activity[] };
     const dateStr = format(date, 'yyyy-MM-dd');
 
     let deadlines = homework.filter(
@@ -48,13 +48,15 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId, 
           .map((task) => ({ task, homework: hw }))
       );
 
+    const dayActivities = getActivitiesForDate ? getActivitiesForDate(activeChildId, date) : [];
+
     // Apply filter — when filtering by type, only show deadlines of that type (not study tasks)
     if (filter !== 'all') {
       deadlines = deadlines.filter((hw) => hw.homework_type === filter);
       tasks = []; // Hide study tasks when filtering by deadline type
     }
 
-    return { deadlines, tasks };
+    return { deadlines, tasks, activities: dayActivities };
   };
 
   const hasAnyContent = weekDays.some((day) => {
