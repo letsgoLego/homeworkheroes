@@ -84,6 +84,7 @@ export default function TodayPage() {
   const todayAdhocTasks = activeChildId ? getAdhocTasksForDate(activeChildId, today) : [];
   const itemsToBringData = activeChildId ? getItemsToBringForDate(activeChildId, bringToSchoolDate) : { homeworkItems: [], recurringItems: [] };
   const hasItemsToBring = itemsToBringData.homeworkItems.length > 0 || itemsToBringData.recurringItems.length > 0;
+  const todayActivities = activeChildId ? getActivitiesForDate(activeChildId, today) : [];
   
   // Get homework due on pack date (today before 12, tomorrow after 12)
   const packDateHomework = homework.filter(hw => {
