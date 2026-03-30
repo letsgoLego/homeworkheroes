@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 
 declare global {
   interface Window {
@@ -14,7 +14,7 @@ interface AdBannerProps {
 }
 
 export function AdBanner({ slot, format = 'auto', className = '' }: AdBannerProps) {
-  const { subscribed, loading } = useSubscription();
+  const { subscribed, loading } = useSubscriptionContext();
   const adRef = useRef<HTMLModElement>(null);
   const pushed = useRef(false);
 
