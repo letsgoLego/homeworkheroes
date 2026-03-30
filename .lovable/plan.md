@@ -1,41 +1,47 @@
 
 
-## Plan: Gör läxuppläggningen roligare och smartare
+## Plan: Aktiviteter i dagsplanering och studieplanering
 
-### Problem idag
-1. **Uppgiftstiteln ("Vad ska du göra?") är onödig** — den blir alltid "Plugga" och varje studieuppgift får samma namn. Det ger inget värde.
-2. **Formuläret känns som ett tråkigt vuxen-formulär** — inte anpassat för barn/tonåringar.
-3. **Ingen smart hjälp** — barnet måste själv räkna ut vilka dagar som passar att plugga.
+### Koncept
+En ny tabell `activities` för återkommande och engångsaktiviteter (fotboll, piano, simskola etc.) som visas i dagsvyn och påverkar smart schemaläggning av pluggdagar.
 
-### Förändringar
+### Databasändring
 
-#### 1. Ta bort manuell uppgiftstitel
-Generera titeln automatiskt: `"Plugga {ämne}"` (t.ex. "Plugga Matte", "Öva Engelska"). Bort med textfältet i steg 2. Förhör får "Plugga inför förhör", inlämningar får "Jobba med {titel}".
+Ny tabell `activities`:
+```sql
+CREATE TABLE public.activities (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  child_id uuid NOT NULL,
+  title text NOT NULL,
+  emoji text DEFAULT '⚽',
+  weekdays integer[] DEFAULT '{}',  -- för återkommande (0=sön, 1=mån...)
+  specific_date date,                -- för engångshändelser
+  start_time time,                   -- valfri starttid
+  end_time time,                     -- valfri sluttid
+  created_at timestamptz DEFAULT now()
+);
+```
+RLS-policies som speglar `recurring_pack_items` (familjemedlemmar via `children`).
 
-#### 2. Gör steg 1 mer visuellt och snabbt
-- **Snabbval-templates** högst upp: Tre knappar med emoji — "📖 Läsläxa", "✍️ Prov/Förhör", "📄 Inlämning" — som förfyller typ + föreslår ämne.
-- **Större, roligare ämnesväljare** med animerade emojis vid val.
-- **Uppmuntrande mikro-copy**: Byt "Fyll i titel" till "Vad handlar läxan om? 🤔", "Anteckningar" till "Vill du skriva något mer? 💭".
+### UI-ändringar
 
-#### 3. Smartare pluggschema (steg 2)
-- **Auto-föreslå dagar** baserat på arbetsbelastning: Markera automatiskt de dagar som har lägst belastning. Barnet kan justera men slipper börja från noll.
-- **Visuell belastningsindikator** med färger och text: "Lugnt 😎", "Lite att göra 📚", "Fullt schema! 🔥".
-- **Föreslå antal dagar**: "Du har 5 dagar på dig. Vi föreslår att plugga 3 av dem!" med en slider.
-
-#### 4. Roligare interaktion
-- **Konfetti-burst** när man väljer ämne.
-- **Animerad progress** mellan steg med en liten karaktär/emoji som "vandrar" framåt.
-- **Uppmuntrande slutmeddelande** efter sparande: "Bra jobbat! Du har planerat {X} pluggdagar 💪"
-
-### Filer att ändra
-
-| Fil | Åtgärd |
+| Fil | Ändring |
 |---|---|
-| `src/components/AddHomework.tsx` | Stor refaktorering: ta bort taskTitle-fält, lägg till templates, smart auto-schema, roligare copy och animationer |
+| `src/components/AddActivity.tsx` | **Ny** — dialog för att lägga till aktivitet med emoji-väljare, dag-väljare (återkommande) eller datum (engångs), valfria tider |
+| `src/components/ActivityCard.tsx` | **Ny** — visar aktivitet i dagsvyn med emoji, titel och tid |
+| `src/pages/TodayPage.tsx` | Visa dagens aktiviteter i en egen sektion ovanför läxor |
+| `src/components/WeekView.tsx` | Visa aktiviteter per dag i veckovyn |
+| `src/components/AddHomework.tsx` | I steg 2 (dagväljare) — visa aktiviteter som belastningsindikator så barnet ser "Fotboll 16-17" på tisdagar och väljer andra dagar |
+| `src/hooks/useFamily.ts` | Lägg till CRUD för activities + `getActivitiesForDate()` |
+| `src/hooks/queries/useHomeworkData.ts` | Hämta activities tillsammans med övrig data |
+| `src/pages/AddPage.tsx` | Lägg till knapp "Lägg till aktivitet" |
 
-### Teknisk sammanfattning
-- `taskTitle` state och fältet tas bort. Genereras automatiskt vid `handleSubmit` baserat på `homeworkType` + `subject`.
-- Ny funktion `suggestStudyDays(availableDays, taskCountsByDate)` som returnerar optimalt fördelade dagar.
-- Templates-knapparna sätter `homeworkType`, `subject` och fokuserar titel-fältet i ett klick.
-- Framer Motion-animationer för ämnesval och stegbyte.
+### Flöde
+
+1. **Lägg till aktivitet**: Barnet trycker "+" → väljer "Aktivitet" → fyller i titel, väljer emoji (⚽🎹🏊‍♂️🎭🏀), väljer dagar/tid → sparar
+2. **Dagsvyn**: Aktiviteter visas som färgglada kort med emoji och tid, tydligt separerade från läxor
+3. **Pluggplanering**: När barnet väljer studiedagar i AddHomework visas aktiviteter under varje dag — dagar med aktiviteter rankas lägre i auto-förslaget
+
+### Smart schemaläggning
+Funktionen `suggestStudyDays` utökas så att dagar med aktiviteter får högre "belastning", vilket gör att appen automatiskt föreslår lugnare dagar först. Aktiviteter visas visuellt: "⚽ Fotboll 16:00" under varje dag i dagväljaren.
 
