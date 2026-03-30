@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { format, addDays, getDay, subDays } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { useFamilyData } from './queries/useFamilyData';
-import { useHomeworkData, type HomeworkWithTasks } from './queries/useHomeworkData';
+import { useHomeworkData, type HomeworkWithTasks, type Activity } from './queries/useHomeworkData';
 
 type Child = Tables<'children'>;
 type Family = Tables<'families'>;
@@ -68,6 +68,7 @@ export function useFamily() {
   const homework = hwData?.homework ?? [];
   const recurringPackItems = hwData?.recurringPackItems ?? [];
   const adhocTasks = hwData?.adhocTasks ?? [];
+  const activities = hwData?.activities ?? [];
 
   const loading = familyLoading || (childIds.length > 0 && hwLoading);
 
@@ -489,12 +490,65 @@ export function useFamily() {
   const getActiveHomeworkCount = (childId: string) =>
     homework.filter(hw => hw.child_id === childId && !hw.completed).length;
 
+  // Activities CRUD
+  const addActivity = async (childId: string, activityData: {
+    title: string;
+    emoji: string;
+    weekdays: number[];
+    specificDate?: string;
+    startTime?: string;
+    endTime?: string;
+  }) => {
+    const { error } = await supabase
+      .from('activities')
+      .insert({
+        child_id: childId,
+        title: activityData.title,
+        emoji: activityData.emoji,
+        weekdays: activityData.weekdays,
+        specific_date: activityData.specificDate || null,
+        start_time: activityData.startTime || null,
+        end_time: activityData.endTime || null,
+      });
+    if (error) {
+      toast.error('Kunde inte lägga till aktivitet');
+      return false;
+    }
+    toast.success('Aktivitet tillagd! 🎉');
+    invalidateHomework();
+    return true;
+  };
+
+  const deleteActivity = async (id: string) => {
+    const { error } = await supabase.from('activities').delete().eq('id', id);
+    if (error) {
+      toast.error('Kunde inte ta bort aktivitet');
+      return false;
+    }
+    invalidateHomework();
+    return true;
+  };
+
+  const getActivitiesForDate = (childId: string, date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const dayOfWeek = getDay(date);
+    return activities.filter(a => {
+      if (a.child_id !== childId) return false;
+      // Recurring: matches weekday
+      if (a.weekdays.length > 0 && a.weekdays.includes(dayOfWeek)) return true;
+      // One-off: matches specific date
+      if (a.specific_date === dateStr) return true;
+      return false;
+    });
+  };
+
   return {
     family,
     children,
     homework,
     recurringPackItems,
     adhocTasks,
+    activities,
     activeChildId,
     setActiveChildId,
     loading,
@@ -521,6 +575,9 @@ export function useFamily() {
     deleteAdhocTask,
     getAdhocTasksForDate,
     toggleHomeworkComplete,
+    addActivity,
+    deleteActivity,
+    getActivitiesForDate,
     refetch: invalidateHomework,
   };
 }

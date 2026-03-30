@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          child_id: string
+          created_at: string | null
+          emoji: string | null
+          end_time: string | null
+          id: string
+          specific_date: string | null
+          start_time: string | null
+          title: string
+          weekdays: number[] | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string | null
+          emoji?: string | null
+          end_time?: string | null
+          id?: string
+          specific_date?: string | null
+          start_time?: string | null
+          title: string
+          weekdays?: number[] | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string | null
+          emoji?: string | null
+          end_time?: string | null
+          id?: string
+          specific_date?: string | null
+          start_time?: string | null
+          title?: string
+          weekdays?: number[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       adhoc_tasks: {
         Row: {
           child_id: string

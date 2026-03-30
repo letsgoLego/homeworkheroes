@@ -8,6 +8,7 @@ import { Flag, FileCheck, Filter } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 import { Subject, HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 import { Button } from './ui/button';
+import type { Activity } from '@/hooks/queries/useHomeworkData';
 
 type Homework = Tables<'homework'>;
 type StudyTask = Tables<'study_tasks'>;
@@ -21,17 +22,18 @@ interface WeekViewProps {
   onSelectDate: (date: Date) => void;
   homework: HomeworkWithTasks[];
   activeChildId: string | null;
+  getActivitiesForDate?: (childId: string, date: Date) => Activity[];
 }
 
 type FilterType = 'all' | 'inlamning' | 'forhor';
 
-export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }: WeekViewProps) {
+export function WeekView({ selectedDate, onSelectDate, homework, activeChildId, getActivitiesForDate }: WeekViewProps) {
   const [filter, setFilter] = useState<FilterType>('all');
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const getItemsForDay = (date: Date) => {
-    if (!activeChildId) return { deadlines: [] as HomeworkWithTasks[], tasks: [] as { task: StudyTask; homework: HomeworkWithTasks }[] };
+    if (!activeChildId) return { deadlines: [] as HomeworkWithTasks[], tasks: [] as { task: StudyTask; homework: HomeworkWithTasks }[], activities: [] as Activity[] };
     const dateStr = format(date, 'yyyy-MM-dd');
 
     let deadlines = homework.filter(
@@ -46,18 +48,20 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
           .map((task) => ({ task, homework: hw }))
       );
 
+    const dayActivities = getActivitiesForDate ? getActivitiesForDate(activeChildId, date) : [];
+
     // Apply filter — when filtering by type, only show deadlines of that type (not study tasks)
     if (filter !== 'all') {
       deadlines = deadlines.filter((hw) => hw.homework_type === filter);
       tasks = []; // Hide study tasks when filtering by deadline type
     }
 
-    return { deadlines, tasks };
+    return { deadlines, tasks, activities: dayActivities };
   };
 
   const hasAnyContent = weekDays.some((day) => {
-    const { deadlines, tasks } = getItemsForDay(day);
-    return deadlines.length > 0 || tasks.length > 0;
+    const { deadlines, tasks, activities: acts } = getItemsForDay(day);
+    return deadlines.length > 0 || tasks.length > 0 || acts.length > 0;
   });
 
   return (
@@ -106,8 +110,8 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
       ) : (
         <div className="space-y-4">
           {weekDays.map((day, dayIndex) => {
-            const { deadlines, tasks } = getItemsForDay(day);
-            if (deadlines.length === 0 && tasks.length === 0) return null;
+            const { deadlines, tasks, activities: dayActivities } = getItemsForDay(day);
+            if (deadlines.length === 0 && tasks.length === 0 && dayActivities.length === 0) return null;
 
             return (
               <motion.div
@@ -224,6 +228,26 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId }
                       {task.completed && (
                         <span className="text-success text-sm">✓</span>
                       )}
+                    </motion.div>
+                  ))}
+
+                  {/* Activities */}
+                  {dayActivities.map((act) => (
+                    <motion.div
+                      key={act.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-accent/20 border border-accent/30"
+                    >
+                      <span className="text-xl">{act.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{act.title}</p>
+                        {(act.start_time || act.end_time) && (
+                          <p className="text-xs text-muted-foreground">
+                            {[act.start_time?.slice(0, 5), act.end_time?.slice(0, 5)].filter(Boolean).join('–')}
+                          </p>
+                        )}
+                      </div>
                     </motion.div>
                   ))}
                 </div>

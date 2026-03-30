@@ -70,21 +70,23 @@ function generateAutoTitle(homeworkType: HomeworkType, subject: Subject, title: 
 function suggestStudyDays(
   availableDays: Date[],
   taskCountsByDate: Record<string, number>,
+  activityCountsByDate: Record<string, number>,
   suggestedCount: number
 ): string[] {
-  // Sort days by workload (ascending), prefer weekdays
+  // Sort days by workload (ascending), prefer weekdays, penalize days with activities
   const scored = availableDays.map(day => {
     const dateStr = format(day, 'yyyy-MM-dd');
     const load = taskCountsByDate[dateStr] || 0;
+    const activityLoad = activityCountsByDate[dateStr] || 0;
     const weekendPenalty = isWeekend(day) ? 2 : 0;
-    return { dateStr, score: load + weekendPenalty };
+    return { dateStr, score: load + activityLoad * 2 + weekendPenalty };
   });
   scored.sort((a, b) => a.score - b.score);
   return scored.slice(0, suggestedCount).map(s => s.dateStr);
 }
 
 export function AddHomework({ open, onClose }: AddHomeworkProps) {
-  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework, getActiveHomeworkCount } = useFamily();
+  const { addHomework, addTask, addRecurringPackItem, activeChildId, children, setActiveChildId, homework, getActiveHomeworkCount, getActivitiesForDate } = useFamily();
   const { subscribed } = useSubscriptionContext();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [step, setStep] = useState(1);
@@ -138,11 +140,23 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     return counts;
   }, [homework, targetChildId]);
 
+  const activityCountsByDate = useMemo(() => {
+    if (!targetChildId) return {};
+    const counts: Record<string, number> = {};
+    availableDays.forEach(day => {
+      const acts = getActivitiesForDate(targetChildId, day);
+      if (acts.length > 0) {
+        counts[format(day, 'yyyy-MM-dd')] = acts.length;
+      }
+    });
+    return counts;
+  }, [availableDays, targetChildId, getActivitiesForDate]);
+
   // Auto-suggest days when available days or suggested count changes
   useEffect(() => {
     if (availableDays.length > 0 && step === 2 && selectedDays.length === 0) {
       const count = Math.min(suggestedDayCount, availableDays.length);
-      const suggested = suggestStudyDays(availableDays, taskCountsByDate, count);
+      const suggested = suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count);
       setSelectedDays(suggested);
     }
   }, [step]); // Only run when entering step 2
@@ -746,7 +760,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                     onValueChange={(val) => {
                       const count = val[0];
                       setSuggestedDayCount(count);
-                      const suggested = suggestStudyDays(availableDays, taskCountsByDate, count);
+                      const suggested = suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count);
                       setSelectedDays(suggested);
                     }}
                     min={1}
@@ -767,11 +781,12 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isSelected = selectedDays.includes(dateStr);
                   const isToday = isSameDay(day, today);
-                  const isWeekendDay = isWeekend(day);
-                  const existingTaskCount = taskCountsByDate[dateStr] || 0;
-                  const load = getLoadLabel(existingTaskCount);
-                  
-                  return (
+                   const isWeekendDay = isWeekend(day);
+                   const existingTaskCount = taskCountsByDate[dateStr] || 0;
+                   const load = getLoadLabel(existingTaskCount);
+                   const dayActivities = targetChildId ? getActivitiesForDate(targetChildId, day) : [];
+                   
+                   return (
                     <motion.button
                       key={dateStr}
                       whileTap={{ scale: 0.95 }}
@@ -798,8 +813,14 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       <div className="text-xs opacity-70">
                         {format(day, 'MMM', { locale: sv })}
                       </div>
+                      {/* Activities indicator */}
+                      {dayActivities.length > 0 && !isSelected && (
+                        <div className="text-[10px] mt-0.5 truncate opacity-80">
+                          {dayActivities.map(a => a.emoji).join('')} {dayActivities[0]?.start_time?.slice(0, 5) || ''}
+                        </div>
+                      )}
                       {/* Workload label */}
-                      {existingTaskCount > 0 && !isSelected && (
+                      {existingTaskCount > 0 && !isSelected && dayActivities.length === 0 && (
                         <div className="text-[10px] mt-0.5 opacity-70">
                           {load.emoji}
                         </div>

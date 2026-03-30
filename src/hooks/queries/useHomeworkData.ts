@@ -8,6 +8,18 @@ type StudyTask = Tables<'study_tasks'>;
 type RecurringPackItem = Tables<'recurring_pack_items'>;
 type AdhocTask = Tables<'adhoc_tasks'>;
 
+export interface Activity {
+  id: string;
+  child_id: string;
+  title: string;
+  emoji: string;
+  weekdays: number[];
+  specific_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
+  created_at: string;
+}
+
 export interface HomeworkWithTasks extends Homework {
   tasks: StudyTask[];
 }
@@ -16,16 +28,17 @@ interface HomeworkDataResult {
   homework: HomeworkWithTasks[];
   recurringPackItems: RecurringPackItem[];
   adhocTasks: AdhocTask[];
+  activities: Activity[];
 }
 
 async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult> {
   if (childIds.length === 0) {
-    return { homework: [], recurringPackItems: [], adhocTasks: [] };
+    return { homework: [], recurringPackItems: [], adhocTasks: [], activities: [] };
   }
 
   const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
 
-  const [hwRes, packRes, adhocRes] = await Promise.all([
+  const [hwRes, packRes, adhocRes, actRes] = await Promise.all([
     supabase
       .from('homework')
       .select('*, study_tasks(*)')
@@ -39,11 +52,16 @@ async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult
       .from('adhoc_tasks')
       .select('*')
       .in('child_id', childIds),
+    supabase
+      .from('activities')
+      .select('*')
+      .in('child_id', childIds),
   ]);
 
   if (hwRes.error) throw hwRes.error;
   if (packRes.error) throw packRes.error;
   if (adhocRes.error) throw adhocRes.error;
+  if (actRes.error) throw actRes.error;
 
   const homework: HomeworkWithTasks[] = (hwRes.data || []).map((hw: any) => ({
     ...hw,
@@ -55,6 +73,7 @@ async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult
     homework,
     recurringPackItems: packRes.data || [],
     adhocTasks: adhocRes.data || [],
+    activities: (actRes.data || []) as Activity[],
   };
 }
 

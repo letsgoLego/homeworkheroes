@@ -19,6 +19,7 @@ import { Subject } from '@/types/homework';
 import { RecurringPackItems } from '@/components/RecurringPackItems';
 import { AddAdhocTask } from '@/components/AddAdhocTask';
 import { AdhocTaskCard } from '@/components/AdhocTaskCard';
+import { ActivityCard } from '@/components/ActivityCard';
 import { IntroTour } from '@/components/IntroTour';
 
 export default function TodayPage() {
@@ -46,6 +47,8 @@ export default function TodayPage() {
     deleteAdhocTask,
     getAdhocTasksForDate,
     toggleHomeworkComplete,
+    getActivitiesForDate,
+    deleteActivity,
   } = useFamily();
   
   const today = new Date();
@@ -81,6 +84,7 @@ export default function TodayPage() {
   const todayAdhocTasks = activeChildId ? getAdhocTasksForDate(activeChildId, today) : [];
   const itemsToBringData = activeChildId ? getItemsToBringForDate(activeChildId, bringToSchoolDate) : { homeworkItems: [], recurringItems: [] };
   const hasItemsToBring = itemsToBringData.homeworkItems.length > 0 || itemsToBringData.recurringItems.length > 0;
+  const todayActivities = activeChildId ? getActivitiesForDate(activeChildId, today) : [];
   
   // Get homework due on pack date (today before 12, tomorrow after 12)
   const packDateHomework = homework.filter(hw => {
@@ -210,6 +214,23 @@ export default function TodayPage() {
               </motion.section>
             )}
             
+            {/* Today's activities */}
+            {todayActivities.length > 0 && (
+              <section>
+                <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+                  <span className="w-8 h-8 rounded-lg bg-accent/30 flex items-center justify-center">
+                    🏃
+                  </span>
+                  Aktiviteter idag
+                </h2>
+                <div className="space-y-2">
+                  {todayActivities.map((act) => (
+                    <ActivityCard key={act.id} activity={act} onDelete={deleteActivity} />
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* Today's tasks */}
             <section>
               <h2 className="text-lg font-bold mb-3 flex items-center gap-2">

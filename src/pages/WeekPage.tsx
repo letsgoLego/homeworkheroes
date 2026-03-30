@@ -14,7 +14,7 @@ import { useFamily } from '@/hooks/useFamily';
 export default function WeekPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const { children, activeChildId, setActiveChildId, homework, loading, userRole } = useFamily();
+  const { children, activeChildId, setActiveChildId, homework, loading, userRole, getActivitiesForDate } = useFamily();
   
   const handlePrevWeek = () => {
     setSelectedDate(subWeeks(selectedDate, 1));
@@ -86,6 +86,7 @@ export default function WeekPage() {
           onSelectDate={setSelectedDate}
           homework={homework}
           activeChildId={activeChildId}
+          getActivitiesForDate={getActivitiesForDate}
         />
       </main>
 
