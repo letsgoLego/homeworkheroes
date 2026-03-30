@@ -21,6 +21,7 @@ import TermsPage from "./pages/TermsPage";
 import ParentRouteGuard from "./components/ParentRouteGuard";
 import CookieBanner from "./components/CookieBanner";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
+import { OfflineBanner } from "./components/OfflineBanner";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <SubscriptionProvider>
+            <OfflineBanner />
             <AppRoutes />
             <CookieBanner />
           </SubscriptionProvider>
