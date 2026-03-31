@@ -35,6 +35,8 @@ const EMOJI_OPTIONS = [
   { emoji: '💃', label: 'Dans' },
   { emoji: '🏒', label: 'Hockey' },
   { emoji: '🐴', label: 'Ridning' },
+  { emoji: '🏓', label: 'Bordtennis' },
+  { emoji: '🎯', label: 'Övrigt' },
 ];
 
 const WEEKDAYS = [
