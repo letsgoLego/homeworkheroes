@@ -68,15 +68,26 @@ export default function AddPage() {
       </header>
       
       <main className="px-4 py-4 space-y-6">
-        {/* Add homework button */}
-        <Button
-          onClick={() => setShowAddHomework(true)}
-          className="w-full h-14 text-lg shadow-glow-primary"
-          size="lg"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Lägg till ny läxa
-        </Button>
+        {/* Add buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => setShowAddHomework(true)}
+            className="h-14 text-base shadow-glow-primary"
+            size="lg"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Ny läxa 📚
+          </Button>
+          <Button
+            onClick={() => setShowAddActivity(true)}
+            variant="secondary"
+            className="h-14 text-base"
+            size="lg"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Ny aktivitet 🏃
+          </Button>
+        </div>
         
         {/* Overdue homework */}
         {overdueHomework.length > 0 && (
