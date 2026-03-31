@@ -36,6 +36,7 @@ const EMOJI_OPTIONS = [
   { emoji: '🏒', label: 'Hockey' },
   { emoji: '🐴', label: 'Ridning' },
   { emoji: '🏓', label: 'Bordtennis' },
+  { emoji: '⛸️', label: 'Konståkning' },
   { emoji: '🎯', label: 'Övrigt' },
 ];
 
