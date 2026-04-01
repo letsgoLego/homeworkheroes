@@ -81,6 +81,10 @@ export function useFamily() {
     queryClient.invalidateQueries({ queryKey: ['family-data', user?.id] });
   }, [queryClient, user?.id]);
 
+  const refetch = useCallback(async () => {
+    await Promise.all([invalidateFamily(), invalidateHomework()]);
+  }, [invalidateFamily, invalidateHomework]);
+
   // Debounced refetch for realtime
   const debouncedRefetch = useCallback(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);

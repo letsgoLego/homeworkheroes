@@ -20,7 +20,7 @@ interface ManageChildAccountProps {
   child: Child;
   open: boolean;
   onClose: () => void;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void> | void;
 }
 
 export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChildAccountProps) {
