@@ -25,7 +25,6 @@ export default function FamilyPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [copied, setCopied] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
-  const selectedChild = selectedChildId ? children.find(c => c.id === selectedChildId) || null : null;
   const { children, homework, family, loading, refetch } = useFamily();
   const { signOut, user } = useAuth();
   const { subscribed, status: subStatus, subscriptionEnd, openCustomerPortal } = useSubscriptionContext();
