@@ -232,7 +232,7 @@ export default function FamilyPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => setSelectedChild(child)}
+                      onClick={() => setSelectedChildId(child.id)}
                     >
                       <Settings className="w-5 h-5" />
                     </Button>
