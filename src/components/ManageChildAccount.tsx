@@ -20,7 +20,7 @@ interface ManageChildAccountProps {
   child: Child;
   open: boolean;
   onClose: () => void;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void> | void;
 }
 
 export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChildAccountProps) {
@@ -89,8 +89,8 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
         return;
       }
 
+      await onUpdate();
       toast.success(`Konto skapat för ${child.name}! 🎉`);
-      onUpdate();
       onClose();
     } catch (err: any) {
       console.error('Error creating child account:', err);
