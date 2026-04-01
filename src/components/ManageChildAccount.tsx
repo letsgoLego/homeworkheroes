@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { User, Lock, Check, X } from 'lucide-react';
+import { User, Lock, Check } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Child = Tables<'children'>;
@@ -28,6 +28,15 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Sync state when child prop changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      setUsername(child.username || '');
+      setPassword('');
+      setConfirmPassword('');
+    }
+  }, [open, child.id, child.username]);
 
   const hasAccount = child.has_account;
 
@@ -47,9 +56,7 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
       return;
     }
 
-    // Validate username (only letters, numbers, underscore, 3-20 characters)
-    // This matches the database trigger validation
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
       toast.error('Användarnamn måste vara 3-20 tecken (bokstäver, siffror, understreck)');
       return;
     }
@@ -57,60 +64,29 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
     setLoading(true);
 
     try {
-      // Create auth user with generated email
-      const email = `${username.toLowerCase().trim()}@laxhjalpen.child`;
-      
-      // Note: We don't store sensitive metadata in auth.users.raw_user_meta_data
-      // Authorization is handled via user_roles table with RLS policies
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Inte inloggad');
+
+      const response = await supabase.functions.invoke('create-child-account', {
+        body: {
+          username: username.toLowerCase().trim(),
+          password,
+          childId: child.id,
         },
       });
 
-      if (authError) {
-        if (authError.message.includes('already registered')) {
+      if (response.error) {
+        throw new Error(response.error.message || 'Kunde inte skapa konto');
+      }
+
+      const result = response.data;
+      if (result.error) {
+        if (result.error === 'Username taken') {
           toast.error('Det användarnamnet är upptaget. Välj ett annat.');
         } else {
-          throw authError;
+          throw new Error(result.error);
         }
         return;
-      }
-
-      if (!authData.user) {
-        throw new Error('Kunde inte skapa konto');
-      }
-
-      // Update child record with username
-      const { error: updateError } = await supabase
-        .from('children')
-        .update({ 
-          username: username.toLowerCase().trim(),
-          has_account: true,
-        })
-        .eq('id', child.id);
-
-      if (updateError) throw updateError;
-
-      // Get family_id from child
-      const { data: childData } = await supabase
-        .from('children')
-        .select('family_id')
-        .eq('id', child.id)
-        .single();
-
-      if (childData) {
-        // Add user role for child
-        await supabase
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: 'child',
-            family_id: childData.family_id,
-            child_id: child.id,
-          });
       }
 
       toast.success(`Konto skapat för ${child.name}! 🎉`);
@@ -138,7 +114,6 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
     setLoading(true);
 
     try {
-      // We need to use admin functions for this, but for now show info
       toast.info('Kontakta support för att återställa barnets lösenord');
     } catch (err: any) {
       console.error('Error resetting password:', err);
