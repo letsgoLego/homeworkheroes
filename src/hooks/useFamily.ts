@@ -582,6 +582,6 @@ export function useFamily() {
     addActivity,
     deleteActivity,
     getActivitiesForDate,
-    refetch: invalidateHomework,
+    refetch,
   };
 }
