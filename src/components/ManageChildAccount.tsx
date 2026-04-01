@@ -24,21 +24,43 @@ interface ManageChildAccountProps {
 }
 
 export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChildAccountProps) {
+  const [accountChild, setAccountChild] = useState(child);
   const [username, setUsername] = useState(child.username || '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Sync state when child prop changes or dialog opens
   useEffect(() => {
-    if (open) {
-      setUsername(child.username || '');
-      setPassword('');
-      setConfirmPassword('');
-    }
+    setAccountChild(child);
+  }, [child]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    setUsername(child.username || '');
+    setPassword('');
+    setConfirmPassword('');
+
+    const syncChildStatus = async () => {
+      setRefreshing(true);
+      const { data, error } = await supabase
+        .from('children')
+        .select('*')
+        .eq('id', child.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        setAccountChild(data);
+        setUsername(data.username || '');
+      }
+      setRefreshing(false);
+    };
+
+    void syncChildStatus();
   }, [open, child.id, child.username]);
 
-  const hasAccount = child.has_account;
+  const hasAccount = !!accountChild.has_account;
 
   const handleCreateAccount = async () => {
     if (!username.trim()) {
@@ -64,9 +86,6 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
     setLoading(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Inte inloggad');
-
       const response = await supabase.functions.invoke('create-child-account', {
         body: {
           username: username.toLowerCase().trim(),
@@ -80,7 +99,7 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
       }
 
       const result = response.data;
-      if (result.error) {
+      if (result?.error) {
         if (result.error === 'Username taken') {
           toast.error('Det användarnamnet är upptaget. Välj ett annat.');
         } else {
@@ -89,9 +108,16 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
         return;
       }
 
+      const updatedChild = {
+        ...accountChild,
+        username: username.toLowerCase().trim(),
+        has_account: true,
+      };
+      setAccountChild(updatedChild);
+      setUsername(updatedChild.username || '');
+
       await onUpdate();
-      toast.success(`Konto skapat för ${child.name}! 🎉`);
-      onClose();
+      toast.success(result?.alreadyExists ? `Kontot finns redan för ${child.name} ✓` : `Konto skapat för ${child.name}! 🎉`);
     } catch (err: any) {
       console.error('Error creating child account:', err);
       toast.error(err.message || 'Kunde inte skapa konto');
@@ -128,18 +154,26 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div 
+            <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-              style={{ backgroundColor: child.color }}
+              style={{ backgroundColor: accountChild.color }}
             >
-              {child.name[0]}
+              {accountChild.name[0]}
             </div>
-            {hasAccount ? 'Hantera konto' : 'Skapa inloggning'} för {child.name}
+            {hasAccount ? 'Hantera konto' : 'Skapa inloggning'} för {accountChild.name}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 pt-4">
-          {hasAccount ? (
+          {refreshing ? (
+            <div className="py-8 flex justify-center">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full"
+              />
+            </div>
+          ) : hasAccount ? (
             <>
               <div className="p-4 rounded-xl bg-success/10 border border-success/20">
                 <div className="flex items-center gap-2 text-success">
@@ -147,7 +181,7 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
                   <span className="font-medium">Konto aktivt</span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Användarnamn: <span className="font-mono font-medium">{child.username}</span>
+                  Användarnamn: <span className="font-mono font-medium">{accountChild.username}</span>
                 </p>
               </div>
 
@@ -196,7 +230,7 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
           ) : (
             <>
               <p className="text-sm text-muted-foreground">
-                Skapa ett konto så att {child.name} kan logga in själv och se sina läxor.
+                Skapa ett konto så att {accountChild.name} kan logga in själv och se sina läxor.
               </p>
 
               <div>
