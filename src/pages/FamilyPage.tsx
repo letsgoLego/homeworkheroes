@@ -24,7 +24,7 @@ export default function FamilyPage() {
   const navigate = useNavigate();
   const [showAddChild, setShowAddChild] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [selectedChild, setSelectedChild] = useState<Child | null>(null);
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const { children, homework, family, loading, refetch } = useFamily();
   const { signOut, user } = useAuth();
   const { subscribed, status: subStatus, subscriptionEnd, openCustomerPortal } = useSubscriptionContext();
@@ -232,7 +232,7 @@ export default function FamilyPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => setSelectedChild(child)}
+                      onClick={() => setSelectedChildId(child.id)}
                     >
                       <Settings className="w-5 h-5" />
                     </Button>
@@ -314,14 +314,17 @@ export default function FamilyPage() {
       
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
-      {selectedChild && (
-        <ManageChildAccount
-          child={selectedChild}
-          open={!!selectedChild}
-          onClose={() => setSelectedChild(null)}
-          onUpdate={refetch}
-        />
-      )}
+      {(() => {
+        const selectedChild = selectedChildId ? children.find(c => c.id === selectedChildId) || null : null;
+        return selectedChild ? (
+          <ManageChildAccount
+            child={selectedChild}
+            open={!!selectedChild}
+            onClose={() => setSelectedChildId(null)}
+            onUpdate={refetch}
+          />
+        ) : null;
+      })()}
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />
     </div>
   );
