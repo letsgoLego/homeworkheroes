@@ -314,14 +314,17 @@ export default function FamilyPage() {
       
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
-      {selectedChild && (
-        <ManageChildAccount
-          child={selectedChild}
-          open={!!selectedChild}
-          onClose={() => setSelectedChild(null)}
-          onUpdate={refetch}
-        />
-      )}
+      {(() => {
+        const selectedChild = selectedChildId ? children.find(c => c.id === selectedChildId) || null : null;
+        return selectedChild ? (
+          <ManageChildAccount
+            child={selectedChild}
+            open={!!selectedChild}
+            onClose={() => setSelectedChildId(null)}
+            onUpdate={refetch}
+          />
+        ) : null;
+      })()}
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />
     </div>
   );
