@@ -1,9 +1,16 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
+import { z } from "https://esm.sh/zod@3.25.76";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const BodySchema = z.object({
+  username: z.string().min(3).max(20).regex(/^[a-z0-9_]+$/),
+  password: z.string().min(6),
+  childId: z.string().uuid(),
+});
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -19,15 +26,27 @@ Deno.serve(async (req) => {
       });
     }
 
+    const parsed = BodySchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: parsed.error.flatten().fieldErrors }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { username, password, childId } = parsed.data;
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify the calling user is a parent
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await userClient.auth.getUser();
+
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -35,36 +54,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { username, password, childId } = await req.json();
-
-    if (!username || !password || !childId) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Validate username format
-    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-      return new Response(JSON.stringify({ error: "Invalid username format" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (password.length < 6) {
-      return new Response(JSON.stringify({ error: "Password too short" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Verify calling user is parent in the same family as the child
     const { data: childData, error: childError } = await adminClient
       .from("children")
-      .select("id, family_id, name")
+      .select("id, family_id, name, username, has_account")
       .eq("id", childId)
       .single();
 
@@ -75,7 +69,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check caller is parent in this family
     const { data: callerRole } = await adminClient
       .from("user_roles")
       .select("role")
@@ -91,8 +84,33 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create auth user with admin API (won't affect parent session)
+    if (childData.has_account && childData.username === username) {
+      return new Response(
+        JSON.stringify({ success: true, alreadyExists: true, childName: childData.name }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const email = `${username}@laxhjalpen.child`;
+    const { data: existingUsers, error: listError } = await adminClient.auth.admin.listUsers();
+    if (listError) throw listError;
+
+    const existingUser = existingUsers.users.find((u) => u.email?.toLowerCase() === email);
+
+    if (existingUser) {
+      if (childData.has_account && childData.username === username) {
+        return new Response(
+          JSON.stringify({ success: true, alreadyExists: true, childName: childData.name }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(JSON.stringify({ error: "Username taken" }), {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
       email,
       password,
@@ -109,29 +127,38 @@ Deno.serve(async (req) => {
       throw authError;
     }
 
-    // Update child record
-    await adminClient
+    const { error: updateChildError } = await adminClient
       .from("children")
       .update({ username, has_account: true })
       .eq("id", childId);
 
-    // Add child role
-    await adminClient
+    if (updateChildError) throw updateChildError;
+
+    const { data: existingRole } = await adminClient
       .from("user_roles")
-      .insert({
+      .select("id")
+      .eq("user_id", authData.user.id)
+      .eq("child_id", childId)
+      .eq("role", "child")
+      .maybeSingle();
+
+    if (!existingRole) {
+      const { error: roleError } = await adminClient.from("user_roles").insert({
         user_id: authData.user.id,
         role: "child",
         family_id: childData.family_id,
         child_id: childId,
       });
 
-    return new Response(
-      JSON.stringify({ success: true, childName: childData.name }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+      if (roleError) throw roleError;
+    }
+
+    return new Response(JSON.stringify({ success: true, childName: childData.name }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error("Error creating child account:", err);
-    return new Response(JSON.stringify({ error: err.message || "Internal error" }), {
+    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : "Internal error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
