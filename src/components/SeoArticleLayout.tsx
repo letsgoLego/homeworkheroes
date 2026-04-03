@@ -9,6 +9,7 @@ interface SeoArticleLayoutProps {
   metaDescription: string;
   children: React.ReactNode;
   relatedArticles?: { path: string; title: string }[];
+  slug?: string;
 }
 
 function useDocumentMeta(title: string, description: string) {
