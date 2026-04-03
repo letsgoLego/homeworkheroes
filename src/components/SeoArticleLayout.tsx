@@ -42,11 +42,25 @@ export default function SeoArticleLayout({
   metaDescription,
   children,
   relatedArticles = [],
+  slug,
 }: SeoArticleLayoutProps) {
   useDocumentMeta(metaTitle, metaDescription);
 
+  const jsonLd = slug ? {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": metaTitle,
+    "description": metaDescription,
+    "url": `https://homeworkheroes.lovable.app/tips/${slug}`,
+    "publisher": { "@type": "Organization", "name": "Homework Heroes" },
+    "inLanguage": "sv",
+  } : null;
+
   return (
     <div className="min-h-screen bg-background">
+      {jsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      )}
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
