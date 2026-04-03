@@ -77,6 +77,13 @@ function AppRoutes() {
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
+      <Route path="/tips/laxplanering" element={<LaxplaneringTipsPage />} />
+      <Route path="/tips/studieteknik-barn" element={<StudieteknikBarnPage />} />
+      <Route path="/tips/laxstress" element={<LaxstressBarnPage />} />
+      <Route path="/tips/laxrutin" element={<LaxrutinPage />} />
+      <Route path="/tips/motivation-laxor" element={<MotivationLaxorPage />} />
+      <Route path="/tips/tonaringar-laxor" element={<TonaringarLaxorPage />} />
+      <Route path="/tips/laxhjalp-hemma" element={<LaxhjalpHemmaPage />} />
       <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
       <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
