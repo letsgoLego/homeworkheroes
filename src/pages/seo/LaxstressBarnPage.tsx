@@ -11,6 +11,7 @@ export default function LaxstressBarnPage() {
     <SeoArticleLayout
       title="Läxstress hos barn — så minskar ni den tillsammans"
       metaTitle="Läxstress hos barn — så minskar ni den"
+      slug="laxstress"
       metaDescription="Känner ditt barn stress över läxor? Här är konkreta strategier för att minska läxångesten och skapa en lugnare vardag."
       relatedArticles={related}
     >

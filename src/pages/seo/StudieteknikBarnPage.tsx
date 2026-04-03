@@ -11,6 +11,7 @@ export default function StudieteknikBarnPage() {
     <SeoArticleLayout
       title="Studieteknik för barn — 8 metoder som faktiskt fungerar"
       metaTitle="Studieteknik för barn — 8 metoder som fungerar"
+      slug="studieteknik-barn"
       metaDescription="Hjälp ditt barn att plugga smartare med dessa 8 beprövade studietekniker anpassade för barn i alla åldrar."
       relatedArticles={related}
     >

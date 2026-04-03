@@ -11,6 +11,7 @@ export default function MotivationLaxorPage() {
     <SeoArticleLayout
       title="Så motiverar du ditt barn att göra läxor — utan tjat"
       metaTitle="Motivera barn att göra läxor — utan tjat"
+      slug="motivation-laxor"
       metaDescription="Trött på att tjata om läxor? Här är forskningsbaserade strategier för att öka ditt barns motivation och skapa en positiv inställning till läxor."
       relatedArticles={related}
     >

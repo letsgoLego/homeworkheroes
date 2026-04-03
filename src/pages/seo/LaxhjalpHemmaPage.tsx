@@ -11,6 +11,7 @@ export default function LaxhjalpHemmaPage() {
     <SeoArticleLayout
       title="Läxhjälp hemma — den kompletta guiden för föräldrar"
       metaTitle="Läxhjälp hemma — komplett guide för föräldrar"
+      slug="laxhjalp-hemma"
       metaDescription="Allt du behöver veta om att hjälpa ditt barn med läxor hemma. Från rätt miljö till effektiva strategier för alla åldrar."
       relatedArticles={related}
     >

@@ -11,6 +11,7 @@ export default function LaxplaneringTipsPage() {
     <SeoArticleLayout
       title="Läxplanering — 7 smarta tips för föräldrar och barn"
       metaTitle="Läxplanering — 7 smarta tips för föräldrar och barn"
+      slug="laxplanering"
       metaDescription="Lär dig planera läxor effektivt med dessa 7 beprövade tips. Hjälp ditt barn att organisera skolarbetet utan stress."
       relatedArticles={related}
     >

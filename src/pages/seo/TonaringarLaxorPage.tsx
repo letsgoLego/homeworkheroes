@@ -11,6 +11,7 @@ export default function TonaringarLaxorPage() {
     <SeoArticleLayout
       title="Tonåringar och läxor — en guide för föräldrar"
       metaTitle="Tonåringar och läxor — guide för föräldrar"
+      slug="tonaringar-laxor"
       metaDescription="Hur stöttar man en tonåring med läxor utan att det blir konflikt? Praktiska råd för föräldrar till 13-18-åringar."
       relatedArticles={related}
     >

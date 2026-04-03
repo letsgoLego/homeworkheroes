@@ -11,6 +11,7 @@ export default function LaxrutinPage() {
     <SeoArticleLayout
       title="Skapa en läxrutin som håller hela terminen"
       metaTitle="Skapa en läxrutin som håller hela terminen"
+      slug="laxrutin"
       metaDescription="Lär dig bygga en hållbar läxrutin för ditt barn. Steg-för-steg-guide med konkreta tips för varje ålder."
       relatedArticles={related}
     >
