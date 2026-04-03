@@ -18,6 +18,13 @@ import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
+import LaxplaneringTipsPage from "./pages/seo/LaxplaneringTipsPage";
+import StudieteknikBarnPage from "./pages/seo/StudieteknikBarnPage";
+import LaxstressBarnPage from "./pages/seo/LaxstressBarnPage";
+import LaxrutinPage from "./pages/seo/LaxrutinPage";
+import MotivationLaxorPage from "./pages/seo/MotivationLaxorPage";
+import TonaringarLaxorPage from "./pages/seo/TonaringarLaxorPage";
+import LaxhjalpHemmaPage from "./pages/seo/LaxhjalpHemmaPage";
 import ParentRouteGuard from "./components/ParentRouteGuard";
 import CookieBanner from "./components/CookieBanner";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
@@ -70,6 +77,13 @@ function AppRoutes() {
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
+      <Route path="/tips/laxplanering" element={<LaxplaneringTipsPage />} />
+      <Route path="/tips/studieteknik-barn" element={<StudieteknikBarnPage />} />
+      <Route path="/tips/laxstress" element={<LaxstressBarnPage />} />
+      <Route path="/tips/laxrutin" element={<LaxrutinPage />} />
+      <Route path="/tips/motivation-laxor" element={<MotivationLaxorPage />} />
+      <Route path="/tips/tonaringar-laxor" element={<TonaringarLaxorPage />} />
+      <Route path="/tips/laxhjalp-hemma" element={<LaxhjalpHemmaPage />} />
       <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
       <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
