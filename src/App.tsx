@@ -29,6 +29,7 @@ import ParentRouteGuard from "./components/ParentRouteGuard";
 import CookieBanner from "./components/CookieBanner";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { OfflineBanner } from "./components/OfflineBanner";
+import { useAdSense } from "./hooks/useAdSense";
 
 const queryClient = new QueryClient();
 
