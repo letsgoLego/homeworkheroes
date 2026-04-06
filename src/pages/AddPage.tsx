@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AdBanner } from '@/components/AdBanner';
+
 import { motion } from 'framer-motion';
 import { Navigation } from '@/components/Navigation';
 import { AddHomework } from '@/components/AddHomework';
@@ -295,7 +295,7 @@ export default function AddPage() {
         )}
       </main>
 
-      <AdBanner className="px-4" />
+      
       
       <Navigation />
       <AddHomework open={showAddHomework} onClose={() => setShowAddHomework(false)} />

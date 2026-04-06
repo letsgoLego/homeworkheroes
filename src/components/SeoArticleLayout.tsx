@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useAdSense } from '@/hooks/useAdSense';
 
 interface SeoArticleLayoutProps {
   title: string;
@@ -45,6 +46,19 @@ export default function SeoArticleLayout({
   slug,
 }: SeoArticleLayoutProps) {
   useDocumentMeta(metaTitle, metaDescription);
+  useAdSense();
+  const adPushed = useRef(false);
+
+  useEffect(() => {
+    if (adPushed.current) return;
+    const timer = setTimeout(() => {
+      try {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+        adPushed.current = true;
+      } catch {}
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const jsonLd = slug ? {
     "@context": "https://schema.org",
@@ -97,6 +111,17 @@ export default function SeoArticleLayout({
               Skapa konto gratis <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
+        </div>
+
+        {/* AdSense ad */}
+        <div className="mt-8 flex justify-center">
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block' }}
+            data-ad-client="ca-pub-8522260330728102"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
         </div>
 
         {/* Related articles */}
