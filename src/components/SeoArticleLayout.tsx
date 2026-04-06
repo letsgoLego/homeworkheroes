@@ -113,6 +113,17 @@ export default function SeoArticleLayout({
           </Link>
         </div>
 
+        {/* AdSense ad */}
+        <div className="mt-8 flex justify-center">
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block' }}
+            data-ad-client="ca-pub-8522260330728102"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
+        </div>
+
         {/* Related articles */}
         {relatedArticles.length > 0 && (
           <div className="mt-10">

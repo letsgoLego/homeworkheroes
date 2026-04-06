@@ -71,7 +71,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 
 function AppRoutes() {
-  useAdSense();
+  
   return (
     <Routes>
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
