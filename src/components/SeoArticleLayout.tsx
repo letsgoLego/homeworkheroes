@@ -46,6 +46,19 @@ export default function SeoArticleLayout({
   slug,
 }: SeoArticleLayoutProps) {
   useDocumentMeta(metaTitle, metaDescription);
+  useAdSense();
+  const adPushed = useRef(false);
+
+  useEffect(() => {
+    if (adPushed.current) return;
+    const timer = setTimeout(() => {
+      try {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+        adPushed.current = true;
+      } catch {}
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const jsonLd = slug ? {
     "@context": "https://schema.org",
