@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useAdSense } from '@/hooks/useAdSense';
 
 interface SeoArticleLayoutProps {
   title: string;
