@@ -565,7 +565,7 @@ export default function TodayPage() {
         </Tabs>
       </main>
 
-      <AdBanner className="px-4" />
+      
       
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />

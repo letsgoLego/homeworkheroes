@@ -90,7 +90,7 @@ export default function WeekPage() {
         />
       </main>
 
-      <AdBanner className="px-4" />
+      
       
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />

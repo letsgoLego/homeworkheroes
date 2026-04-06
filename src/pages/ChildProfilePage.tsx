@@ -123,7 +123,7 @@ export default function ChildProfilePage() {
         </motion.div>
       </main>
 
-      <AdBanner className="px-4" />
+      
       
       <Navigation />
     </div>

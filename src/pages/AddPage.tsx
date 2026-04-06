@@ -295,7 +295,7 @@ export default function AddPage() {
         )}
       </main>
 
-      <AdBanner className="px-4" />
+      
       
       <Navigation />
       <AddHomework open={showAddHomework} onClose={() => setShowAddHomework(false)} />
