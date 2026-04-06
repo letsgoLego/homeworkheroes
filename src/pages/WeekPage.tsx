@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AdBanner } from '@/components/AdBanner';
+
 import { motion } from 'framer-motion';
 import { format, addWeeks, subWeeks } from 'date-fns';
 import { sv } from 'date-fns/locale';

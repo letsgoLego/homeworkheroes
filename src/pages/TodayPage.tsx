@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AdBanner } from '@/components/AdBanner';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, addDays, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';

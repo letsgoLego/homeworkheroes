@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { AdBanner } from '@/components/AdBanner';
+
 import { Navigation } from '@/components/Navigation';
 import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
