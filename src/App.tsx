@@ -81,6 +81,8 @@ function AppRoutes() {
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
+      <Route path="/tips" element={<TipsIndexPage />} />
+      <Route path="/om-oss" element={<AboutPage />} />
       <Route path="/tips/laxplanering" element={<LaxplaneringTipsPage />} />
       <Route path="/tips/studieteknik-barn" element={<StudieteknikBarnPage />} />
       <Route path="/tips/laxstress" element={<LaxstressBarnPage />} />

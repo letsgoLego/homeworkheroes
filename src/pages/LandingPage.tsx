@@ -33,7 +33,17 @@ export default function LandingPage() {
             <span className="text-2xl">📚</span>
             <span className="text-xl font-extrabold text-foreground">Homework Heroes</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
+            <Link to="/tips" className="hidden sm:inline-flex">
+              <Button variant="ghost" size="sm" className="font-semibold">
+                Tips
+              </Button>
+            </Link>
+            <Link to="/om-oss" className="hidden sm:inline-flex">
+              <Button variant="ghost" size="sm" className="font-semibold">
+                Om oss
+              </Button>
+            </Link>
             <Link to="/auth">
               <Button variant="ghost" size="sm" className="font-semibold">
                 Logga in
@@ -527,7 +537,15 @@ export default function LandingPage() {
             <span className="text-lg">📚</span>
             <span className="font-bold text-foreground">Homework Heroes</span>
           </div>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+            <Link to="/tips" className="text-muted-foreground hover:text-primary transition-colors">
+              Tips & guider
+            </Link>
+            <span className="text-border">·</span>
+            <Link to="/om-oss" className="text-muted-foreground hover:text-primary transition-colors">
+              Om oss
+            </Link>
+            <span className="text-border">·</span>
             <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
               Integritetspolicy
             </Link>
