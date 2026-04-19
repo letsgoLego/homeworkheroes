@@ -34,8 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Redirect logic
+        // Only redirect on explicit sign out — ignore transient token refresh failures
+        // so users aren't kicked out during temporary network issues.
         if (event === 'SIGNED_OUT') {
+          // Remember last child username to make re-login fast
           navigate('/auth');
         }
       }
@@ -47,8 +49,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       setLoading(false);
     });
+
+    // Re-check session when app returns to foreground (PWA returning from background)
+    // iOS Safari often suspends timers, so the auto-refresh may not have fired.
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        supabase.auth.getSession().then(({ data: { session: s }, error }) => {
+          if (s) {
+            setSession(s);
+            setUser(s.user);
+          }
+          // If refresh fails silently, try an explicit refresh before giving up
+          if (!s && !error) {
+            supabase.auth.refreshSession();
+          }
+        });
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
     
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
   }, [navigate]);
   
   const signOut = async () => {
