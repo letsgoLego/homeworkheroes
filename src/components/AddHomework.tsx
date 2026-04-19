@@ -58,13 +58,13 @@ function getLoadLabel(count: number): { text: string; emoji: string } {
 
 function generateAutoTitle(homeworkType: HomeworkType, subject: Subject, title: string): string {
   const subjectLabel = SUBJECT_LABELS[subject];
-  if (homeworkType === 'forhor') {
-    return `Plugga inför förhör – ${subjectLabel}`;
-  }
   if (title.trim()) {
-    return `Jobba med ${title.trim()}`;
+    return title.trim();
   }
-  return `Plugga ${subjectLabel}`;
+  if (homeworkType === 'forhor') {
+    return `Förhör – ${subjectLabel}`;
+  }
+  return subjectLabel;
 }
 
 function suggestStudyDays(
