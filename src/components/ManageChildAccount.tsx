@@ -140,7 +140,22 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
     setLoading(true);
 
     try {
-      toast.info('Kontakta support för att återställa barnets lösenord');
+      const response = await supabase.functions.invoke('reset-child-password', {
+        body: { password, childId: child.id },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Kunde inte återställa lösenord');
+      }
+
+      const result = response.data;
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      setPassword('');
+      setConfirmPassword('');
+      toast.success(`Lösenord återställt för ${child.name} ✓`);
     } catch (err: any) {
       console.error('Error resetting password:', err);
       toast.error(err.message || 'Kunde inte återställa lösenord');
