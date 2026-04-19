@@ -25,6 +25,8 @@ import LaxrutinPage from "./pages/seo/LaxrutinPage";
 import MotivationLaxorPage from "./pages/seo/MotivationLaxorPage";
 import TonaringarLaxorPage from "./pages/seo/TonaringarLaxorPage";
 import LaxhjalpHemmaPage from "./pages/seo/LaxhjalpHemmaPage";
+import TipsIndexPage from "./pages/seo/TipsIndexPage";
+import AboutPage from "./pages/AboutPage";
 import ParentRouteGuard from "./components/ParentRouteGuard";
 import CookieBanner from "./components/CookieBanner";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
