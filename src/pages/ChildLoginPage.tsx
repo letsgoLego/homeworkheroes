@@ -10,7 +10,10 @@ import { BookOpen, User, Lock, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function ChildLoginPage() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    return localStorage.getItem('lastChildUsername') ?? '';
+  });
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +29,8 @@ export default function ChildLoginPage() {
 
     try {
       // Child accounts use generated email: username@laxhjalpen.child
-      const email = `${username.toLowerCase().trim()}@laxhjalpen.child`;
+      const cleanUsername = username.toLowerCase().trim();
+      const email = `${cleanUsername}@laxhjalpen.child`;
       
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -40,6 +44,13 @@ export default function ChildLoginPage() {
           toast.error(error.message);
         }
         return;
+      }
+
+      // Remember username for fast re-login next time
+      try {
+        localStorage.setItem('lastChildUsername', cleanUsername);
+      } catch {
+        // ignore storage errors (private mode, etc.)
       }
 
       toast.success('Välkommen! 👋');
