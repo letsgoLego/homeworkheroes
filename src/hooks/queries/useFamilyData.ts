@@ -19,8 +19,12 @@ async function fetchFamilyData(userId: string): Promise<FamilyDataResult> {
     .select('family_id, child_id, role')
     .eq('user_id', userId);
 
-  if (rolesError) throw rolesError;
+  if (rolesError) {
+    console.error('[useFamilyData] Failed to fetch user_roles:', rolesError);
+    throw rolesError;
+  }
   if (!roles || roles.length === 0) {
+    console.warn('[useFamilyData] No roles found for user', userId);
     return { role: null, family: null, children: [], childId: null, familyId: null };
   }
 

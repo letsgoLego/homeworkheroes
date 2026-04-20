@@ -65,9 +65,9 @@ export default function TodayPage() {
     );
   }
   
-  // Redirect to onboarding only if user has no role (not yet part of any family)
-  // Users with a role (parent or child) should NOT be redirected, even if children list is empty
-  if (!userRole && children.length === 0) {
+  // Redirect to onboarding only for users with no role at all (not yet part of any family).
+  // Child accounts must NEVER be redirected to onboarding — they cannot create families.
+  if (!userRole) {
     navigate('/onboarding');
     return null;
   }
