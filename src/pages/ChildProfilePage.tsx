@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Smartphone, Download, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StreakStats } from '@/components/StreakStats';
+import { NotificationSettings } from '@/components/NotificationSettings';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
@@ -87,6 +88,9 @@ export default function ChildProfilePage() {
         {activeChildId && (
           <StreakStats homework={homework} childId={activeChildId} />
         )}
+        
+        {/* Notification Settings */}
+        <NotificationSettings />
         
         {/* Install App */}
         <motion.div
