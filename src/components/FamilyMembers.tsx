@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Shield, ShieldOff, UserX, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, ShieldOff, UserX, Users, ChevronDown, ChevronUp, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Select,
@@ -12,6 +12,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Child = Tables<'children'>;
