@@ -67,11 +67,16 @@ export default function TodayPage() {
     );
   }
   
-  // Redirect to onboarding only for users with no role at all (not yet part of any family).
-  // Child accounts must NEVER be redirected to onboarding — they cannot create families.
-  if (!userRole) {
-    navigate('/onboarding');
-    return null;
+  // Only redirect to onboarding for brand-new accounts (created < 5 min ago)
+  // that have no family yet. Existing users without a role should NOT be forced
+  // back into onboarding — they may have been removed or have a data issue.
+  if (!userRole && user?.created_at) {
+    const accountAge = Date.now() - new Date(user.created_at).getTime();
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    if (accountAge < FIVE_MINUTES) {
+      navigate('/onboarding');
+      return null;
+    }
   }
   
   const tomorrow = addDays(today, 1);
