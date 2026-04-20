@@ -181,6 +181,17 @@ export default function AuthPage() {
                 </>
               )}
             </Button>
+
+            {isLogin && (
+              <div className="text-center">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Glömt lösenord?
+                </Link>
+              </div>
+            )}
           </form>
 
           {/* Alternative actions */}

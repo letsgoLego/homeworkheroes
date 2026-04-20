@@ -27,6 +27,8 @@ import TonaringarLaxorPage from "./pages/seo/TonaringarLaxorPage";
 import LaxhjalpHemmaPage from "./pages/seo/LaxhjalpHemmaPage";
 import TipsIndexPage from "./pages/seo/TipsIndexPage";
 import AboutPage from "./pages/AboutPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ParentRouteGuard from "./components/ParentRouteGuard";
 import CookieBanner from "./components/CookieBanner";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
@@ -78,6 +80,8 @@ function AppRoutes() {
     <Routes>
       <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
       <Route path="/child-login" element={<PublicRoute><ChildLoginPage /></PublicRoute>} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
