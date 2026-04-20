@@ -17,15 +17,16 @@ async function fetchFamilyData(userId: string): Promise<FamilyDataResult> {
   const { data: roles, error: rolesError } = await supabase
     .from('user_roles')
     .select('family_id, child_id, role')
-    .eq('user_id', userId)
-    .limit(1);
+    .eq('user_id', userId);
 
   if (rolesError) throw rolesError;
   if (!roles || roles.length === 0) {
     return { role: null, family: null, children: [], childId: null, familyId: null };
   }
 
-  const userRoleData = roles[0];
+  // Prioritize child role if user has both (handles edge case of legacy/duplicate roles)
+  const childRole = roles.find(r => r.role === 'child' && r.child_id);
+  const userRoleData = childRole || roles[0];
   const role = userRoleData.role as 'parent' | 'child';
   let familyId: string | null = userRoleData.family_id;
 

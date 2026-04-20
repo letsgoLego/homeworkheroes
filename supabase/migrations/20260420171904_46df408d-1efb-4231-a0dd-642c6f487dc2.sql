@@ -1,0 +1,2 @@
+DELETE FROM public.user_roles WHERE user_id='0c6777da-78ad-4af7-9fdd-5ff53252eb6a' AND role='parent' AND child_id IS NULL;
+DELETE FROM public.families WHERE id='968e69a9-f640-410f-8723-960aaa943171' AND NOT EXISTS (SELECT 1 FROM public.user_roles WHERE family_id='968e69a9-f640-410f-8723-960aaa943171');
