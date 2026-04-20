@@ -23,8 +23,10 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>('welcome');
   const [loading, setLoading] = useState(false);
   
+  const [familyMode, setFamilyMode] = useState<'create' | 'join'>('create');
   const [familyName, setFamilyName] = useState('');
   const [familyId, setFamilyId] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState('');
   
   const [childName, setChildName] = useState('');
   const [childColor, setChildColor] = useState(colors[0]);
@@ -60,6 +62,55 @@ export default function OnboardingPage() {
       setLoading(false);
     }
   };
+
+  const handleJoinFamily = async () => {
+    const cleanCode = inviteCode.toLowerCase().trim();
+    if (!/^[a-f0-9]{8}$/.test(cleanCode)) {
+      toast.error('Ogiltig kod. 8 tecken (a-f, 0-9).');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Logga in först');
+        navigate('/auth');
+        return;
+      }
+
+      const { data: families, error: lookupError } = await supabase
+        .rpc('lookup_family_by_invite_code', { code: cleanCode });
+      if (lookupError) throw lookupError;
+      const family = families && families.length > 0 ? families[0] : null;
+      if (!family) {
+        toast.error('Ingen familj hittades med den koden');
+        return;
+      }
+
+      const { data: existing } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('family_id', family.id)
+        .maybeSingle();
+
+      if (!existing) {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: user.id, role: 'parent', family_id: family.id });
+        if (roleError) throw roleError;
+      }
+
+      toast.success(`Välkommen till ${family.name}! 🎉`);
+      navigate('/');
+    } catch (err: any) {
+      console.error('Error joining family:', err);
+      toast.error(err.message || 'Kunde inte gå med i familjen');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   
   const handleAddChild = async () => {
     if (!childName.trim()) {
