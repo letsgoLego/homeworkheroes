@@ -110,17 +110,22 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('user_roles')
       .delete()
       .eq('user_id', memberId)
-      .eq('family_id', familyId);
+      .eq('family_id', familyId)
+      .select();
 
     if (error) {
-      toast.error('Kunde inte ta bort medlem');
+      toast.error('Kunde inte ta bort medlem: ' + error.message);
       return;
     }
-    toast.success('Medlem borttagen från familjen');
+    if (!data || data.length === 0) {
+      toast.error('Inget togs bort. Du kan inte ta bort dig själv eller saknar behörighet.');
+      return;
+    }
+    toast.success(`Medlem borttagen (${data.length} roll${data.length > 1 ? 'er' : ''})`);
     fetchMembers();
   };
 
