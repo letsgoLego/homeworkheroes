@@ -23,6 +23,7 @@ import { ActivityCard } from '@/components/ActivityCard';
 import { IntroTour } from '@/components/IntroTour';
 
 export default function TodayPage() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [showAddChild, setShowAddChild] = useState(false);
   const {
