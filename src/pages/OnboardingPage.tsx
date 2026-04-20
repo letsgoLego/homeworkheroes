@@ -23,8 +23,10 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>('welcome');
   const [loading, setLoading] = useState(false);
   
+  const [familyMode, setFamilyMode] = useState<'create' | 'join'>('create');
   const [familyName, setFamilyName] = useState('');
   const [familyId, setFamilyId] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState('');
   
   const [childName, setChildName] = useState('');
   const [childColor, setChildColor] = useState(colors[0]);
@@ -60,6 +62,55 @@ export default function OnboardingPage() {
       setLoading(false);
     }
   };
+
+  const handleJoinFamily = async () => {
+    const cleanCode = inviteCode.toLowerCase().trim();
+    if (!/^[a-f0-9]{8}$/.test(cleanCode)) {
+      toast.error('Ogiltig kod. 8 tecken (a-f, 0-9).');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Logga in först');
+        navigate('/auth');
+        return;
+      }
+
+      const { data: families, error: lookupError } = await supabase
+        .rpc('lookup_family_by_invite_code', { code: cleanCode });
+      if (lookupError) throw lookupError;
+      const family = families && families.length > 0 ? families[0] : null;
+      if (!family) {
+        toast.error('Ingen familj hittades med den koden');
+        return;
+      }
+
+      const { data: existing } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('family_id', family.id)
+        .maybeSingle();
+
+      if (!existing) {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: user.id, role: 'parent', family_id: family.id });
+        if (roleError) throw roleError;
+      }
+
+      toast.success(`Välkommen till ${family.name}! 🎉`);
+      navigate('/');
+    } catch (err: any) {
+      console.error('Error joining family:', err);
+      toast.error(err.message || 'Kunde inte gå med i familjen');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   
   const handleAddChild = async () => {
     if (!childName.trim()) {
@@ -179,32 +230,78 @@ export default function OnboardingPage() {
 
           {step === 'family' && (
             <>
-              <div className="text-center mb-8">
+              <div className="text-center mb-6">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Users className="w-8 h-8 text-primary" />
                 </div>
-                <h1 className="text-2xl font-bold mb-2">Skapa din familj</h1>
+                <h1 className="text-2xl font-bold mb-2">
+                  {familyMode === 'create' ? 'Skapa din familj' : 'Gå med i familj'}
+                </h1>
                 <p className="text-muted-foreground">
-                  Ge din familj ett roligt namn!
+                  {familyMode === 'create'
+                    ? 'Ge din familj ett roligt namn!'
+                    : 'Ange inbjudningskoden du fått'}
                 </p>
               </div>
-              
-              <div className="space-y-4">
-                <Input
-                  value={familyName}
-                  onChange={(e) => setFamilyName(e.target.value)}
-                  placeholder="t.ex. Familjen Svensson"
-                  className="text-center text-lg h-14"
-                />
-                <Button
-                  onClick={handleCreateFamily}
-                  disabled={loading || !familyName.trim()}
-                  className="w-full h-12 text-lg shadow-glow-primary"
+
+              {/* Mode toggle */}
+              <div className="flex rounded-xl bg-muted p-1 mb-4">
+                <button
+                  onClick={() => setFamilyMode('create')}
+                  className={cn(
+                    'flex-1 py-2 px-4 rounded-lg font-medium transition-all text-sm',
+                    familyMode === 'create' ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
+                  )}
                 >
-                  Fortsätt
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
+                  Skapa ny
+                </button>
+                <button
+                  onClick={() => setFamilyMode('join')}
+                  className={cn(
+                    'flex-1 py-2 px-4 rounded-lg font-medium transition-all text-sm',
+                    familyMode === 'join' ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
+                  )}
+                >
+                  Gå med
+                </button>
               </div>
+
+              {familyMode === 'create' ? (
+                <div className="space-y-4">
+                  <Input
+                    value={familyName}
+                    onChange={(e) => setFamilyName(e.target.value)}
+                    placeholder="t.ex. Familjen Svensson"
+                    className="text-center text-lg h-14"
+                  />
+                  <Button
+                    onClick={handleCreateFamily}
+                    disabled={loading || !familyName.trim()}
+                    className="w-full h-12 text-lg shadow-glow-primary"
+                  >
+                    Fortsätt
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Input
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toLowerCase())}
+                    placeholder="xxxxxxxx"
+                    maxLength={8}
+                    className="text-center text-2xl font-mono tracking-widest h-14"
+                  />
+                  <Button
+                    onClick={handleJoinFamily}
+                    disabled={loading || inviteCode.trim().length !== 8}
+                    className="w-full h-12 text-lg shadow-glow-primary"
+                  >
+                    Gå med i familjen
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+              )}
             </>
           )}
 
