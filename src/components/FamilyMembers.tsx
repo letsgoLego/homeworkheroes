@@ -45,6 +45,32 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
+  const [resetTarget, setResetTarget] = useState<FamilyMember | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
+
+  const handleResetPassword = async () => {
+    if (!resetTarget || newPassword.length < 6) {
+      toast.error('Lösenord måste vara minst 6 tecken');
+      return;
+    }
+    setResetting(true);
+    const body: Record<string, string> = { password: newPassword };
+    if (resetTarget.role === 'child' && resetTarget.child_id) {
+      body.childId = resetTarget.child_id;
+    } else {
+      body.targetUserId = resetTarget.user_id;
+    }
+    const { data, error } = await supabase.functions.invoke('reset-child-password', { body });
+    setResetting(false);
+    if (error || (data as any)?.error) {
+      toast.error('Kunde inte återställa lösenord: ' + (error?.message || (data as any)?.error));
+      return;
+    }
+    toast.success(`Lösenord återställt för ${resetTarget.email}`);
+    setResetTarget(null);
+    setNewPassword('');
+  };
 
   const fetchMembers = async () => {
     const { data, error } = await supabase.rpc('get_family_members', {
