@@ -230,32 +230,78 @@ export default function OnboardingPage() {
 
           {step === 'family' && (
             <>
-              <div className="text-center mb-8">
+              <div className="text-center mb-6">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Users className="w-8 h-8 text-primary" />
                 </div>
-                <h1 className="text-2xl font-bold mb-2">Skapa din familj</h1>
+                <h1 className="text-2xl font-bold mb-2">
+                  {familyMode === 'create' ? 'Skapa din familj' : 'Gå med i familj'}
+                </h1>
                 <p className="text-muted-foreground">
-                  Ge din familj ett roligt namn!
+                  {familyMode === 'create'
+                    ? 'Ge din familj ett roligt namn!'
+                    : 'Ange inbjudningskoden du fått'}
                 </p>
               </div>
-              
-              <div className="space-y-4">
-                <Input
-                  value={familyName}
-                  onChange={(e) => setFamilyName(e.target.value)}
-                  placeholder="t.ex. Familjen Svensson"
-                  className="text-center text-lg h-14"
-                />
-                <Button
-                  onClick={handleCreateFamily}
-                  disabled={loading || !familyName.trim()}
-                  className="w-full h-12 text-lg shadow-glow-primary"
+
+              {/* Mode toggle */}
+              <div className="flex rounded-xl bg-muted p-1 mb-4">
+                <button
+                  onClick={() => setFamilyMode('create')}
+                  className={cn(
+                    'flex-1 py-2 px-4 rounded-lg font-medium transition-all text-sm',
+                    familyMode === 'create' ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
+                  )}
                 >
-                  Fortsätt
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
+                  Skapa ny
+                </button>
+                <button
+                  onClick={() => setFamilyMode('join')}
+                  className={cn(
+                    'flex-1 py-2 px-4 rounded-lg font-medium transition-all text-sm',
+                    familyMode === 'join' ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
+                  )}
+                >
+                  Gå med
+                </button>
               </div>
+
+              {familyMode === 'create' ? (
+                <div className="space-y-4">
+                  <Input
+                    value={familyName}
+                    onChange={(e) => setFamilyName(e.target.value)}
+                    placeholder="t.ex. Familjen Svensson"
+                    className="text-center text-lg h-14"
+                  />
+                  <Button
+                    onClick={handleCreateFamily}
+                    disabled={loading || !familyName.trim()}
+                    className="w-full h-12 text-lg shadow-glow-primary"
+                  >
+                    Fortsätt
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Input
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toLowerCase())}
+                    placeholder="xxxxxxxx"
+                    maxLength={8}
+                    className="text-center text-2xl font-mono tracking-widest h-14"
+                  />
+                  <Button
+                    onClick={handleJoinFamily}
+                    disabled={loading || inviteCode.trim().length !== 8}
+                    className="w-full h-12 text-lg shadow-glow-primary"
+                  >
+                    Gå med i familjen
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+              )}
             </>
           )}
 
