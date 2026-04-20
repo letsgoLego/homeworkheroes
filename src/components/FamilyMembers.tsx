@@ -311,6 +311,16 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => { setResetTarget(member); setNewPassword(''); }}
+                    >
+                      <KeyRound className="w-3 h-3 mr-1" />
+                      Nytt lösenord
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-8 text-xs text-destructive hover:text-destructive"
                       onClick={() => handleRemoveMember(member.user_id)}
                     >
@@ -324,6 +334,34 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
           })}
         </div>
       )}
+
+      <Dialog open={!!resetTarget} onOpenChange={(o) => !o && setResetTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Återställ lösenord</DialogTitle>
+            <DialogDescription>
+              Sätt ett nytt lösenord för {resetTarget?.email}. Minst 6 tecken.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="new-pwd">Nytt lösenord</Label>
+            <Input
+              id="new-pwd"
+              type="text"
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Minst 6 tecken"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setResetTarget(null)}>Avbryt</Button>
+            <Button onClick={handleResetPassword} disabled={resetting || newPassword.length < 6}>
+              {resetting ? 'Sparar...' : 'Spara lösenord'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
