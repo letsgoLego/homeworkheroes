@@ -8,7 +8,10 @@ const corsHeaders = {
 
 const BodySchema = z.object({
   password: z.string().min(6),
-  childId: z.string().uuid(),
+  childId: z.string().uuid().optional(),
+  targetUserId: z.string().uuid().optional(),
+}).refine((d) => d.childId || d.targetUserId, {
+  message: "childId or targetUserId required",
 });
 
 Deno.serve(async (req) => {
@@ -27,13 +30,13 @@ Deno.serve(async (req) => {
 
     const parsed = BodySchema.safeParse(await req.json());
     if (!parsed.success) {
-      return new Response(JSON.stringify({ error: parsed.error.flatten().fieldErrors }), {
+      return new Response(JSON.stringify({ error: parsed.error.flatten() }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { password, childId } = parsed.data;
+    const { password, childId, targetUserId } = parsed.data;
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -55,22 +58,81 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Get child info
-    const { data: childData, error: childError } = await adminClient
-      .from("children")
-      .select("id, family_id, name, username, has_account")
-      .eq("id", childId)
-      .single();
+    let resolvedUserId: string | undefined;
+    let displayName = "";
+    let familyId: string | undefined;
 
-    if (childError || !childData) {
-      return new Response(JSON.stringify({ error: "Child not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (childId) {
+      // Reset child password
+      const { data: childData, error: childError } = await adminClient
+        .from("children")
+        .select("id, family_id, name, username, has_account")
+        .eq("id", childId)
+        .single();
+
+      if (childError || !childData) {
+        return new Response(JSON.stringify({ error: "Child not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!childData.has_account || !childData.username) {
+        return new Response(JSON.stringify({ error: "Child has no account" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      familyId = childData.family_id;
+      displayName = childData.name;
+
+      const { data: childRole } = await adminClient
+        .from("user_roles")
+        .select("user_id")
+        .eq("child_id", childId)
+        .eq("role", "child")
+        .maybeSingle();
+
+      resolvedUserId = childRole?.user_id;
+
+      if (!resolvedUserId) {
+        const email = `${childData.username}@laxhjalpen.child`;
+        const { data: existingUsers, error: listError } = await adminClient.auth.admin.listUsers();
+        if (listError) throw listError;
+        const existingUser = existingUsers.users.find((u) => u.email?.toLowerCase() === email);
+        if (!existingUser) {
+          return new Response(JSON.stringify({ error: "Child auth user not found" }), {
+            status: 404,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        resolvedUserId = existingUser.id;
+      }
+    } else if (targetUserId) {
+      // Reset family member password — find their family via user_roles
+      const { data: targetRole, error: targetErr } = await adminClient
+        .from("user_roles")
+        .select("user_id, family_id")
+        .eq("user_id", targetUserId)
+        .maybeSingle();
+
+      if (targetErr || !targetRole || !targetRole.family_id) {
+        return new Response(JSON.stringify({ error: "Target user not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      familyId = targetRole.family_id;
+      resolvedUserId = targetUserId;
+
+      const { data: targetAuth } = await adminClient.auth.admin.getUserById(targetUserId);
+      displayName = targetAuth.user?.email ?? "medlem";
     }
 
-    if (!childData.has_account || !childData.username) {
-      return new Response(JSON.stringify({ error: "Child has no account" }), {
+    if (!familyId || !resolvedUserId) {
+      return new Response(JSON.stringify({ error: "Could not resolve target" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -81,53 +143,36 @@ Deno.serve(async (req) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
-      .eq("family_id", childData.family_id)
+      .eq("family_id", familyId)
       .eq("role", "parent")
-      .single();
+      .maybeSingle();
 
     if (!callerRole) {
-      return new Response(JSON.stringify({ error: "Only parents can reset child passwords" }), {
+      return new Response(JSON.stringify({ error: "Only parents can reset passwords" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Find child auth user via the user_roles mapping
-    const { data: childRole } = await adminClient
-      .from("user_roles")
-      .select("user_id")
-      .eq("child_id", childId)
-      .eq("role", "child")
-      .maybeSingle();
-
-    let childUserId = childRole?.user_id;
-
-    // Fallback: lookup by email if no role mapping
-    if (!childUserId) {
-      const email = `${childData.username}@laxhjalpen.child`;
-      const { data: existingUsers, error: listError } = await adminClient.auth.admin.listUsers();
-      if (listError) throw listError;
-      const existingUser = existingUsers.users.find((u) => u.email?.toLowerCase() === email);
-      if (!existingUser) {
-        return new Response(JSON.stringify({ error: "Child auth user not found" }), {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      childUserId = existingUser.id;
+    // Prevent resetting your own password via this endpoint
+    if (resolvedUserId === user.id) {
+      return new Response(JSON.stringify({ error: "Use account settings to change your own password" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const { error: updateError } = await adminClient.auth.admin.updateUserById(childUserId, {
+    const { error: updateError } = await adminClient.auth.admin.updateUserById(resolvedUserId, {
       password,
     });
 
     if (updateError) throw updateError;
 
-    return new Response(JSON.stringify({ success: true, childName: childData.name }), {
+    return new Response(JSON.stringify({ success: true, name: displayName, childName: displayName }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("Error resetting child password:", err);
+    console.error("Error resetting password:", err);
     return new Response(
       JSON.stringify({ error: err instanceof Error ? err.message : "Internal error" }),
       {

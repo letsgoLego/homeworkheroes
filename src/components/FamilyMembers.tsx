@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Shield, ShieldOff, UserX, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Shield, ShieldOff, UserX, Users, ChevronDown, ChevronUp, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Select,
@@ -12,6 +12,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Child = Tables<'children'>;
@@ -35,6 +45,32 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
+  const [resetTarget, setResetTarget] = useState<FamilyMember | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
+
+  const handleResetPassword = async () => {
+    if (!resetTarget || newPassword.length < 6) {
+      toast.error('Lösenord måste vara minst 6 tecken');
+      return;
+    }
+    setResetting(true);
+    const body: Record<string, string> = { password: newPassword };
+    if (resetTarget.role === 'child' && resetTarget.child_id) {
+      body.childId = resetTarget.child_id;
+    } else {
+      body.targetUserId = resetTarget.user_id;
+    }
+    const { data, error } = await supabase.functions.invoke('reset-child-password', { body });
+    setResetting(false);
+    if (error || (data as any)?.error) {
+      toast.error('Kunde inte återställa lösenord: ' + (error?.message || (data as any)?.error));
+      return;
+    }
+    toast.success(`Lösenord återställt för ${resetTarget.email}`);
+    setResetTarget(null);
+    setNewPassword('');
+  };
 
   const fetchMembers = async () => {
     const { data, error } = await supabase.rpc('get_family_members', {
@@ -275,6 +311,16 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
                     <Button
                       variant="ghost"
                       size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => { setResetTarget(member); setNewPassword(''); }}
+                    >
+                      <KeyRound className="w-3 h-3 mr-1" />
+                      Nytt lösenord
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="h-8 text-xs text-destructive hover:text-destructive"
                       onClick={() => handleRemoveMember(member.user_id)}
                     >
@@ -288,6 +334,34 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
           })}
         </div>
       )}
+
+      <Dialog open={!!resetTarget} onOpenChange={(o) => !o && setResetTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Återställ lösenord</DialogTitle>
+            <DialogDescription>
+              Sätt ett nytt lösenord för {resetTarget?.email}. Minst 6 tecken.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="new-pwd">Nytt lösenord</Label>
+            <Input
+              id="new-pwd"
+              type="text"
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Minst 6 tecken"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setResetTarget(null)}>Avbryt</Button>
+            <Button onClick={handleResetPassword} disabled={resetting || newPassword.length < 6}>
+              {resetting ? 'Sparar...' : 'Spara lösenord'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
