@@ -39,7 +39,7 @@ export function useFamily() {
   }, []);
 
   // React Query: family data
-  const { data: familyData, isLoading: familyLoading } = useFamilyData(user?.id);
+  const { data: familyData, isLoading: familyLoading, error: familyError } = useFamilyData(user?.id);
 
   const family = familyData?.family ?? null;
   const children = familyData?.children ?? [];
@@ -557,6 +557,7 @@ export function useFamily() {
     setActiveChildId,
     loading,
     userRole,
+    familyError,
     getActiveHomeworkCount,
     addChild,
     addHomework,
