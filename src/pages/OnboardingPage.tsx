@@ -23,7 +23,7 @@ const JOIN_STEPS: Step[] = ['welcome', 'choice', 'join'];
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { userRole, loading: familyLoading } = useFamily();
+  const { userRole, loading: familyLoading, familyError } = useFamily();
 
   const [step, setStep] = useState<Step>('welcome');
   const [path, setPath] = useState<'create' | 'join' | null>(null);
@@ -37,6 +37,16 @@ export default function OnboardingPage() {
   const [childColor, setChildColor] = useState(colors[0]);
   const [addedChildren, setAddedChildren] = useState<{ name: string; color: string }[]>([]);
 
+  // Safety timeout: if family-data takes too long (e.g. transient network issue
+  // or a failing query), we still want to let the user proceed with onboarding
+  // rather than be stuck on a spinner.
+  const [bypassLoading, setBypassLoading] = useState(false);
+  useEffect(() => {
+    if (!familyLoading) return;
+    const t = setTimeout(() => setBypassLoading(true), 4000);
+    return () => clearTimeout(t);
+  }, [familyLoading]);
+
   // Guard: users with an existing role should never see onboarding.
   useEffect(() => {
     if (!familyLoading && userRole) {
@@ -44,13 +54,24 @@ export default function OnboardingPage() {
     }
   }, [familyLoading, userRole, navigate]);
 
-  if (familyLoading || userRole) {
+  // If the family lookup errored, log it but don't block onboarding —
+  // the user clearly has no usable role yet, so onboarding is the right place.
+  useEffect(() => {
+    if (familyError) {
+      console.error('[Onboarding] family lookup failed, continuing anyway:', familyError);
+    }
+  }, [familyError]);
+
+  const stillLoading = familyLoading && !familyError && !bypassLoading;
+
+  if (stillLoading || userRole) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
+
 
   const activeSteps = path === 'join' ? JOIN_STEPS : CREATE_STEPS;
   const currentStepIndex = Math.max(0, activeSteps.indexOf(step));
