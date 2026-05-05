@@ -27,6 +27,7 @@ export default function TodayPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showAddChild, setShowAddChild] = useState(false);
+  const [refetchAttempted, setRefetchAttempted] = useState(false);
   const {
     homework,
     children,
@@ -51,6 +52,7 @@ export default function TodayPage() {
     toggleHomeworkComplete,
     getActivitiesForDate,
     deleteActivity,
+    refetch,
   } = useFamily();
   
   const today = new Date();
@@ -67,14 +69,24 @@ export default function TodayPage() {
     );
   }
   
-  // Only redirect to onboarding for brand-new accounts (created < 5 min ago)
-  // that have no family yet. Existing users without a role should NOT be forced
-  // back into onboarding — they may have been removed or have a data issue.
+  // Redirect to onboarding only for brand-new accounts (created < 10 min ago)
+  // that have no family yet. To avoid race conditions where a parent has just
+  // joined a family but the cached query hasn't refreshed, we first try a
+  // refetch and only redirect if the role is still missing.
   if (!userRole && user?.created_at) {
     const accountAge = Date.now() - new Date(user.created_at).getTime();
-    const FIVE_MINUTES = 5 * 60 * 1000;
-    if (accountAge < FIVE_MINUTES) {
-      navigate('/onboarding');
+    const TEN_MINUTES = 10 * 60 * 1000;
+    if (accountAge < TEN_MINUTES) {
+      if (!refetchAttempted) {
+        setRefetchAttempted(true);
+        refetch();
+        return (
+          <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          </div>
+        );
+      }
+      navigate('/onboarding', { replace: true });
       return null;
     }
   }
