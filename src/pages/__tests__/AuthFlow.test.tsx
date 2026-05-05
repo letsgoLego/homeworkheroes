@@ -1,0 +1,119 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
+
+const navigateMock = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom")>(
+    "react-router-dom"
+  );
+  return { ...actual, useNavigate: () => navigateMock };
+});
+
+const signInMock = vi.fn();
+const signUpMock = vi.fn();
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: {
+    auth: {
+      signInWithPassword: (...a: unknown[]) => signInMock(...a),
+      signUp: (...a: unknown[]) => signUpMock(...a),
+    },
+  },
+}));
+
+vi.mock("@/integrations/lovable/index", () => ({
+  lovable: { auth: { signInWithOAuth: vi.fn() } },
+}));
+
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
+}));
+
+import AuthPage from "@/pages/AuthPage";
+import ChildLoginPage from "@/pages/ChildLoginPage";
+
+const renderAuth = () =>
+  render(
+    <MemoryRouter>
+      <AuthPage />
+    </MemoryRouter>
+  );
+
+const renderChild = () =>
+  render(
+    <MemoryRouter>
+      <ChildLoginPage />
+    </MemoryRouter>
+  );
+
+beforeEach(() => {
+  navigateMock.mockReset();
+  signInMock.mockReset();
+  signUpMock.mockReset();
+  localStorage.clear();
+});
+
+describe("AuthPage", () => {
+  const submitButton = () =>
+    document.querySelector('button[type="submit"]') as HTMLButtonElement;
+
+  it("signs in existing user and navigates to /", async () => {
+    const user = userEvent.setup();
+    signInMock.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    renderAuth();
+    await user.type(screen.getByPlaceholderText(/du@exempel/i), "p@x.se");
+    await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
+    await user.click(submitButton());
+    await waitFor(() => {
+      expect(signInMock).toHaveBeenCalledWith({
+        email: "p@x.se",
+        password: "secret123",
+      });
+      expect(navigateMock).toHaveBeenCalledWith("/");
+    });
+  });
+
+  it("creates a new account and navigates to /onboarding", async () => {
+    const user = userEvent.setup();
+    signUpMock.mockResolvedValue({ data: { user: { id: "u2" } }, error: null });
+    renderAuth();
+    // switch to signup via the toggle tab
+    await user.click(screen.getByRole("button", { name: /^Skapa konto$/i }));
+    await user.type(screen.getByPlaceholderText(/du@exempel/i), "n@x.se");
+    await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
+    await user.click(submitButton());
+    await waitFor(() => {
+      expect(signUpMock).toHaveBeenCalled();
+      expect(navigateMock).toHaveBeenCalledWith("/onboarding");
+    });
+  });
+
+  it("rejects too-short password", async () => {
+    const user = userEvent.setup();
+    renderAuth();
+    await user.type(screen.getByPlaceholderText(/du@exempel/i), "a@b.se");
+    await user.type(screen.getByPlaceholderText(/••••••••/i), "123");
+    await user.click(submitButton());
+    expect(signInMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("ChildLoginPage", () => {
+  it("logs in child using username@laxhjalpen.child and navigates to /", async () => {
+    const user = userEvent.setup();
+    signInMock.mockResolvedValue({ data: { user: { id: "c1" } }, error: null });
+    renderChild();
+    await user.type(screen.getByPlaceholderText(/ditt_användarnamn/i), "tuva");
+    await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
+    await user.click(screen.getByRole("button", { name: /^Logga in$/i }));
+    await waitFor(() => {
+      expect(signInMock).toHaveBeenCalledWith({
+        email: "tuva@laxhjalpen.child",
+        password: "secret123",
+      });
+      expect(navigateMock).toHaveBeenCalledWith("/");
+      expect(localStorage.getItem("lastChildUsername")).toBe("tuva");
+    });
+  });
+});
