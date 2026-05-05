@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Users, Plus, ArrowRight, BookOpen, Bell, CheckCircle2 } from 'lucide-react';
+import { Users, Plus, ArrowRight, ArrowLeft, BookOpen, Bell, CheckCircle2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFamily } from '@/hooks/useFamily';
 
@@ -15,15 +15,27 @@ const colors = [
   '#e6c229', '#27ae60', '#e74c3c', '#f39c12',
 ];
 
-type Step = 'welcome' | 'family' | 'children';
+type Step = 'welcome' | 'choice' | 'create' | 'join' | 'children';
 
-const STEPS: Step[] = ['welcome', 'family', 'children'];
+// Step sequences depend on the chosen path.
+const CREATE_STEPS: Step[] = ['welcome', 'choice', 'create', 'children'];
+const JOIN_STEPS: Step[] = ['welcome', 'choice', 'join'];
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const { userRole, loading: familyLoading } = useFamily();
+
   const [step, setStep] = useState<Step>('welcome');
+  const [path, setPath] = useState<'create' | 'join' | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const [familyName, setFamilyName] = useState('');
+  const [familyId, setFamilyId] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState('');
+
+  const [childName, setChildName] = useState('');
+  const [childColor, setChildColor] = useState(colors[0]);
+  const [addedChildren, setAddedChildren] = useState<{ name: string; color: string }[]>([]);
 
   // Guard: users with an existing role should never see onboarding.
   useEffect(() => {
@@ -40,17 +52,14 @@ export default function OnboardingPage() {
     );
   }
 
-  const [familyMode, setFamilyMode] = useState<'create' | 'join'>('create');
-  const [familyName, setFamilyName] = useState('');
-  const [familyId, setFamilyId] = useState<string | null>(null);
-  const [inviteCode, setInviteCode] = useState('');
-  
-  const [childName, setChildName] = useState('');
-  const [childColor, setChildColor] = useState(colors[0]);
-  const [addedChildren, setAddedChildren] = useState<{ name: string; color: string }[]>([]);
-  
-  const currentStepIndex = STEPS.indexOf(step);
-  const progressValue = ((currentStepIndex + 1) / STEPS.length) * 100;
+  const activeSteps = path === 'join' ? JOIN_STEPS : CREATE_STEPS;
+  const currentStepIndex = Math.max(0, activeSteps.indexOf(step));
+  const progressValue = ((currentStepIndex + 1) / activeSteps.length) * 100;
+
+  const handleChoosePath = (choice: 'create' | 'join') => {
+    setPath(choice);
+    setStep(choice);
+  };
 
   const handleCreateFamily = async () => {
     if (!familyName.trim()) {
@@ -128,7 +137,6 @@ export default function OnboardingPage() {
     }
   };
 
-  
   const handleAddChild = async () => {
     if (!childName.trim()) {
       toast.error('Ange ett namn');
@@ -155,7 +163,7 @@ export default function OnboardingPage() {
       setLoading(false);
     }
   };
-  
+
   const handleFinish = () => {
     if (addedChildren.length === 0) {
       toast.error('Lägg till minst ett barn');
@@ -164,14 +172,14 @@ export default function OnboardingPage() {
     toast.success('Allt klart! Nu börjar vi hålla koll på läxorna! 📚');
     navigate('/');
   };
-  
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-12">
       {/* Progress bar */}
       <div className="w-full max-w-sm mb-8">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-muted-foreground font-medium">
-            Steg {currentStepIndex + 1} av {STEPS.length}
+            Steg {currentStepIndex + 1} av {activeSteps.length}
           </span>
         </div>
         <Progress value={progressValue} className="h-2" />
@@ -202,7 +210,7 @@ export default function OnboardingPage() {
                   Håll koll på läxorna tillsammans som familj
                 </p>
               </div>
-              
+
               <div className="space-y-4 mb-8">
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-card shadow-soft">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -213,7 +221,7 @@ export default function OnboardingPage() {
                     <p className="text-xs text-muted-foreground">Lägg till läxor, dela upp i uppgifter och bocka av dag för dag</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-card shadow-soft">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Bell className="w-5 h-5 text-primary" />
@@ -223,7 +231,7 @@ export default function OnboardingPage() {
                     <p className="text-xs text-muted-foreground">Glöm aldrig vad som ska med till skolan</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-card shadow-soft">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <CheckCircle2 className="w-5 h-5 text-primary" />
@@ -234,9 +242,9 @@ export default function OnboardingPage() {
                   </div>
                 </div>
               </div>
-              
+
               <Button
-                onClick={() => setStep('family')}
+                onClick={() => setStep('choice')}
                 className="w-full h-12 text-lg shadow-glow-primary"
               >
                 Kom igång
@@ -245,80 +253,145 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {step === 'family' && (
+          {step === 'choice' && (
             <>
               <div className="text-center mb-6">
                 <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Users className="w-8 h-8 text-primary" />
                 </div>
-                <h1 className="text-2xl font-bold mb-2">
-                  {familyMode === 'create' ? 'Skapa din familj' : 'Gå med i familj'}
-                </h1>
+                <h1 className="text-2xl font-bold mb-2">Hur vill du börja?</h1>
                 <p className="text-muted-foreground">
-                  {familyMode === 'create'
-                    ? 'Ge din familj ett roligt namn!'
-                    : 'Ange inbjudningskoden du fått'}
+                  Skapa en ny familj eller gå med i en befintlig
                 </p>
               </div>
 
-              {/* Mode toggle */}
-              <div className="flex rounded-xl bg-muted p-1 mb-4">
+              <div className="space-y-3">
                 <button
-                  onClick={() => setFamilyMode('create')}
-                  className={cn(
-                    'flex-1 py-2 px-4 rounded-lg font-medium transition-all text-sm',
-                    familyMode === 'create' ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
-                  )}
+                  onClick={() => handleChoosePath('create')}
+                  className="w-full p-4 rounded-2xl bg-card shadow-card text-left flex items-start gap-3 hover:shadow-glow-primary transition-all border-2 border-transparent hover:border-primary"
                 >
-                  Skapa ny
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold">Skapa ny familj</p>
+                    <p className="text-xs text-muted-foreground">
+                      Du blir förälder och lägger till barn
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground self-center" />
                 </button>
+
                 <button
-                  onClick={() => setFamilyMode('join')}
-                  className={cn(
-                    'flex-1 py-2 px-4 rounded-lg font-medium transition-all text-sm',
-                    familyMode === 'join' ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
-                  )}
+                  onClick={() => handleChoosePath('join')}
+                  className="w-full p-4 rounded-2xl bg-card shadow-card text-left flex items-start gap-3 hover:shadow-glow-primary transition-all border-2 border-transparent hover:border-primary"
                 >
-                  Gå med
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Users className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold">Gå med i befintlig familj</p>
+                    <p className="text-xs text-muted-foreground">
+                      Använd en inbjudningskod du har fått
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground self-center" />
                 </button>
               </div>
 
-              {familyMode === 'create' ? (
-                <div className="space-y-4">
-                  <Input
-                    value={familyName}
-                    onChange={(e) => setFamilyName(e.target.value)}
-                    placeholder="t.ex. Familjen Svensson"
-                    className="text-center text-lg h-14"
-                  />
-                  <Button
-                    onClick={handleCreateFamily}
-                    disabled={loading || !familyName.trim()}
-                    className="w-full h-12 text-lg shadow-glow-primary"
-                  >
-                    Fortsätt
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
+              <div className="mt-6 text-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => setStep('welcome')}
+                  className="text-muted-foreground"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Tillbaka
+                </Button>
+              </div>
+            </>
+          )}
+
+          {step === 'create' && (
+            <>
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-8 h-8 text-primary" />
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <Input
-                    value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value.toLowerCase())}
-                    placeholder="xxxxxxxx"
-                    maxLength={8}
-                    className="text-center text-2xl font-mono tracking-widest h-14"
-                  />
-                  <Button
-                    onClick={handleJoinFamily}
-                    disabled={loading || inviteCode.trim().length !== 8}
-                    className="w-full h-12 text-lg shadow-glow-primary"
-                  >
-                    Gå med i familjen
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
+                <h1 className="text-2xl font-bold mb-2">Skapa din familj</h1>
+                <p className="text-muted-foreground">Ge din familj ett roligt namn!</p>
+              </div>
+
+              <div className="space-y-4">
+                <Input
+                  value={familyName}
+                  onChange={(e) => setFamilyName(e.target.value)}
+                  placeholder="t.ex. Familjen Svensson"
+                  className="text-center text-lg h-14"
+                />
+                <Button
+                  onClick={handleCreateFamily}
+                  disabled={loading || !familyName.trim()}
+                  className="w-full h-12 text-lg shadow-glow-primary"
+                >
+                  Fortsätt
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+
+              <div className="mt-6 text-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => { setPath(null); setStep('choice'); }}
+                  className="text-muted-foreground"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Tillbaka
+                </Button>
+              </div>
+            </>
+          )}
+
+          {step === 'join' && (
+            <>
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-primary" />
                 </div>
-              )}
+                <h1 className="text-2xl font-bold mb-2">Gå med i familj</h1>
+                <p className="text-muted-foreground">Ange inbjudningskoden du fått</p>
+              </div>
+
+              <div className="space-y-4">
+                <Input
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toLowerCase())}
+                  placeholder="xxxxxxxx"
+                  maxLength={8}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  className="text-center text-2xl font-mono tracking-widest h-14"
+                />
+                <Button
+                  onClick={handleJoinFamily}
+                  disabled={loading || inviteCode.trim().length !== 8}
+                  className="w-full h-12 text-lg shadow-glow-primary"
+                >
+                  Gå med i familjen
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+
+              <div className="mt-6 text-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => { setPath(null); setStep('choice'); }}
+                  className="text-muted-foreground"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Tillbaka
+                </Button>
+              </div>
             </>
           )}
 
@@ -328,7 +401,7 @@ export default function OnboardingPage() {
                 <h1 className="text-2xl font-bold mb-2">Lägg till barn</h1>
                 <p className="text-muted-foreground">Vilka ska göra läxor?</p>
               </div>
-              
+
               {addedChildren.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6 justify-center">
                   {addedChildren.map((child, i) => (
@@ -342,7 +415,7 @@ export default function OnboardingPage() {
                   ))}
                 </div>
               )}
-              
+
               <div className="p-4 rounded-2xl bg-card shadow-card space-y-4 mb-4">
                 <Input
                   value={childName}
@@ -373,7 +446,7 @@ export default function OnboardingPage() {
                   Lägg till barn
                 </Button>
               </div>
-              
+
               <Button
                 onClick={handleFinish}
                 disabled={addedChildren.length === 0}
