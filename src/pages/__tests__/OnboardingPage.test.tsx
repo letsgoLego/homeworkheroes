@@ -127,7 +127,9 @@ describe("OnboardingPage step sequence", () => {
       await screen.findByText(/Hur vill du börja/i)
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /Skapa ny familj/i }));
+    await user.click(
+      await screen.findByRole("button", { name: /Skapa ny familj/i })
+    );
     expect(await screen.findByText(/Skapa din familj/i)).toBeInTheDocument();
 
     await user.type(
@@ -139,7 +141,10 @@ describe("OnboardingPage step sequence", () => {
     expect(rpcMock).toHaveBeenCalledWith("create_family_with_role", {
       _family_name: "Familjen Test",
     });
-    expect(await screen.findByText(/Lägg till barn/i)).toBeInTheDocument();
+    // Heading for the children step
+    expect(
+      await screen.findByRole("heading", { name: /Lägg till barn/i })
+    ).toBeInTheDocument();
   });
 
   it("join path: welcome → choice → join (skips children step)", async () => {
@@ -162,12 +167,16 @@ describe("OnboardingPage step sequence", () => {
 
     await user.click(screen.getByRole("button", { name: /Kom igång/i }));
     await user.click(
-      screen.getByRole("button", { name: /Gå med i befintlig familj/i })
+      await screen.findByRole("button", { name: /Gå med i befintlig familj/i })
     );
-    expect(await screen.findByText(/Gå med i familj/i)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /Gå med i familj/i })
+    ).toBeInTheDocument();
 
-    // Should NOT show "Lägg till barn" in the join branch
-    expect(screen.queryByText(/Lägg till barn/i)).not.toBeInTheDocument();
+    // Should NOT show the children heading in the join branch
+    expect(
+      screen.queryByRole("heading", { name: /Lägg till barn/i })
+    ).not.toBeInTheDocument();
 
     await user.type(screen.getByPlaceholderText(/xxxxxxxx/i), "abcdef12");
     await user.click(
@@ -186,7 +195,9 @@ describe("OnboardingPage step sequence", () => {
     const user = userEvent.setup();
     renderPage();
     await user.click(screen.getByRole("button", { name: /Kom igång/i }));
-    await user.click(screen.getByRole("button", { name: /Skapa ny familj/i }));
+    await user.click(
+      await screen.findByRole("button", { name: /Skapa ny familj/i })
+    );
     expect(await screen.findByText(/Skapa din familj/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /Tillbaka/i }));
     expect(await screen.findByText(/Hur vill du börja/i)).toBeInTheDocument();
