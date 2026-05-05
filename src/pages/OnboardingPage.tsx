@@ -21,9 +21,25 @@ const STEPS: Step[] = ['welcome', 'family', 'children'];
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { userRole, loading: familyLoading } = useFamily();
   const [step, setStep] = useState<Step>('welcome');
   const [loading, setLoading] = useState(false);
-  
+
+  // Guard: users with an existing role should never see onboarding.
+  useEffect(() => {
+    if (!familyLoading && userRole) {
+      navigate('/', { replace: true });
+    }
+  }, [familyLoading, userRole, navigate]);
+
+  if (familyLoading || userRole) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   const [familyMode, setFamilyMode] = useState<'create' | 'join'>('create');
   const [familyName, setFamilyName] = useState('');
   const [familyId, setFamilyId] = useState<string | null>(null);
