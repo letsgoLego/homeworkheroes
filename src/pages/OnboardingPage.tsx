@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Users, Plus, ArrowRight, BookOpen, Bell, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useFamily } from '@/hooks/useFamily';
 
 const colors = [
   '#2eb8a6', '#f97853', '#9b59b6', '#3498db',
