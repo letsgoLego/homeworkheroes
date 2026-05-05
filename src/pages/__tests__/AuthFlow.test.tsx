@@ -55,13 +55,16 @@ beforeEach(() => {
 });
 
 describe("AuthPage", () => {
+  const submitButton = () =>
+    document.querySelector('button[type="submit"]') as HTMLButtonElement;
+
   it("signs in existing user and navigates to /", async () => {
     const user = userEvent.setup();
     signInMock.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     renderAuth();
     await user.type(screen.getByPlaceholderText(/du@exempel/i), "p@x.se");
     await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
-    await user.click(screen.getByRole("button", { name: /^Logga in$/i }));
+    await user.click(submitButton());
     await waitFor(() => {
       expect(signInMock).toHaveBeenCalledWith({
         email: "p@x.se",
@@ -75,13 +78,11 @@ describe("AuthPage", () => {
     const user = userEvent.setup();
     signUpMock.mockResolvedValue({ data: { user: { id: "u2" } }, error: null });
     renderAuth();
-    // switch to signup
-    await user.click(screen.getByRole("button", { name: /Skapa konto/i }));
+    // switch to signup via the toggle tab
+    await user.click(screen.getByRole("button", { name: /^Skapa konto$/i }));
     await user.type(screen.getByPlaceholderText(/du@exempel/i), "n@x.se");
     await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
-    // Submit (the form button now reads "Skapa konto")
-    const buttons = screen.getAllByRole("button", { name: /Skapa konto/i });
-    await user.click(buttons[buttons.length - 1]);
+    await user.click(submitButton());
     await waitFor(() => {
       expect(signUpMock).toHaveBeenCalled();
       expect(navigateMock).toHaveBeenCalledWith("/onboarding");
@@ -93,7 +94,7 @@ describe("AuthPage", () => {
     renderAuth();
     await user.type(screen.getByPlaceholderText(/du@exempel/i), "a@b.se");
     await user.type(screen.getByPlaceholderText(/••••••••/i), "123");
-    await user.click(screen.getByRole("button", { name: /^Logga in$/i }));
+    await user.click(submitButton());
     expect(signInMock).not.toHaveBeenCalled();
   });
 });
