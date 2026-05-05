@@ -27,6 +27,7 @@ export default function TodayPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showAddChild, setShowAddChild] = useState(false);
+  const [refetchAttempted, setRefetchAttempted] = useState(false);
   const {
     homework,
     children,
