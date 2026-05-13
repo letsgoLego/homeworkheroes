@@ -8,6 +8,7 @@ import TodayPage from "./pages/TodayPage";
 import WeekPage from "./pages/WeekPage";
 import AddPage from "./pages/AddPage";
 import FamilyPage from "./pages/FamilyPage";
+import InsightsPage from "./pages/InsightsPage";
 import ChildProfilePage from "./pages/ChildProfilePage";
 import AuthPage from "./pages/AuthPage";
 import OnboardingPage from "./pages/OnboardingPage";
