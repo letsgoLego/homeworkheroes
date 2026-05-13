@@ -12,4 +12,9 @@
   <url><loc>https://homeworkheroes.lovable.app/tips/laxhjalp-hemma</loc><priority>0.8</priority></url>
   <url><loc>https://homeworkheroes.lovable.app/privacy</loc><priority>0.3</priority></url>
   <url><loc>https://homeworkheroes.lovable.app/terms</loc><priority>0.3</priority></url>
+  <url><loc>https://homeworkheroes.lovable.app/auth</loc><priority>0.4</priority></url>
+  <url><loc>https://homeworkheroes.lovable.app/child-login</loc><priority>0.3</priority></url>
+  <url><loc>https://homeworkheroes.lovable.app/forgot-password</loc><priority>0.2</priority></url>
+  <url><loc>https://homeworkheroes.lovable.app/reset-password</loc><priority>0.2</priority></url>
+  <url><loc>https://homeworkheroes.lovable.app/join-family-start</loc><priority>0.4</priority></url>
 </urlset>
