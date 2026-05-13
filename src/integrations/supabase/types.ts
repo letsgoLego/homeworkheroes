@@ -122,6 +122,7 @@ export type Database = {
           family_id: string
           has_account: boolean | null
           id: string
+          last_seen_at: string | null
           name: string
           username: string | null
         }
@@ -132,6 +133,7 @@ export type Database = {
           family_id: string
           has_account?: boolean | null
           id?: string
+          last_seen_at?: string | null
           name: string
           username?: string | null
         }
@@ -142,6 +144,7 @@ export type Database = {
           family_id?: string
           has_account?: boolean | null
           id?: string
+          last_seen_at?: string | null
           name?: string
           username?: string | null
         }
@@ -259,6 +262,47 @@ export type Database = {
           {
             foreignKeyName: "homework_child_id_fkey"
             columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nudges: {
+        Row: {
+          created_at: string
+          delivered: boolean
+          family_id: string
+          from_user_id: string
+          id: string
+          message: string
+          to_child_id: string
+          tone: string
+        }
+        Insert: {
+          created_at?: string
+          delivered?: boolean
+          family_id: string
+          from_user_id: string
+          id?: string
+          message: string
+          to_child_id: string
+          tone?: string
+        }
+        Update: {
+          created_at?: string
+          delivered?: boolean
+          family_id?: string
+          from_user_id?: string
+          id?: string
+          message?: string
+          to_child_id?: string
+          tone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nudges_to_child_id_fkey"
+            columns: ["to_child_id"]
             isOneToOne: false
             referencedRelation: "children"
             referencedColumns: ["id"]
@@ -464,6 +508,11 @@ export type Database = {
           id: string
           name: string
         }[]
+      }
+      nudges_remaining_today: { Args: { _child_id: string }; Returns: number }
+      update_child_last_seen: {
+        Args: { _child_id: string }
+        Returns: undefined
       }
       user_belongs_to_family: {
         Args: { _family_id: string; _user_id: string }
