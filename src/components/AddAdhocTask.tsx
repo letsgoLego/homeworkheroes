@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { celebrateTask } from '@/lib/confetti';
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ export function AddAdhocTask({ onAdd }: AddAdhocTaskProps) {
     setLoading(false);
 
     if (success) {
+      celebrateTask();
       setTitle('');
       setOpen(false);
     }
