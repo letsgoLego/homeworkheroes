@@ -1,10 +1,14 @@
 import confetti from 'canvas-confetti';
 
-export const haptic = (style: 'light' | 'medium' | 'heavy' = 'medium') => {
-  if ('vibrate' in navigator) {
-    const patterns = { light: [10], medium: [20], heavy: [30, 10, 30] };
-    navigator.vibrate(patterns[style]);
-  }
+export const haptic = (style: 'light' | 'medium' | 'heavy' | 'success' = 'medium') => {
+  if (typeof navigator === 'undefined' || !('vibrate' in navigator)) return;
+  const patterns: Record<string, number | number[]> = {
+    light: [25],
+    medium: [40],
+    heavy: [60, 40, 60, 40, 80],
+    success: [30, 60, 30],
+  };
+  navigator.vibrate(patterns[style]);
 };
 
 export const celebrateTask = () => {
