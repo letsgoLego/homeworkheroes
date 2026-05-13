@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,6 +24,8 @@ import { ActivityCard } from '@/components/ActivityCard';
 import { IntroTour } from '@/components/IntroTour';
 import { NudgeButton } from '@/components/NudgeButton';
 import { useChildHeartbeat } from '@/hooks/useChildPresence';
+import { PerfectDaySplash } from '@/components/PerfectDaySplash';
+import { computeCurrentStreak } from '@/lib/streak';
 
 export default function TodayPage() {
   const { user } = useAuth();
@@ -63,6 +65,45 @@ export default function TodayPage() {
 
   // Child account heartbeat: pings last_seen_at so parents see presence dot
   useChildHeartbeat(userRole === 'child' ? activeChildId : null, userRole === 'child');
+
+  // Perfect-day splash state — shown once per child per day
+  const [splashOpen, setSplashOpen] = useState(false);
+  const [splashStreak, setSplashStreak] = useState(0);
+  const prevAllDoneRef = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (!activeChildId) {
+      prevAllDoneRef.current = null;
+      return;
+    }
+    const todayStudy = homework
+      .filter(hw => hw.child_id === activeChildId)
+      .flatMap(hw => hw.tasks)
+      .filter(t => {
+        const isToday = t.task_date === todayStr && (!t.snoozed_until || t.snoozed_until <= todayStr);
+        const isSnoozedToToday = t.snoozed_until === todayStr;
+        const isOverdue = !t.completed && t.task_date < todayStr && (!t.snoozed_until || t.snoozed_until <= todayStr);
+        return isToday || isSnoozedToToday || isOverdue;
+      });
+    const todayAdhoc = adhocTasks.filter(t => t.child_id === activeChildId && t.task_date === todayStr);
+    const all = [...todayStudy, ...todayAdhoc];
+
+    if (all.length === 0) { prevAllDoneRef.current = null; return; }
+
+    const allDone = all.every(t => t.completed);
+    const prev = prevAllDoneRef.current;
+    prevAllDoneRef.current = allDone;
+
+    if (allDone && prev === false) {
+      const flagKey = `laxhjalpen_perfect_splash_${todayStr}_${activeChildId}`;
+      if (!localStorage.getItem(flagKey)) {
+        const streak = computeCurrentStreak(homework, adhocTasks, activeChildId);
+        setSplashStreak(streak);
+        setSplashOpen(true);
+        localStorage.setItem(flagKey, '1');
+      }
+    }
+  }, [homework, adhocTasks, activeChildId, todayStr]);
   
   // Don't redirect while still loading user role information
   // This prevents premature redirects for child accounts and invited parents
@@ -603,6 +644,12 @@ export default function TodayPage() {
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
       <IntroTour />
+      <PerfectDaySplash
+        open={splashOpen}
+        streak={splashStreak}
+        childName={activeChild?.name ?? ''}
+        onClose={() => setSplashOpen(false)}
+      />
     </div>
   );
 }
