@@ -1,10 +1,19 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Shield } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Integritetspolicy – Homework Heroes</title>
+        <meta name="description" content="Läs Homework Heroes integritetspolicy. Så hanterar vi familjers personuppgifter enligt GDPR i vår läxapp." />
+        <link rel="canonical" href="https://homeworkheroes.lovable.app/privacy" />
+        <meta property="og:title" content="Integritetspolicy – Homework Heroes" />
+        <meta property="og:description" content="Så hanterar Homework Heroes personuppgifter enligt GDPR." />
+        <meta property="og:url" content="https://homeworkheroes.lovable.app/privacy" />
+      </Helmet>
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
           <Link to="/landing">
