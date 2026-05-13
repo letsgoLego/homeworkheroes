@@ -22,6 +22,8 @@ import { AddAdhocTask } from '@/components/AddAdhocTask';
 import { AdhocTaskCard } from '@/components/AdhocTaskCard';
 import { ActivityCard } from '@/components/ActivityCard';
 import { IntroTour } from '@/components/IntroTour';
+import { NudgeButton } from '@/components/NudgeButton';
+import { useChildHeartbeat } from '@/hooks/useChildPresence';
 
 export default function TodayPage() {
   const { user } = useAuth();
