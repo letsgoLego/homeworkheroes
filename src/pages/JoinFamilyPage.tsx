@@ -40,45 +40,25 @@ export default function JoinFamilyPage() {
     setLoading(true);
 
     try {
-      // Find family by invite code using secure RPC function
-      const { data: families, error: familyError } = await supabase
+      // Look up family name first (for the success toast)
+      const { data: families } = await supabase
         .rpc('lookup_family_by_invite_code', { code: cleanCode });
-
-      if (familyError) throw familyError;
-
       const family = families && families.length > 0 ? families[0] : null;
 
-      if (!family) {
-        toast.error('Ingen familj hittades med den koden');
+      // Securely join via SECURITY DEFINER RPC (validates code + caps members)
+      const { error: joinError } = await supabase
+        .rpc('join_family_with_invite_code', { _code: cleanCode });
+
+      if (joinError) {
+        const msg = joinError.message?.toLowerCase() || '';
+        if (msg.includes('not found')) toast.error('Ingen familj hittades med den koden');
+        else if (msg.includes('limit')) toast.error('Familjen har nått max antal medlemmar');
+        else if (msg.includes('invalid invite code')) toast.error('Ogiltig kod');
+        else toast.error(joinError.message || 'Kunde inte gå med i familjen');
         return;
       }
 
-      // Check if user already belongs to this family
-      const { data: existingRole } = await supabase
-        .from('user_roles')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('family_id', family.id)
-        .maybeSingle();
-
-      if (existingRole) {
-        toast.info('Du är redan medlem i denna familj!');
-        navigate('/');
-        return;
-      }
-
-      // Add user as parent to family
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: user.id,
-          role: 'parent',
-          family_id: family.id,
-        });
-
-      if (roleError) throw roleError;
-
-      toast.success(`Välkommen till ${family.name}! 🎉`);
+      toast.success(`Välkommen till ${family?.name ?? 'familjen'}! 🎉`);
       navigate('/');
     } catch (err: any) {
       console.error('Error joining family:', err);
