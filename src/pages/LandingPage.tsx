@@ -94,6 +94,20 @@ export default function LandingPage() {
                   </Button>
                 </a>
               </motion.div>
+              <motion.div
+                variants={fadeUp}
+                className="mt-5 flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-sm text-muted-foreground"
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-primary" /> Gratis att börja
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Shield className="w-4 h-4 text-primary" /> Ingen kortuppgift
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Heart className="w-4 h-4 text-primary" /> Avsluta när du vill
+                </span>
+              </motion.div>
             </motion.div>
 
             <motion.div
