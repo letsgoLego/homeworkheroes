@@ -8,6 +8,7 @@ import TodayPage from "./pages/TodayPage";
 import WeekPage from "./pages/WeekPage";
 import AddPage from "./pages/AddPage";
 import FamilyPage from "./pages/FamilyPage";
+import InsightsPage from "./pages/InsightsPage";
 import ChildProfilePage from "./pages/ChildProfilePage";
 import AuthPage from "./pages/AuthPage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -101,6 +102,7 @@ function AppRoutes() {
       <Route path="/week" element={<ProtectedRoute><WeekPage /></ProtectedRoute>} />
       <Route path="/add" element={<ProtectedRoute><AddPage /></ProtectedRoute>} />
       <Route path="/family" element={<ProtectedRoute><ParentRouteGuard><FamilyPage /></ParentRouteGuard></ProtectedRoute>} />
+      <Route path="/insights" element={<ProtectedRoute><ParentRouteGuard><InsightsPage /></ParentRouteGuard></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ChildProfilePage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
