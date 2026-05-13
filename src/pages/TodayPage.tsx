@@ -644,6 +644,12 @@ export default function TodayPage() {
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
       <IntroTour />
+      <PerfectDaySplash
+        open={splashOpen}
+        streak={splashStreak}
+        childName={activeChild?.name ?? ''}
+        onClose={() => setSplashOpen(false)}
+      />
     </div>
   );
 }
