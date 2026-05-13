@@ -1,10 +1,19 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, FileText } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Användarvillkor – Homework Heroes</title>
+        <meta name="description" content="Användarvillkor för Homework Heroes – villkoren som gäller när din familj använder vår läx- och skolapp." />
+        <link rel="canonical" href="https://homeworkheroes.lovable.app/terms" />
+        <meta property="og:title" content="Användarvillkor – Homework Heroes" />
+        <meta property="og:description" content="Villkoren som gäller när din familj använder Homework Heroes." />
+        <meta property="og:url" content="https://homeworkheroes.lovable.app/terms" />
+      </Helmet>
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
           <Link to="/landing">
