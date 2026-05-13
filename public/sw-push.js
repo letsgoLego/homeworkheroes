@@ -15,7 +15,7 @@ self.addEventListener("push", function (event) {
     tag: data.tag || "default",
     data: { url: data.url || "/" },
     requireInteraction: true,
-    vibrate: [200, 100, 200],
+    vibrate: [300, 120, 300, 120, 400],
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
