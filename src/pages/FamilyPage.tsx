@@ -153,6 +153,25 @@ export default function FamilyPage() {
         {family && (
           <FamilyMembers familyId={family.id} children={children} />
         )}
+
+        {/* Insights link */}
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          onClick={() => navigate('/insights')}
+          className="w-full p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary/20 flex items-center gap-3 text-left hover:shadow-card transition-shadow"
+        >
+          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+            <BarChart3 className="w-6 h-6 text-primary" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold">Insikter</h3>
+            <p className="text-sm text-muted-foreground">
+              Se mönster: bästa dagar, ämnen och tider
+            </p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+        </motion.button>
         
         {/* Notification Settings */}
         <NotificationSettings />
