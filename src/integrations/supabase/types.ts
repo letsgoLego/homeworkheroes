@@ -502,6 +502,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_role_in_family: {
+        Args: {
+          _family_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      join_family_with_invite_code: { Args: { _code: string }; Returns: string }
       lookup_family_by_invite_code: {
         Args: { code: string }
         Returns: {

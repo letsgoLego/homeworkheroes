@@ -399,6 +399,25 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Require either a shared cron secret or the service role key as bearer
+    const cronSecret = Deno.env.get("CRON_SECRET");
+    const authHeader = req.headers.get("authorization") || "";
+    const providedSecret = req.headers.get("x-cron-secret") || "";
+    const bearer = authHeader.toLowerCase().startsWith("bearer ")
+      ? authHeader.slice(7).trim()
+      : "";
+    const isAuthorized =
+      (cronSecret && providedSecret && providedSecret === cronSecret) ||
+      (bearer && bearer === serviceRoleKey);
+
+    if (!isAuthorized) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Get VAPID keys

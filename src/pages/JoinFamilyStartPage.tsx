@@ -77,36 +77,22 @@ export default function JoinFamilyStartPage() {
     }
   };
 
-  const handleJoinFamily = async (userId: string) => {
+  const handleJoinFamily = async (_userId: string) => {
     if (!familyInfo) {
       toast.error('Familj saknas');
       return;
     }
 
-    // Check if user already belongs to this family
-    const { data: existingRole } = await supabase
-      .from('user_roles')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('family_id', familyInfo.id)
-      .maybeSingle();
+    const { error: joinError } = await supabase
+      .rpc('join_family_with_invite_code', { _code: inviteCode.trim().toLowerCase() });
 
-    if (existingRole) {
-      toast.info('Du är redan medlem i denna familj!');
-      navigate('/');
+    if (joinError) {
+      const msg = joinError.message?.toLowerCase() || '';
+      if (msg.includes('limit')) toast.error('Familjen har nått max antal medlemmar');
+      else if (msg.includes('not found')) toast.error('Ingen familj hittades');
+      else throw joinError;
       return;
     }
-
-    // Add user as parent to family
-    const { error: roleError } = await supabase
-      .from('user_roles')
-      .insert({
-        user_id: userId,
-        role: 'parent',
-        family_id: familyInfo.id,
-      });
-
-    if (roleError) throw roleError;
 
     toast.success(`Välkommen till ${familyInfo.name}! 🎉`);
     navigate('/');

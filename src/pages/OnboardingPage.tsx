@@ -134,18 +134,13 @@ export default function OnboardingPage() {
         return;
       }
 
-      const { data: existing } = await supabase
-        .from('user_roles')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('family_id', family.id)
-        .maybeSingle();
-
-      if (!existing) {
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({ user_id: user.id, role: 'parent', family_id: family.id });
-        if (roleError) throw roleError;
+      const { error: joinError } = await supabase
+        .rpc('join_family_with_invite_code', { _code: cleanCode });
+      if (joinError) {
+        const msg = joinError.message?.toLowerCase() || '';
+        if (msg.includes('limit')) toast.error('Familjen har nått max antal medlemmar');
+        else throw joinError;
+        return;
       }
 
       toast.success(`Välkommen till ${family.name}! 🎉`);
