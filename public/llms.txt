@@ -1,0 +1,26 @@
+# Homework Heroes (Läxhjälpen)
+
+> En svensk familjeapp för att hålla koll på barnens läxor, prov, packlistor och fritidsaktiviteter. Designad som PWA för iPhone/iPad med separata föräldrar- och barnkonton.
+
+Homework Heroes hjälper familjer att planera läxor, dela upp arbete på lugna dagar, undvika krockar med träningar och minska läxstress. Föräldrar administrerar familjen; barnen får en förenklad vy med streaks, XP och konfetti.
+
+## Pages
+
+- [Start / Marknadsföring](/landing): Översikt av appen, funktioner och prissättning.
+- [Om oss](/om-oss): Bakgrund och vision för Homework Heroes.
+- [Tips och guider](/tips): Artikelhubb om läxplanering, studieteknik och motivation.
+- [Logga in / Skapa konto](/auth): Inloggning för föräldrar (e-post, Google, Apple).
+- [Barninloggning](/child-login): Förenklad inloggning för barnkonton.
+- [Gå med i familj](/join-family-start): Anslut till en befintlig familj med inbjudningskod.
+- [Integritetspolicy](/privacy): GDPR-information och hantering av personuppgifter.
+- [Användarvillkor](/terms): Villkor för användning av tjänsten.
+
+## Tips-artiklar
+
+- [Läxplanering – 7 smarta tips](/tips/laxplanering): Praktiska tips för veckoplanering av läxor.
+- [Studieteknik för barn](/tips/studieteknik-barn): 8 metoder som faktiskt fungerar.
+- [Läxstress hos barn](/tips/laxstress): Strategier för att minska läxångest.
+- [Skapa en läxrutin](/tips/laxrutin): Bygg en hållbar rutin för hela terminen.
+- [Motivation för läxor](/tips/motivation-laxor): Så motiverar du ditt barn.
+- [Tonåringar och läxor](/tips/tonaringar-laxor): Guide för föräldrar till tonåringar.
+- [Läxhjälp hemma](/tips/laxhjalp-hemma): Så stöttar du utan att ta över.
