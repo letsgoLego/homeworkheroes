@@ -12,7 +12,7 @@ export const haptic = (style: 'light' | 'medium' | 'heavy' | 'success' = 'medium
 };
 
 export const celebrateTask = () => {
-  haptic('light');
+  haptic('success');
   confetti({
     particleCount: 50,
     spread: 60,
