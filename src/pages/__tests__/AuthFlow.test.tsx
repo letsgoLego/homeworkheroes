@@ -62,6 +62,8 @@ describe("AuthPage", () => {
     const user = userEvent.setup();
     signInMock.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     renderAuth();
+    // default view is signup — switch to login first
+    await user.click(screen.getByRole("button", { name: /^Logga in$/i }));
     await user.type(screen.getByPlaceholderText(/du@exempel/i), "p@x.se");
     await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
     await user.click(submitButton());
@@ -74,12 +76,14 @@ describe("AuthPage", () => {
     });
   });
 
-  it("creates a new account and navigates to /onboarding", async () => {
+  it("creates a new account with active session and navigates to /onboarding", async () => {
     const user = userEvent.setup();
-    signUpMock.mockResolvedValue({ data: { user: { id: "u2" } }, error: null });
+    signUpMock.mockResolvedValue({
+      data: { user: { id: "u2" }, session: { access_token: "t" } },
+      error: null,
+    });
     renderAuth();
-    // switch to signup via the toggle tab
-    await user.click(screen.getByRole("button", { name: /^Skapa konto$/i }));
+    // signup is the default view
     await user.type(screen.getByPlaceholderText(/du@exempel/i), "n@x.se");
     await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
     await user.click(submitButton());
@@ -87,6 +91,23 @@ describe("AuthPage", () => {
       expect(signUpMock).toHaveBeenCalled();
       expect(navigateMock).toHaveBeenCalledWith("/onboarding");
     });
+  });
+
+  it("shows 'check inbox' screen when signup requires email confirmation", async () => {
+    const user = userEvent.setup();
+    signUpMock.mockResolvedValue({
+      data: { user: { id: "u3" }, session: null },
+      error: null,
+    });
+    renderAuth();
+    await user.type(screen.getByPlaceholderText(/du@exempel/i), "v@x.se");
+    await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
+    await user.click(submitButton());
+    await waitFor(() => {
+      expect(signUpMock).toHaveBeenCalled();
+      expect(screen.getByText(/Kolla din inkorg/i)).toBeInTheDocument();
+    });
+    expect(navigateMock).not.toHaveBeenCalledWith("/onboarding");
   });
 
   it("rejects too-short password", async () => {
