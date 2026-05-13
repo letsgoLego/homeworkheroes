@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,6 +24,8 @@ import { ActivityCard } from '@/components/ActivityCard';
 import { IntroTour } from '@/components/IntroTour';
 import { NudgeButton } from '@/components/NudgeButton';
 import { useChildHeartbeat } from '@/hooks/useChildPresence';
+import { PerfectDaySplash } from '@/components/PerfectDaySplash';
+import { computeCurrentStreak } from '@/lib/streak';
 
 export default function TodayPage() {
   const { user } = useAuth();
