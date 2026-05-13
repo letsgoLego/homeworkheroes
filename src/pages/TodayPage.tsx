@@ -22,6 +22,8 @@ import { AddAdhocTask } from '@/components/AddAdhocTask';
 import { AdhocTaskCard } from '@/components/AdhocTaskCard';
 import { ActivityCard } from '@/components/ActivityCard';
 import { IntroTour } from '@/components/IntroTour';
+import { NudgeButton } from '@/components/NudgeButton';
+import { useChildHeartbeat } from '@/hooks/useChildPresence';
 
 export default function TodayPage() {
   const { user } = useAuth();
@@ -58,6 +60,9 @@ export default function TodayPage() {
   const today = new Date();
   const todayStr = format(today, 'yyyy-MM-dd');
   const activeChild = children.find((c) => c.id === activeChildId);
+
+  // Child account heartbeat: pings last_seen_at so parents see presence dot
+  useChildHeartbeat(userRole === 'child' ? activeChildId : null, userRole === 'child');
   
   // Don't redirect while still loading user role information
   // This prevents premature redirects for child accounts and invited parents
@@ -167,9 +172,18 @@ export default function TodayPage() {
               </span>
             </div>
           </div>
-          <h1 className="text-2xl font-bold">
-            {activeChild ? `Hej, ${activeChild.name}! 👋` : 'Välkommen!'}
-          </h1>
+          <div className="flex items-end justify-between gap-3">
+            <h1 className="text-2xl font-bold">
+              {activeChild ? `Hej, ${activeChild.name}! 👋` : 'Välkommen!'}
+            </h1>
+            {userRole !== 'child' && activeChild && totalIncompleteTasks > 0 && (
+              <NudgeButton
+                childId={activeChild.id}
+                childName={activeChild.name}
+                hasAccount={!!activeChild.has_account}
+              />
+            )}
+          </div>
         </div>
         
         {/* Child switcher - only for parents */}

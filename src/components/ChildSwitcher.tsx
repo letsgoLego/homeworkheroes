@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { PresenceDot } from '@/components/PresenceDot';
 
 type Child = Tables<'children'>;
 
@@ -10,9 +11,10 @@ interface ChildSwitcherProps {
   activeChildId: string | null;
   onSelectChild: (childId: string) => void;
   onAddChild: () => void;
+  showPresence?: boolean;
 }
 
-export function ChildSwitcher({ children, activeChildId, onSelectChild, onAddChild }: ChildSwitcherProps) {
+export function ChildSwitcher({ children, activeChildId, onSelectChild, onAddChild, showPresence = true }: ChildSwitcherProps) {
   return (
     <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4">
       {children.map((child) => (
@@ -21,7 +23,7 @@ export function ChildSwitcher({ children, activeChildId, onSelectChild, onAddChi
           whileTap={{ scale: 0.95 }}
           onClick={() => onSelectChild(child.id)}
           className={cn(
-            'flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all',
+            'relative flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all',
             activeChildId === child.id
               ? 'shadow-card'
               : 'bg-muted hover:bg-muted/80'
@@ -31,8 +33,15 @@ export function ChildSwitcher({ children, activeChildId, onSelectChild, onAddChi
             color: activeChildId === child.id ? 'white' : undefined,
           }}
         >
-          <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">
+          <span className="relative w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">
             {child.name[0]}
+            {showPresence && (
+              <PresenceDot
+                lastSeenAt={child.last_seen_at}
+                hasAccount={!!child.has_account}
+                className="absolute -bottom-0.5 -right-0.5"
+              />
+            )}
           </span>
           <span className="font-medium">{child.name}</span>
         </motion.button>
