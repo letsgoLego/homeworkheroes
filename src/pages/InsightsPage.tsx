@@ -333,7 +333,121 @@ export default function InsightsPage() {
               </p>
             </motion.div>
 
-            {/* Best & worst weekday */}
+            {/* This week's hand-ins & tests */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-2xl bg-card shadow-card space-y-3"
+            >
+              <div className="flex items-baseline justify-between">
+                <h3 className="font-bold flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4 text-primary" />
+                  Veckan som kommer
+                </h3>
+                <span className="text-[11px] text-muted-foreground">
+                  {format(weekItems.wkStart, 'd MMM', { locale: sv })}–{format(weekItems.wkEnd, 'd MMM', { locale: sv })}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-3 rounded-xl bg-warning/10 border border-warning/30">
+                  <div className="flex items-center gap-1.5 text-warning-foreground">
+                    <Flag className="w-3.5 h-3.5" />
+                    <span className="text-xs font-semibold uppercase">Inlämningar</span>
+                  </div>
+                  <p className="text-2xl font-bold mt-1">{weekItems.inlamningar.length}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/30">
+                  <div className="flex items-center gap-1.5 text-destructive">
+                    <FileCheck className="w-3.5 h-3.5" />
+                    <span className="text-xs font-semibold uppercase">Förhör</span>
+                  </div>
+                  <p className="text-2xl font-bold mt-1">{weekItems.forhor.length}</p>
+                </div>
+              </div>
+
+              {weekItems.items.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-3">
+                  Inga inlämningar eller förhör den här veckan 🎉
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {weekItems.items.map(({ hw, total, done, progress, daysLeft, status }) => (
+                    <div
+                      key={hw.id}
+                      className={cn(
+                        'p-3 rounded-xl border',
+                        status === 'done' && 'bg-success/10 border-success/30',
+                        status === 'ontrack' && 'bg-card border-border',
+                        status === 'behind' && 'bg-destructive/5 border-destructive/30',
+                        status === 'open' && 'bg-muted/40 border-border',
+                      )}
+                    >
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span>{SUBJECT_ICONS[hw.subject as Subject] || '📝'}</span>
+                        <span className="font-medium text-sm flex-1 truncate">{hw.title}</span>
+                        <span
+                          className={cn(
+                            'text-[10px] px-1.5 py-0.5 rounded-full font-semibold uppercase flex items-center gap-1',
+                            hw.homework_type === 'forhor'
+                              ? 'bg-destructive/10 text-destructive'
+                              : 'bg-warning/15 text-warning-foreground',
+                          )}
+                        >
+                          {hw.homework_type === 'forhor' ? <FileCheck className="w-2.5 h-2.5" /> : <Flag className="w-2.5 h-2.5" />}
+                          {hw.homework_type === 'forhor' ? 'Förhör' : 'Inlämning'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className={cn(
+                              'h-full transition-all',
+                              status === 'done' && 'bg-success',
+                              status === 'behind' && 'bg-destructive',
+                              (status === 'ontrack' || status === 'open') && 'bg-primary',
+                            )}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <span className="text-[11px] text-muted-foreground tabular-nums w-12 text-right">
+                          {total > 0 ? `${done}/${total}` : '—'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between mt-1.5 text-[11px]">
+                        <span className="text-muted-foreground">
+                          {daysLeft < 0
+                            ? `${Math.abs(daysLeft)} dgr försent`
+                            : daysLeft === 0
+                            ? 'Idag!'
+                            : daysLeft === 1
+                            ? 'Imorgon'
+                            : `Om ${daysLeft} dgr`}
+                          {' · '}
+                          {format(parseISO(hw.due_date), 'EEE d MMM', { locale: sv })}
+                        </span>
+                        <span
+                          className={cn(
+                            'font-semibold',
+                            status === 'done' && 'text-success',
+                            status === 'ontrack' && 'text-primary',
+                            status === 'behind' && 'text-destructive',
+                            status === 'open' && 'text-muted-foreground',
+                          )}
+                        >
+                          {status === 'done' && '✓ Klar'}
+                          {status === 'ontrack' && '👍 På spåret'}
+                          {status === 'behind' && '⚠️ Efter'}
+                          {status === 'open' && 'Inga delsteg'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+
+
             <div className="grid grid-cols-2 gap-3">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 rounded-2xl bg-card shadow-card">
                 <div className="flex items-center gap-2 text-celebration mb-1">
