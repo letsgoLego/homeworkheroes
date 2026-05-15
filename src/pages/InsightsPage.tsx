@@ -20,6 +20,7 @@ type Row = {
   completed: boolean;
   completed_at: string | null;
   snoozed_until: string | null;
+  homework_id: string;
   homework: { subject: string; child_id: string } | null;
 };
 
@@ -33,11 +34,13 @@ type AdhocRow = {
 
 type HwRow = {
   id: string;
+  title: string;
   subject: string;
   child_id: string;
   completed: boolean;
   due_date: string;
   created_at: string;
+  homework_type: string;
 };
 
 export default function InsightsPage() {
