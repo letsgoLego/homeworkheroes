@@ -66,7 +66,7 @@ export default function InsightsPage() {
       const [stRes, adRes, hwRes] = await Promise.all([
         supabase
           .from('study_tasks')
-          .select('id, task_date, completed, completed_at, snoozed_until, homework!inner(subject, child_id)')
+          .select('id, task_date, completed, completed_at, snoozed_until, homework_id, homework!inner(subject, child_id)')
           .gte('task_date', since)
           .in('homework.child_id', childIds),
         supabase
@@ -76,7 +76,7 @@ export default function InsightsPage() {
           .in('child_id', childIds),
         supabase
           .from('homework')
-          .select('id, subject, child_id, completed, due_date, created_at')
+          .select('id, title, subject, child_id, completed, due_date, created_at, homework_type')
           .gte('due_date', since)
           .in('child_id', childIds),
       ]);
