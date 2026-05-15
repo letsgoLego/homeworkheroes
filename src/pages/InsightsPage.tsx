@@ -223,6 +223,39 @@ export default function InsightsPage() {
   const maxWeekdayPlanned = Math.max(...stats.byWeekday.map((d) => d.planned), 1);
   const maxHour = Math.max(...stats.completionsByHour, 1);
 
+  const weekItems = useMemo(() => {
+    const today = new Date();
+    const wkStart = startOfWeek(today, { weekStartsOn: 1 });
+    const wkEnd = endOfWeek(today, { weekStartsOn: 1 });
+    const startStr = format(wkStart, 'yyyy-MM-dd');
+    const endStr = format(wkEnd, 'yyyy-MM-dd');
+    const items = filteredHw
+      .filter((h) => h.due_date >= startStr && h.due_date <= endStr)
+      .map((h) => {
+        const tasks = filteredStudy.filter((s) => s.homework_id === h.id);
+        const total = tasks.length;
+        const done = tasks.filter((t) => t.completed).length;
+        const progress = total ? Math.round((done / total) * 100) : (h.completed ? 100 : 0);
+        const daysLeft = differenceInCalendarDays(parseISO(h.due_date), today);
+        // Readiness signal: completed, on track, behind
+        let status: 'done' | 'ontrack' | 'behind' | 'open';
+        if (h.completed) status = 'done';
+        else if (total === 0) status = 'open';
+        else {
+          // expected progress = elapsed task days / total
+          const pastTasks = tasks.filter((t) => t.task_date <= format(today, 'yyyy-MM-dd')).length;
+          const expected = total ? pastTasks / total : 0;
+          const actual = total ? done / total : 0;
+          status = actual + 0.01 >= expected ? 'ontrack' : 'behind';
+        }
+        return { hw: h, total, done, progress, daysLeft, status };
+      })
+      .sort((a, b) => a.hw.due_date.localeCompare(b.hw.due_date));
+    const inlamningar = items.filter((i) => i.hw.homework_type === 'inlamning');
+    const forhor = items.filter((i) => i.hw.homework_type === 'forhor');
+    return { items, inlamningar, forhor, wkStart, wkEnd };
+  }, [filteredHw, filteredStudy]);
+
   if (famLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
