@@ -25,6 +25,7 @@ import { IntroTour } from '@/components/IntroTour';
 import { NudgeButton } from '@/components/NudgeButton';
 import { useChildHeartbeat } from '@/hooks/useChildPresence';
 import { PerfectDaySplash } from '@/components/PerfectDaySplash';
+import { ChildWeekDashboard } from '@/components/ChildWeekDashboard';
 import { computeCurrentStreak } from '@/lib/streak';
 
 export default function TodayPage() {
@@ -258,6 +259,16 @@ export default function TodayPage() {
           </TabsList>
           
           <TabsContent value="today" className="space-y-6">
+            {/* Child weekly dashboard - peppar barnet att komma i mål */}
+            {userRole === 'child' && activeChild && (
+              <ChildWeekDashboard
+                childId={activeChild.id}
+                childName={activeChild.name}
+                homework={homework}
+                adhocTasks={adhocTasks}
+              />
+            )}
+
             {/* Reminders section */}
             {homeworkWithReminders.length > 0 && (
               <motion.section
