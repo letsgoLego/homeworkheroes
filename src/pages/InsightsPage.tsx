@@ -226,8 +226,9 @@ export default function InsightsPage() {
 
   const weekItems = useMemo(() => {
     const today = new Date();
-    const wkStart = startOfWeek(today, { weekStartsOn: 1 });
-    const wkEnd = endOfWeek(today, { weekStartsOn: 1 });
+    const ref = addWeeks(today, weekOffset);
+    const wkStart = startOfWeek(ref, { weekStartsOn: 1 });
+    const wkEnd = endOfWeek(ref, { weekStartsOn: 1 });
     const startStr = format(wkStart, 'yyyy-MM-dd');
     const endStr = format(wkEnd, 'yyyy-MM-dd');
     const items = filteredHw
@@ -238,12 +239,10 @@ export default function InsightsPage() {
         const done = tasks.filter((t) => t.completed).length;
         const progress = total ? Math.round((done / total) * 100) : (h.completed ? 100 : 0);
         const daysLeft = differenceInCalendarDays(parseISO(h.due_date), today);
-        // Readiness signal: completed, on track, behind
         let status: 'done' | 'ontrack' | 'behind' | 'open';
         if (h.completed) status = 'done';
         else if (total === 0) status = 'open';
         else {
-          // expected progress = elapsed task days / total
           const pastTasks = tasks.filter((t) => t.task_date <= format(today, 'yyyy-MM-dd')).length;
           const expected = total ? pastTasks / total : 0;
           const actual = total ? done / total : 0;
@@ -255,7 +254,7 @@ export default function InsightsPage() {
     const inlamningar = items.filter((i) => i.hw.homework_type === 'inlamning');
     const forhor = items.filter((i) => i.hw.homework_type === 'forhor');
     return { items, inlamningar, forhor, wkStart, wkEnd };
-  }, [filteredHw, filteredStudy]);
+  }, [filteredHw, filteredStudy, weekOffset]);
 
   if (famLoading) {
     return (
