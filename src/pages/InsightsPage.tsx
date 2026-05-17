@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, BarChart3, TrendingUp, Clock, Sparkles, AlertTriangle, Calendar as CalendarIcon, Flag, FileCheck } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Clock, Sparkles, AlertTriangle, Calendar as CalendarIcon, Flag, FileCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { useFamily } from '@/hooks/useFamily';
 import { supabase } from '@/integrations/supabase/client';
-import { format, subDays, parseISO, getDay, getHours, startOfWeek, endOfWeek, differenceInCalendarDays } from 'date-fns';
+import { format, subDays, parseISO, getDay, getHours, startOfWeek, endOfWeek, differenceInCalendarDays, addWeeks } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { SUBJECT_LABELS, SUBJECT_ICONS, type Subject } from '@/types/homework';
 import { cn } from '@/lib/utils';
@@ -51,6 +51,7 @@ export default function InsightsPage() {
   const [homework, setHomework] = useState<HwRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(60);
+  const [weekOffset, setWeekOffset] = useState(0);
 
   const childIds = useMemo(() => children.map((c) => c.id), [children]);
 
@@ -225,8 +226,9 @@ export default function InsightsPage() {
 
   const weekItems = useMemo(() => {
     const today = new Date();
-    const wkStart = startOfWeek(today, { weekStartsOn: 1 });
-    const wkEnd = endOfWeek(today, { weekStartsOn: 1 });
+    const ref = addWeeks(today, weekOffset);
+    const wkStart = startOfWeek(ref, { weekStartsOn: 1 });
+    const wkEnd = endOfWeek(ref, { weekStartsOn: 1 });
     const startStr = format(wkStart, 'yyyy-MM-dd');
     const endStr = format(wkEnd, 'yyyy-MM-dd');
     const items = filteredHw
@@ -237,12 +239,10 @@ export default function InsightsPage() {
         const done = tasks.filter((t) => t.completed).length;
         const progress = total ? Math.round((done / total) * 100) : (h.completed ? 100 : 0);
         const daysLeft = differenceInCalendarDays(parseISO(h.due_date), today);
-        // Readiness signal: completed, on track, behind
         let status: 'done' | 'ontrack' | 'behind' | 'open';
         if (h.completed) status = 'done';
         else if (total === 0) status = 'open';
         else {
-          // expected progress = elapsed task days / total
           const pastTasks = tasks.filter((t) => t.task_date <= format(today, 'yyyy-MM-dd')).length;
           const expected = total ? pastTasks / total : 0;
           const actual = total ? done / total : 0;
@@ -254,7 +254,7 @@ export default function InsightsPage() {
     const inlamningar = items.filter((i) => i.hw.homework_type === 'inlamning');
     const forhor = items.filter((i) => i.hw.homework_type === 'forhor');
     return { items, inlamningar, forhor, wkStart, wkEnd };
-  }, [filteredHw, filteredStudy]);
+  }, [filteredHw, filteredStudy, weekOffset]);
 
   if (famLoading) {
     return (
@@ -339,14 +339,38 @@ export default function InsightsPage() {
               animate={{ opacity: 1, y: 0 }}
               className="p-4 rounded-2xl bg-card shadow-card space-y-3"
             >
-              <div className="flex items-baseline justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <h3 className="font-bold flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-primary" />
-                  Veckan som kommer
+                  {weekOffset === 0 ? 'Veckan som kommer' : weekOffset === 1 ? 'Nästa vecka' : weekOffset === -1 ? 'Förra veckan' : `Vecka ${format(weekItems.wkStart, 'w', { locale: sv })}`}
                 </h3>
-                <span className="text-[11px] text-muted-foreground">
-                  {format(weekItems.wkStart, 'd MMM', { locale: sv })}–{format(weekItems.wkEnd, 'd MMM', { locale: sv })}
-                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setWeekOffset((w) => w - 1)}
+                    className="p-1 rounded-md hover:bg-muted transition-colors"
+                    aria-label="Föregående vecka"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-[11px] text-muted-foreground tabular-nums min-w-[80px] text-center">
+                    {format(weekItems.wkStart, 'd MMM', { locale: sv })}–{format(weekItems.wkEnd, 'd MMM', { locale: sv })}
+                  </span>
+                  <button
+                    onClick={() => setWeekOffset((w) => w + 1)}
+                    className="p-1 rounded-md hover:bg-muted transition-colors"
+                    aria-label="Nästa vecka"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                  {weekOffset !== 0 && (
+                    <button
+                      onClick={() => setWeekOffset(0)}
+                      className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold"
+                    >
+                      Idag
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
