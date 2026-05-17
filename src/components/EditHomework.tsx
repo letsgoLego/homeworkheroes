@@ -69,7 +69,7 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
   const [bringItems, setBringItems] = useState<string[]>(editingHomework.bring_to_school || []);
   const [newItem, setNewItem] = useState('');
   const [enableReminder, setEnableReminder] = useState(!!editingHomework.reminder_date);
-  const [submissionDay, setSubmissionDay] = useState<number>(editingHomework.submission_day ?? 5);
+  const [submissionDay, setSubmissionDay] = useState<number | null>(editingHomework.submission_day ?? 5);
   const [homeworkType, setHomeworkType] = useState<HomeworkType>((editingHomework.homework_type as HomeworkType) || 'inlamning');
   const [recurrenceDays, setRecurrenceDays] = useState<number[]>(editingHomework.recurrence_days || [1, 2, 3, 4, 5]);
   
@@ -112,7 +112,7 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
     setDueDate(editingHomework.due_date);
     setBringItems(editingHomework.bring_to_school || []);
     setEnableReminder(!!editingHomework.reminder_date);
-    setSubmissionDay(editingHomework.submission_day ?? 5);
+    setSubmissionDay(editingHomework.submission_day);
     setHomeworkType((editingHomework.homework_type as HomeworkType) || 'inlamning');
     setRecurrenceDays(editingHomework.recurrence_days || [1, 2, 3, 4, 5]);
   }, [editingHomework]);
@@ -399,9 +399,21 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
                   <div>
                     <Label className="text-sm font-medium">Inlämningsdag</Label>
                     <p className="text-xs text-muted-foreground mb-1.5">
-                      Vilken veckodag lämnas den in?
+                      Vilken veckodag lämnas den in? Välj "Ingen inlämning" för t.ex. läsläxa.
                     </p>
                     <div className="flex flex-wrap gap-2">
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setSubmissionDay(null)}
+                        className={cn(
+                          'px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                          submissionDay === null
+                            ? 'bg-accent text-accent-foreground shadow-md'
+                            : 'bg-muted hover:bg-muted/80'
+                        )}
+                      >
+                        Ingen inlämning
+                      </motion.button>
                       {WEEKDAYS.map((day) => (
                         <motion.button
                           key={day.value}

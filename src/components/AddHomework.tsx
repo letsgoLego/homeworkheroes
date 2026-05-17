@@ -108,7 +108,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceDays, setRecurrenceDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [recurrenceWeeks, setRecurrenceWeeks] = useState(4);
-  const [submissionDay, setSubmissionDay] = useState<number>(5);
+  const [submissionDay, setSubmissionDay] = useState<number | null>(5);
   const [recurringBringDays, setRecurringBringDays] = useState<number[]>([]);
   const [suggestedDayCount, setSuggestedDayCount] = useState(3);
   const [subjectAnimKey, setSubjectAnimKey] = useState(0);
@@ -295,7 +295,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       isRecurring,
       recurrenceDays: isRecurring ? recurrenceDays : undefined,
       recurrenceEndDate,
-      submissionDay: isRecurring ? submissionDay : undefined,
+      submissionDay: isRecurring ? submissionDay ?? undefined : undefined,
       homeworkType,
     });
     
@@ -571,9 +571,20 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   <div>
                     <Label className="text-sm font-medium">Vilken dag lämnas den in?</Label>
                     <p className="text-xs text-muted-foreground mb-1.5">
-                      T.ex. logg som lämnas in varje fredag
+                      T.ex. logg som lämnas in varje fredag — eller välj "Ingen inlämning" för t.ex. läsläxa
                     </p>
                     <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setSubmissionDay(null)}
+                        className={cn(
+                          'px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                          submissionDay === null
+                            ? 'bg-accent text-accent-foreground shadow-md'
+                            : 'bg-muted hover:bg-muted/80'
+                        )}
+                      >
+                        Ingen inlämning
+                      </button>
                       {WEEKDAYS.map((day) => (
                         <button
                           key={day.value}
