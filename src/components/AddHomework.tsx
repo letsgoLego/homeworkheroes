@@ -108,7 +108,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceDays, setRecurrenceDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [recurrenceWeeks, setRecurrenceWeeks] = useState(4);
-  const [submissionDay, setSubmissionDay] = useState<number>(5);
+  const [submissionDay, setSubmissionDay] = useState<number | null>(5);
   const [recurringBringDays, setRecurringBringDays] = useState<number[]>([]);
   const [suggestedDayCount, setSuggestedDayCount] = useState(3);
   const [subjectAnimKey, setSubjectAnimKey] = useState(0);
