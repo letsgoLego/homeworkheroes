@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { useFamily } from '@/hooks/useFamily';
 import { supabase } from '@/integrations/supabase/client';
-import { format, subDays, parseISO, getDay, getHours, startOfWeek, endOfWeek, differenceInCalendarDays } from 'date-fns';
+import { format, subDays, parseISO, getDay, getHours, startOfWeek, endOfWeek, differenceInCalendarDays, addWeeks } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { SUBJECT_LABELS, SUBJECT_ICONS, type Subject } from '@/types/homework';
 import { cn } from '@/lib/utils';
