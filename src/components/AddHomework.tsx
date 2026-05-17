@@ -571,9 +571,20 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   <div>
                     <Label className="text-sm font-medium">Vilken dag lämnas den in?</Label>
                     <p className="text-xs text-muted-foreground mb-1.5">
-                      T.ex. logg som lämnas in varje fredag
+                      T.ex. logg som lämnas in varje fredag — eller välj "Ingen inlämning" för t.ex. läsläxa
                     </p>
                     <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setSubmissionDay(null)}
+                        className={cn(
+                          'px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                          submissionDay === null
+                            ? 'bg-accent text-accent-foreground shadow-md'
+                            : 'bg-muted hover:bg-muted/80'
+                        )}
+                      >
+                        Ingen inlämning
+                      </button>
                       {WEEKDAYS.map((day) => (
                         <button
                           key={day.value}
