@@ -339,14 +339,38 @@ export default function InsightsPage() {
               animate={{ opacity: 1, y: 0 }}
               className="p-4 rounded-2xl bg-card shadow-card space-y-3"
             >
-              <div className="flex items-baseline justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <h3 className="font-bold flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-primary" />
-                  Veckan som kommer
+                  {weekOffset === 0 ? 'Veckan som kommer' : weekOffset === 1 ? 'Nästa vecka' : weekOffset === -1 ? 'Förra veckan' : `Vecka ${format(weekItems.wkStart, 'w', { locale: sv })}`}
                 </h3>
-                <span className="text-[11px] text-muted-foreground">
-                  {format(weekItems.wkStart, 'd MMM', { locale: sv })}–{format(weekItems.wkEnd, 'd MMM', { locale: sv })}
-                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setWeekOffset((w) => w - 1)}
+                    className="p-1 rounded-md hover:bg-muted transition-colors"
+                    aria-label="Föregående vecka"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-[11px] text-muted-foreground tabular-nums min-w-[80px] text-center">
+                    {format(weekItems.wkStart, 'd MMM', { locale: sv })}–{format(weekItems.wkEnd, 'd MMM', { locale: sv })}
+                  </span>
+                  <button
+                    onClick={() => setWeekOffset((w) => w + 1)}
+                    className="p-1 rounded-md hover:bg-muted transition-colors"
+                    aria-label="Nästa vecka"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                  {weekOffset !== 0 && (
+                    <button
+                      onClick={() => setWeekOffset(0)}
+                      className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold"
+                    >
+                      Idag
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
