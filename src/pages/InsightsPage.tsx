@@ -51,6 +51,7 @@ export default function InsightsPage() {
   const [homework, setHomework] = useState<HwRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(60);
+  const [weekOffset, setWeekOffset] = useState(0);
 
   const childIds = useMemo(() => children.map((c) => c.id), [children]);
 
