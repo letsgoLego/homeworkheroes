@@ -295,7 +295,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       isRecurring,
       recurrenceDays: isRecurring ? recurrenceDays : undefined,
       recurrenceEndDate,
-      submissionDay: isRecurring ? submissionDay : undefined,
+      submissionDay: isRecurring ? submissionDay ?? undefined : undefined,
       homeworkType,
     });
     
