@@ -1,14 +1,60 @@
 import confetti from 'canvas-confetti';
 
-export const haptic = (style: 'light' | 'medium' | 'heavy' | 'success' = 'medium') => {
-  if (typeof navigator === 'undefined' || !('vibrate' in navigator)) return;
-  const patterns: Record<string, number | number[]> = {
-    light: [25],
-    medium: [40],
-    heavy: [60, 40, 60, 40, 80],
-    success: [30, 60, 30],
+type HapticStyle = 'light' | 'medium' | 'heavy' | 'success';
+
+const supportsVibrate = () =>
+  typeof navigator !== 'undefined' &&
+  'vibrate' in navigator &&
+  // iOS Safari exposes navigator.vibrate but it's a no-op
+  !/iPad|iPhone|iPod/.test(navigator.userAgent);
+
+const visualPulse = (style: HapticStyle) => {
+  if (typeof document === 'undefined') return;
+  const intensity: Record<HapticStyle, { scale: number; duration: number; color: string }> = {
+    light:   { scale: 1.005, duration: 120, color: 'hsl(var(--primary) / 0.08)' },
+    medium:  { scale: 1.01,  duration: 160, color: 'hsl(var(--primary) / 0.12)' },
+    heavy:   { scale: 1.015, duration: 220, color: 'hsl(var(--primary) / 0.18)' },
+    success: { scale: 1.01,  duration: 200, color: 'hsl(var(--success, var(--primary)) / 0.15)' },
   };
-  navigator.vibrate(patterns[style]);
+  const cfg = intensity[style];
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed;inset:0;pointer-events:none;z-index:9998;
+    background:${cfg.color};opacity:0;
+    transition:opacity ${cfg.duration}ms ease-out;
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    requestAnimationFrame(() => {
+      overlay.style.opacity = '0';
+    });
+  });
+  setTimeout(() => overlay.remove(), cfg.duration + 50);
+
+  const root = document.getElementById('root') ?? document.body;
+  const prev = root.style.transition;
+  root.style.transition = `transform ${cfg.duration / 2}ms ease-out`;
+  root.style.transform = `scale(${cfg.scale})`;
+  setTimeout(() => {
+    root.style.transform = '';
+    setTimeout(() => { root.style.transition = prev; }, cfg.duration / 2);
+  }, cfg.duration / 2);
+};
+
+export const haptic = (style: HapticStyle = 'medium') => {
+  if (supportsVibrate()) {
+    const patterns: Record<HapticStyle, number | number[]> = {
+      light: [25],
+      medium: [40],
+      heavy: [60, 40, 60, 40, 80],
+      success: [30, 60, 30],
+    };
+    (navigator as Navigator).vibrate(patterns[style]);
+    return;
+  }
+  // Visual fallback for iOS (and other platforms without vibration)
+  visualPulse(style);
 };
 
 export const celebrateTask = () => {
