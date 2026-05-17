@@ -5,12 +5,13 @@ import { Navigation } from '@/components/Navigation';
 import { AddHomework } from '@/components/AddHomework';
 import { EditHomework } from '@/components/EditHomework';
 import { AddActivity } from '@/components/AddActivity';
+import { AddTodo } from '@/components/AddTodo';
 import { ActivityCard } from '@/components/ActivityCard';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { useFamily } from '@/hooks/useFamily';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
-import { Plus, Calendar, Trash2, Pencil, Repeat, Flag, AlertTriangle } from 'lucide-react';
+import { Plus, Calendar, Trash2, Pencil, Repeat, Flag, AlertTriangle, ListTodo } from 'lucide-react';
 import { HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 import { Button } from '@/components/ui/button';
 import { format, isPast, parseISO, startOfDay } from 'date-fns';
@@ -28,9 +29,10 @@ interface HomeworkWithTasks extends Homework {
 export default function AddPage() {
   const [showAddHomework, setShowAddHomework] = useState(false);
   const [showAddActivity, setShowAddActivity] = useState(false);
+  const [showAddTodo, setShowAddTodo] = useState(false);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
-  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, deleteActivity } = useFamily();
+  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, deleteActivity, addAdhocTask } = useFamily();
   
   const today = startOfDay(new Date());
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
@@ -69,23 +71,33 @@ export default function AddPage() {
       
       <main className="px-4 py-4 space-y-6">
         {/* Add buttons */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           <Button
             onClick={() => setShowAddHomework(true)}
-            className="h-14 text-base shadow-glow-primary"
+            className="h-auto py-3 px-2 text-sm flex-col gap-1 shadow-glow-primary"
             size="lg"
           >
-            <Plus className="w-5 h-5 mr-2" />
-            Ny läxa 📚
+            <Plus className="w-4 h-4" />
+            <span>Läxa 📚</span>
+          </Button>
+          <Button
+            onClick={() => setShowAddTodo(true)}
+            variant="secondary"
+            className="h-auto py-3 px-2 text-sm flex-col gap-1"
+            size="lg"
+            disabled={!activeChildId}
+          >
+            <ListTodo className="w-4 h-4" />
+            <span>Todo ⭐</span>
           </Button>
           <Button
             onClick={() => setShowAddActivity(true)}
             variant="secondary"
-            className="h-14 text-base"
+            className="h-auto py-3 px-2 text-sm flex-col gap-1"
             size="lg"
           >
-            <Plus className="w-5 h-5 mr-2" />
-            Ny aktivitet 🏃
+            <Plus className="w-4 h-4" />
+            <span>Aktivitet 🏃</span>
           </Button>
         </div>
         
@@ -305,6 +317,14 @@ export default function AddPage() {
           open={showAddActivity}
           onClose={() => setShowAddActivity(false)}
           onAdd={(data) => addActivity(activeChildId, data)}
+        />
+      )}
+      {activeChildId && (
+        <AddTodo
+          open={showAddTodo}
+          onClose={() => setShowAddTodo(false)}
+          childId={activeChildId}
+          onAdd={addAdhocTask}
         />
       )}
       {editingHomework && (
