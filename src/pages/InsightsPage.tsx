@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, BarChart3, TrendingUp, Clock, Sparkles, AlertTriangle, Calendar as CalendarIcon, Flag, FileCheck } from 'lucide-react';
+import { ArrowLeft, BarChart3, TrendingUp, Clock, Sparkles, AlertTriangle, Calendar as CalendarIcon, Flag, FileCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { useFamily } from '@/hooks/useFamily';
