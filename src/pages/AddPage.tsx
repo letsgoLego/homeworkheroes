@@ -29,9 +29,10 @@ interface HomeworkWithTasks extends Homework {
 export default function AddPage() {
   const [showAddHomework, setShowAddHomework] = useState(false);
   const [showAddActivity, setShowAddActivity] = useState(false);
+  const [showAddTodo, setShowAddTodo] = useState(false);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
-  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, deleteActivity } = useFamily();
+  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, deleteActivity, addAdhocTask } = useFamily();
   
   const today = startOfDay(new Date());
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
