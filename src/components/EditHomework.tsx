@@ -69,7 +69,7 @@ export function EditHomework({ open, onClose, homework: editingHomework }: EditH
   const [bringItems, setBringItems] = useState<string[]>(editingHomework.bring_to_school || []);
   const [newItem, setNewItem] = useState('');
   const [enableReminder, setEnableReminder] = useState(!!editingHomework.reminder_date);
-  const [submissionDay, setSubmissionDay] = useState<number>(editingHomework.submission_day ?? 5);
+  const [submissionDay, setSubmissionDay] = useState<number | null>(editingHomework.submission_day ?? 5);
   const [homeworkType, setHomeworkType] = useState<HomeworkType>((editingHomework.homework_type as HomeworkType) || 'inlamning');
   const [recurrenceDays, setRecurrenceDays] = useState<number[]>(editingHomework.recurrence_days || [1, 2, 3, 4, 5]);
   
