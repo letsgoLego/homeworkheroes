@@ -319,6 +319,14 @@ export default function AddPage() {
           onAdd={(data) => addActivity(activeChildId, data)}
         />
       )}
+      {activeChildId && (
+        <AddTodo
+          open={showAddTodo}
+          onClose={() => setShowAddTodo(false)}
+          childId={activeChildId}
+          onAdd={addAdhocTask}
+        />
+      )}
       {editingHomework && (
         <EditHomework 
           open={true} 
