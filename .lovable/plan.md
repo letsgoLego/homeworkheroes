@@ -1,81 +1,29 @@
+Skapa en FEATURES.md i repo-roten som beskriver alla appens funktioner pa svenska, plus uppdatera README.md sa den pekar pa den.
 
-# Föräldra-nudge: Peta barnet + engagemangsindikator
+### Innehall i FEATURES.md
+- App-namn och kort beskrivning (Laxhjalpen / Homework Heroes — PWA for familjer att hantera laxor)
+- Malsprak: svenska, malgrupp: barn och foraldrar
+- Huvudfunktioner grupperade efter kategori:
+  - **Hemuppgifter & Laxor**: Skapa laxor (inlamning/forhor), aterkommande laxor, extrauppgifter (ad-hoc), smart schemalaggning, snooze, paminnelser 2 dagar innan deadline, forsenade laxor med aldersindikator, veckooverblick med filter.
+  - **Barnvyn**: Forenklad dashboard for barn, veckooversikt, packningslista (skolchecklista), vaderwidget, visuell och taktil haptic feedback vid avklarade uppgifter, konfetti-animationer.
+  - **Familj & Roller**: Foraldrar som administrerer, barnkonton med forenklad inloggning (@laxhjalpen.child), max 6 medlemmar per familj, 8-siffriga hex-inbjudningskoder for att ansluta familj.
+  - **Progress & Gamification**: XP-system med nivaer 0-10, veckostatistik/KPI:er, swipe-to-delete i dagens vy.
+  - **Aktiviteter**: Fritidsaktiviteter med krockdetektering, forinstallda mallar for sporter/hobbies med emojis.
+  - **Tillval (Todos)**: Engangs- och aterkommande todo-uppgifter utover laxor.
+  - **Prenumeration**: Stripe-baserade nivaer (Gratis: 3 laxor/barn, Pro: 39 SEK/man), kundportal.
+  - **Teknik & PWA**: Offline-stod med NetworkFirst-caching, push-notiser kl 14:30/15:30/18:30, PWA-installation for iPhone/iPad.
+  - **Autentisering**: Google- och Apple-inloggning, e-postverifiering, losenordsaterstallning, automatisk kontolankning baserat pa verifierad e-post.
+  - **SEO-artiklar**: /tips/* med JSON-LD Article-schema, AdSense begransat till dessa sidor.
+  - **Onboarding**: 3-stegs installation och UI-tur sparad i localStorage.
+  - **Sakerhet & efterlevnad**: GDPR/cookie-banner, RLS-policyer, roller i separat tabell, edge-funktioner for kansliga operationer.
+- Teknisk stack-kortfattat (React, Vite, TypeScript, Tailwind, shadcn/ui, Supabase/Edge Functions, Stripe)
 
-## Vad vi bygger
+### Uppdatera README.md
+- Ersatt den generiska Lovable-texten med kort projektbeskrivning
+- Lagg till lank till FEATURES.md
+- Bevara instruktioner for lokalt utvecklingsarbete (clone, install, dev)
 
-**1. "Peta barnet" 🫵** — knapp på förälderns vy som skickar en push direkt till barnets enhet med ett peppigt meddelande.
-
-**2. Engagemangsindikator 🟢🟡🔴** — liten prick på varje barnkort som visar om barnet öppnat appen idag, så föräldern vet *när* en nudge faktiskt behövs.
-
----
-
-## Användarflöde
-
-### Peta barnet
-- Förälder ser barnets dagsvy (eller barnväljaren) → om barnet har minst en ojord uppgift idag visas en **"Peta 🫵"**-knapp.
-- Klick → liten dialog med 3 förvalda tonlägen:
-  - 😊 *Snäll*: "Hej älskling, kom ihåg matteläxan 💚"
-  - 🚀 *Peppig*: "Du fixar det här! 5 min så är du i mål 🔥"
-  - ⏰ *Bestämd*: "Dags att börja med läxan nu, tack!"
-- Plus fält för eget kort meddelande (max 80 tecken).
-- Skickar push till barnets enhet med titel "Mamma/Pappa petar 🫵" och meddelandet som body. Klick på pushen öppnar appen direkt på dagens lista.
-- **Rate-limit**: max 2 petningar per förälder per barn per dag, för att skydda mot tjat.
-- Bekräftelse-toast: "Petning skickad ✨"
-
-### Engagemangsindikator
-- Liten färgad prick visas på varje barnkort i barnväljaren och förälderns översikt:
-  - 🟢 **Grön** — barnet har öppnat appen senaste timmen
-  - 🟡 **Gul** — öppnat tidigare idag
-  - 🔴 **Röd** — inte öppnat sedan igår eller tidigare
-  - ⚪ **Grå** — barnet har inget eget konto än
-- Tooltip/lång-tryck: "Senast aktiv: 14:32 idag"
-
----
-
-## Teknisk plan
-
-### Databas (migration)
-1. Ny tabell `nudges`:
-   - `id`, `from_user_id`, `to_child_id`, `family_id`, `message`, `tone` (snäll/peppig/bestämd/custom), `created_at`, `delivered` (bool)
-   - RLS: föräldrar i samma familj kan INSERT/SELECT
-2. Lägg kolumn `last_seen_at timestamptz` på `children` (uppdateras när barnkonto öppnar appen).
-3. Trigger eller server-side rate-limit-check (max 2 petningar/förälder/barn/dag).
-
-### Edge function: `nudge-child`
-- Tar `child_id` + `message` + `tone`.
-- Validerar: anropare är förälder i samma familj, inom rate-limit.
-- Hittar barnets `push_subscriptions` (via `user_roles.child_id`).
-- Skickar push via befintlig VAPID-logik (återanvänder kod från `send-notifications`).
-- Loggar i `nudges`-tabellen.
-
-### Frontend
-- **Hook** `useNudge(childId)`: returnerar `sendNudge(message, tone)` + `remainingToday`.
-- **Komponent** `NudgeButton.tsx`: knapp + dialog med tonval och eget meddelande.
-- Placera i `ChildSwitcher` och/eller på `TodayPage` när förälder är i barnets vy.
-- **Hook** `useChildPresence(childId)`: läser `children.last_seen_at`, returnerar status (green/yellow/red/grey).
-- **Komponent** `PresenceDot.tsx`: visa pricken med tooltip.
-- Heartbeat: när ett barnkonto öppnar appen → uppdatera `children.last_seen_at` (en gång per session, inte varje render).
-
-### Push-payload
-Återanvänder befintlig service worker (`sw-push.js`) — bara nytt `tag: "nudge"` och `url: "/"`.
-
----
-
-## Edge cases & beslut
-
-- **Barn utan konto**: inget push-mål → visa knappen som disabled med tooltip "Barnet behöver ett konto för att kunna petas". Engagemangspricken blir grå.
-- **Förälder petar sig själv**: blockera (samma användare).
-- **Push avstängd på barnets enhet**: vi kan inte veta säkert; visa knappen ändå men logga "delivered=false" om push misslyckas.
-- **Tysta timmar**: ingen petning före 07:00 eller efter 21:00 (server-side check).
-
----
-
-## Inte med i denna iteration (kommer senare)
-- Belöning från förälder ("hejarop tillbaka")
-- Streak-hot i auto-pushar
-- Gemensam "Vi kör nu"-kickoff med Pomodoro-timer
-
----
-
-## Leverans
-Allt byggs i en omgång. Efter implementation testar vi flödet: förälderns enhet → push på barnets enhet → klick öppnar dagens lista.
+### Implementationsmetod
+- Generera innehallet baserat pa projektminne (mem://index.md) och kodbasgranskning
+- Skriv filerna direkt i repo-roten
+- Commit sker automatiskt via Lovable's synkronisering till GitHub

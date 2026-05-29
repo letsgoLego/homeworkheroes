@@ -1,73 +1,51 @@
-# Welcome to your Lovable project
+# Läxhjälpen
 
-## Project info
+En svensk PWA som hjälper familjer att hålla koll på läxor, prov, inlämningar och fritidsaktiviteter – designad för iPhone och iPad och anpassad för både föräldrar och barn.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**Live:** https://homeworkheroes.lovable.app
 
-## How can I edit this code?
+## Funktioner
 
-There are several ways of editing your application.
+En komplett översikt över appens funktioner finns i [FEATURES.md](./FEATURES.md).
 
-**Use Lovable**
+Kort sammanfattning:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- Läxor med inlämningar, förhör, återkommande uppgifter och extrauppgifter
+- Barnvy med dashboard, packlista, väder och peppande animationer
+- Familjehantering med upp till 6 medlemmar och separata barnkonton
+- Smart schemaläggning, snooze och påminnelser
+- XP-system och veckostatistik
+- Push-notiser kl 14:30, 15:30 och 18:30
+- Offlinestöd via PWA
+- Gratis (3 läxor/barn) och Pro (39 SEK/mån) via Stripe
 
-Changes made via Lovable will be committed automatically to this repo.
+## Teknisk stack
 
-**Use your preferred IDE**
+- React 18 + Vite 5 + TypeScript 5
+- Tailwind CSS + shadcn/ui + Framer Motion
+- Lovable Cloud (Supabase) – databas, auth, storage, edge functions
+- Stripe Subscriptions
+- Workbox (PWA, NetworkFirst)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Utveckling
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Projektet redigeras primärt via [Lovable](https://lovable.dev). Ändringar synkas automatiskt till GitHub.
 
-Follow these steps:
+För lokal utveckling:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Krav: Node.js & npm ([installera via nvm](https://github.com/nvm-sh/nvm#installing-and-updating)).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Publicering
 
-**Use GitHub Codespaces**
+Öppna [Lovable](https://lovable.dev) och välj **Share → Publish**.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Custom domain
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Gå till **Project → Settings → Domains** och klicka **Connect Domain**. Mer info: [docs.lovable.dev](https://docs.lovable.dev/features/custom-domain#custom-domain).
