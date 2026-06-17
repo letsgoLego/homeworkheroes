@@ -310,6 +310,7 @@ export function useHolidayMode(childId: string | null) {
     endHoliday,
     createGoal,
     deleteGoal,
+    updateGoal,
     setEntryValue,
     getEntryValue,
     getEntriesForGoal,
