@@ -115,19 +115,25 @@ export default function HolidayPage() {
                 </p>
               </motion.div>
             ) : (
-              <div className="space-y-3">
-                {goals.map((g) => (
-                  <HolidayGoalCard key={g.id} goal={g} childId={activeChildId} />
-                ))}
-              </div>
+              <>
+                <HolidayProgressHeader childId={activeChildId} />
+                <div className="space-y-3">
+                  {goals.map((g) => (
+                    <HolidayGoalCard key={g.id} goal={g} childId={activeChildId} />
+                  ))}
+                </div>
+              </>
             )}
 
             <HolidayGoalEditor childId={activeChildId} />
 
             {goals.length > 0 && (
-              <div className="pt-2">
-                <HolidayWeekSummary childId={activeChildId} childName={activeChild?.name ?? ''} />
-              </div>
+              <>
+                <HolidayHeatmap childId={activeChildId} />
+                <div className="pt-2">
+                  <HolidayWeekSummary childId={activeChildId} childName={activeChild?.name ?? ''} />
+                </div>
+              </>
             )}
 
             <div className="pt-4">
@@ -136,6 +142,14 @@ export default function HolidayPage() {
           </>
         )}
       </main>
+
+      <PerfectDaySplash
+        open={showPerfect}
+        streak={Math.max(0, ...goals.map(g => getGoalStreak(g.id)))}
+        childName={activeChild?.name ?? ''}
+        onClose={() => setShowPerfect(false)}
+      />
+
 
       <Navigation />
     </div>
