@@ -7,6 +7,7 @@ import { LogOut, Smartphone, Download, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StreakStats } from '@/components/StreakStats';
 import { NotificationSettings } from '@/components/NotificationSettings';
+import { HolidayToggle } from '@/components/HolidayToggle';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
