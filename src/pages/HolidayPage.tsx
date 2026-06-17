@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -11,6 +11,9 @@ import { HolidayGoalCard } from '@/components/HolidayGoalCard';
 import { HolidayGoalEditor } from '@/components/HolidayGoalEditor';
 import { HolidayWeekSummary } from '@/components/HolidayWeekSummary';
 import { HolidayToggle } from '@/components/HolidayToggle';
+import { HolidayProgressHeader } from '@/components/HolidayProgressHeader';
+import { HolidayHeatmap } from '@/components/HolidayHeatmap';
+import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 
 export default function HolidayPage() {
   const { children, activeChildId, setActiveChildId, userRole, loading } = useFamily();
