@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { Trash2, Plus, Check } from 'lucide-react';
+import { sv } from 'date-fns/locale';
+import { Trash2, Plus, Check, Flame } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,7 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { useHolidayMode, type HolidayGoal } from '@/hooks/useHolidayMode';
-import { celebrateTask, haptic } from '@/lib/confetti';
+import { celebrateTask, celebrateStars, haptic } from '@/lib/confetti';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -17,15 +19,19 @@ interface Props {
   childId: string;
 }
 
+const MILESTONES = [25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+
 export function HolidayGoalCard({ goal, childId }: Props) {
-  const { getEntryValue, setEntryValue, deleteGoal, getEntriesForGoal } = useHolidayMode(childId);
+  const {
+    getEntryValue, setEntryValue, deleteGoal, getEntriesForGoal,
+    getGoalStreak, getLast7Days,
+  } = useHolidayMode(childId);
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const isTotal = goal.type === 'total_for_holiday';
   const isCheckbox = goal.type === 'checkbox_per_day';
   const isMinutes = goal.type === 'minutes_per_day';
 
-  // For total: sum all entries. For others: today's value.
   const allEntries = getEntriesForGoal(goal.id);
   const todayValue = getEntryValue(goal.id, today);
   const totalValue = allEntries.reduce((acc, e) => acc + (e.value || 0), 0);
@@ -34,26 +40,46 @@ export function HolidayGoalCard({ goal, childId }: Props) {
   const target = isTotal ? (goal.total_target ?? 1) : (goal.daily_target ?? 1);
   const percent = Math.min(100, target > 0 ? (currentValue / target) * 100 : 0);
   const reached = currentValue >= target;
+  const streak = getGoalStreak(goal.id);
+  const last7 = getLast7Days(goal.id);
+  const max7 = Math.max(target, ...last7.map(d => d.value), 1);
 
   const [customInput, setCustomInput] = useState('');
+
+  const checkMilestone = (prevTotal: number, nextTotal: number) => {
+    const crossed = MILESTONES.find(m => prevTotal < m && nextTotal >= m);
+    if (crossed) {
+      const unit = isMinutes ? 'minuter' : isCheckbox ? 'gånger' : '';
+      celebrateStars();
+      haptic('heavy');
+      toast.success(`🎉 ${crossed} ${unit} totalt med ${goal.name}!`, { duration: 4000 });
+    }
+  };
 
   const handleAdd = async (delta: number) => {
     const prev = todayValue;
     const next = Math.max(0, prev + delta);
+    const prevTotal = totalValue;
+    const nextTotal = totalValue - prev + next;
     await setEntryValue(goal.id, today, next);
-    // Check if reached now (compute new percent)
-    const newCurrent = isTotal ? totalValue - prev + next : next;
-    if (newCurrent >= target && (isTotal ? totalValue : prev) < target) {
+    const justReached = isTotal
+      ? nextTotal >= target && prevTotal < target
+      : next >= target && prev < target;
+    if (justReached) {
       celebrateTask();
       haptic('medium');
     }
+    checkMilestone(prevTotal, nextTotal);
   };
 
   const handleSetCustom = async () => {
     const n = parseInt(customInput, 10);
     if (isNaN(n) || n < 0) return;
+    const prevTotal = totalValue;
+    const nextTotal = totalValue - todayValue + n;
     await setEntryValue(goal.id, today, n);
     setCustomInput('');
+    checkMilestone(prevTotal, nextTotal);
   };
 
   const handleCheckbox = async () => {
@@ -84,7 +110,17 @@ export function HolidayGoalCard({ goal, childId }: Props) {
             {goal.emoji}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-bold truncate">{goal.name}</h3>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-bold truncate">{goal.name}</h3>
+              {streak > 0 && (
+                <span
+                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/15 text-orange-600"
+                  title={`${streak} dagar i rad`}
+                >
+                  <Flame className="w-3 h-3" />{streak}
+                </span>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">
               {isTotal && `Totalt mål: ${goal.total_target}`}
               {isCheckbox && 'Klart varje dag'}
@@ -142,6 +178,43 @@ export function HolidayGoalCard({ goal, childId }: Props) {
             animate={{ width: `${percent}%` }}
             transition={{ type: 'spring', stiffness: 80, damping: 18 }}
           />
+        </div>
+      </div>
+
+      {/* 7-day mini history */}
+      <div className="px-4 pt-3">
+        <div className="flex items-end gap-1.5 h-12">
+          {last7.map((d, i) => {
+            const isToday = d.dateStr === today;
+            const hit = isCheckbox || isTotal ? d.value > 0 : d.value >= target;
+            const h = isCheckbox
+              ? (d.value > 0 ? 100 : 12)
+              : Math.max(12, (d.value / max7) * 100);
+            return (
+              <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                <div className="w-full flex-1 flex items-end">
+                  <motion.div
+                    className={cn('w-full rounded-sm', isToday && 'ring-2 ring-offset-1 ring-offset-card')}
+                    style={{
+                      height: `${h}%`,
+                      backgroundColor: d.value > 0 ? (hit ? goal.color : `${goal.color}80`) : 'hsl(var(--muted))',
+                      // @ts-ignore
+                      '--tw-ring-color': goal.color,
+                    }}
+                    initial={{ scaleY: 0 }}
+                    animate={{ scaleY: 1 }}
+                    transition={{ delay: i * 0.04, type: 'spring', stiffness: 120, damping: 16 }}
+                  />
+                </div>
+                <span className={cn(
+                  'text-[9px] uppercase',
+                  isToday ? 'font-bold' : 'text-muted-foreground'
+                )} style={isToday ? { color: goal.color } : undefined}>
+                  {format(d.date, 'EEEEE', { locale: sv })}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
