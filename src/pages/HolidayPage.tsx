@@ -13,6 +13,7 @@ import { HolidayWeekSummary } from '@/components/HolidayWeekSummary';
 import { HolidayToggle } from '@/components/HolidayToggle';
 import { HolidayProgressHeader } from '@/components/HolidayProgressHeader';
 import { HolidayHeatmap } from '@/components/HolidayHeatmap';
+import { HolidayTrophyView } from '@/components/HolidayTrophyView';
 import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 
 export default function HolidayPage() {
