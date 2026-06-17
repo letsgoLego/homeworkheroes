@@ -26,6 +26,7 @@ import { NudgeButton } from '@/components/NudgeButton';
 import { useChildHeartbeat } from '@/hooks/useChildPresence';
 import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 import { ChildWeekDashboard } from '@/components/ChildWeekDashboard';
+import { HolidayBanner } from '@/components/HolidayBanner';
 import { computeCurrentStreak } from '@/lib/streak';
 
 export default function TodayPage() {
