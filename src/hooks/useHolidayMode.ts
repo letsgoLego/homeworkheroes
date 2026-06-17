@@ -200,13 +200,93 @@ export function useHolidayMode(childId: string | null) {
   const getEntriesForGoal = (goalId: string): HolidayGoalEntry[] =>
     entries.filter(e => e.goal_id === goalId);
 
-  // Returns array of {date, value} for the last 7 days (Mon-Sun of current week or recent week)
   const getWeekEntries = (goalId: string, weekStart: Date) => {
     return Array.from({ length: 7 }).map((_, i) => {
       const d = addDays(weekStart, i);
       const ds = format(d, 'yyyy-MM-dd');
       return { date: d, dateStr: ds, value: getEntryValue(goalId, ds) };
     });
+  };
+
+  // Rolling last 7 days ending today
+  const getLast7Days = (goalId: string) => {
+    return Array.from({ length: 7 }).map((_, i) => {
+      const d = addDays(new Date(), -6 + i);
+      const ds = format(d, 'yyyy-MM-dd');
+      return { date: d, dateStr: ds, value: getEntryValue(goalId, ds) };
+    });
+  };
+
+  const getGoalStreak = (goalId: string): number => {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal) return 0;
+    const isCheckbox = goal.type === 'checkbox_per_day';
+    const isTotal = goal.type === 'total_for_holiday';
+    let s = 0;
+    for (let i = 0; i < 365; i++) {
+      const ds = format(addDays(new Date(), -i), 'yyyy-MM-dd');
+      const v = getEntryValue(goalId, ds);
+      const hit = (isCheckbox || isTotal) ? v > 0 : v >= (goal.daily_target ?? 1);
+      if (hit) s++;
+      else break;
+    }
+    return s;
+  };
+
+  const getGoalTotal = (goalId: string): number =>
+    entries.filter(e => e.goal_id === goalId).reduce((a, e) => a + (e.value || 0), 0);
+
+  const getPerfectDays = (): string[] => {
+    if (goals.length === 0) return [];
+    const dateSet = new Set(entries.map(e => e.entry_date));
+    const result: string[] = [];
+    dateSet.forEach(date => {
+      const allHit = goals.every(g => {
+        const v = getEntryValue(g.id, date);
+        if (g.type === 'checkbox_per_day' || g.type === 'total_for_holiday') return v > 0;
+        return v >= (g.daily_target ?? 1);
+      });
+      if (allHit) result.push(date);
+    });
+    return result.sort();
+  };
+
+  const isPerfectToday = (): boolean => {
+    if (goals.length === 0) return false;
+    const today = format(new Date(), 'yyyy-MM-dd');
+    return goals.every(g => {
+      const v = getEntryValue(g.id, today);
+      if (g.type === 'checkbox_per_day' || g.type === 'total_for_holiday') return v > 0;
+      return v >= (g.daily_target ?? 1);
+    });
+  };
+
+  const getHolidayXp = () => {
+    let xp = 0;
+    for (const e of entries) {
+      if ((e.value || 0) <= 0) continue;
+      const goal = goals.find(g => g.id === e.goal_id);
+      if (!goal) continue;
+      xp += 10;
+      const isCheckbox = goal.type === 'checkbox_per_day';
+      const isTotal = goal.type === 'total_for_holiday';
+      const hit = (isCheckbox || isTotal) ? e.value > 0 : e.value >= (goal.daily_target ?? 1);
+      if (hit && !isCheckbox) xp += 15;
+    }
+    xp += getPerfectDays().length * 50;
+    const thresholds = [0, 50, 150, 300, 500, 800, 1200, 1700, 2300, 3000, 4000];
+    const titles = [
+      '🌱 Lovstartare', '🏖️ Strandvandrare', '☀️ Solpiraten', '🍦 Glassmästaren',
+      '🏊 Vågsurfaren', '🚀 Lov-raket', '🏝️ Ö-äventyraren', '🎢 Tivolikungen',
+      '👑 Lov-mästare', '🏆 Lov-legend', '🌟 Lov-superstjärna',
+    ];
+    let level = 0;
+    for (let i = thresholds.length - 1; i >= 0; i--) {
+      if (xp >= thresholds[i]) { level = i; break; }
+    }
+    const curr = thresholds[level];
+    const next = thresholds[level + 1] ?? curr + 1000;
+    return { xp, level, title: titles[Math.min(level, titles.length - 1)], xpToNext: next - curr, xpInLevel: xp - curr };
   };
 
   return {
@@ -223,6 +303,12 @@ export function useHolidayMode(childId: string | null) {
     getEntryValue,
     getEntriesForGoal,
     getWeekEntries,
+    getLast7Days,
+    getGoalStreak,
+    getGoalTotal,
+    getPerfectDays,
+    isPerfectToday,
+    getHolidayXp,
     invalidate,
   };
 }
