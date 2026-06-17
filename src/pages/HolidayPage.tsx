@@ -13,6 +13,7 @@ import { HolidayWeekSummary } from '@/components/HolidayWeekSummary';
 import { HolidayToggle } from '@/components/HolidayToggle';
 import { HolidayProgressHeader } from '@/components/HolidayProgressHeader';
 import { HolidayHeatmap } from '@/components/HolidayHeatmap';
+import { HolidayTrophyView } from '@/components/HolidayTrophyView';
 import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 
 export default function HolidayPage() {
@@ -87,19 +88,23 @@ export default function HolidayPage() {
         {!activeChildId ? (
           <p className="text-center text-muted-foreground">Välj ett barn</p>
         ) : !isActive ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-3xl bg-card p-6 text-center shadow-card border border-border"
-          >
-            <div className="text-5xl mb-3">🌴</div>
-            <h2 className="text-xl font-bold mb-2">Dags för lov?</h2>
-            <p className="text-sm text-muted-foreground mb-5">
-              Pausa läxor och sätt upp 1–3 egna mål att jobba mot på lovet.
-              Fyll i varje dag och dela en sammanfattning med familjen.
-            </p>
-            <HolidayToggle childId={activeChildId} />
-          </motion.div>
+          mode && goals.length > 0 ? (
+            <HolidayTrophyView childId={activeChildId} childName={activeChild?.name ?? ''} />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-3xl bg-card p-6 text-center shadow-card border border-border"
+            >
+              <div className="text-5xl mb-3">🌴</div>
+              <h2 className="text-xl font-bold mb-2">Dags för lov?</h2>
+              <p className="text-sm text-muted-foreground mb-5">
+                Pausa läxor och sätt upp 1–3 egna mål att jobba mot på lovet.
+                Fyll i varje dag och dela en sammanfattning med familjen.
+              </p>
+              <HolidayToggle childId={activeChildId} />
+            </motion.div>
+          )
         ) : (
           <>
             {goals.length === 0 ? (

@@ -165,6 +165,17 @@ export function useHolidayMode(childId: string | null) {
     return true;
   };
 
+  const updateGoal = async (goalId: string, patch: Partial<Pick<HolidayGoal, 'name' | 'emoji' | 'type' | 'daily_target' | 'total_target' | 'color'>>) => {
+    const { error } = await supabase.from('holiday_goals').update(patch).eq('id', goalId);
+    if (error) {
+      toast.error('Kunde inte spara ändringar');
+      return false;
+    }
+    toast.success('Mål uppdaterat');
+    invalidate();
+    return true;
+  };
+
   const setEntryValue = async (goalId: string, date: string, value: number) => {
     // Optimistic
     qc.setQueryData(['holiday-mode', childId], (old: any) => {
@@ -299,6 +310,7 @@ export function useHolidayMode(childId: string | null) {
     endHoliday,
     createGoal,
     deleteGoal,
+    updateGoal,
     setEntryValue,
     getEntryValue,
     getEntriesForGoal,

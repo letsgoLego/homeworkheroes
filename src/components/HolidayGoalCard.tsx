@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Trash2, Plus, Check, Flame } from 'lucide-react';
+import { Trash2, Plus, Check, Flame, Pencil, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { useHolidayMode, type HolidayGoal } from '@/hooks/useHolidayMode';
+import { HolidayGoalEditor } from './HolidayGoalEditor';
 import { celebrateTask, celebrateStars, haptic } from '@/lib/confetti';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +46,7 @@ export function HolidayGoalCard({ goal, childId }: Props) {
   const max7 = Math.max(target, ...last7.map(d => d.value), 1);
 
   const [customInput, setCustomInput] = useState('');
+  const [editOpen, setEditOpen] = useState(false);
 
   const checkMilestone = (prevTotal: number, nextTotal: number) => {
     const crossed = MILESTONES.find(m => prevTotal < m && nextTotal >= m);
@@ -54,6 +56,18 @@ export function HolidayGoalCard({ goal, childId }: Props) {
       haptic('heavy');
       toast.success(`🎉 ${crossed} ${unit} totalt med ${goal.name}!`, { duration: 4000 });
     }
+  };
+
+  const checkDouble = (prev: number, next: number) => {
+    // Trigger when crossing 2x target today, once per day per goal
+    if (isCheckbox || isTotal) return;
+    if (prev >= target * 2 || next < target * 2) return;
+    const key = `holiday-double-${childId}-${goal.id}-${today}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+    celebrateStars();
+    haptic('medium');
+    toast.success(`🔥 Dubbelt upp – ${next}${isMinutes ? ' min' : ''} ${goal.name}!`, { duration: 3500 });
   };
 
   const handleAdd = async (delta: number) => {
@@ -68,17 +82,31 @@ export function HolidayGoalCard({ goal, childId }: Props) {
     if (justReached) {
       celebrateTask();
       haptic('medium');
+      if (!isTotal) {
+        toast.success('🎯 Dagsmål klart! Fortsätt gärna.', { duration: 3000 });
+      }
     }
+    checkDouble(prev, next);
     checkMilestone(prevTotal, nextTotal);
   };
 
   const handleSetCustom = async () => {
     const n = parseInt(customInput, 10);
     if (isNaN(n) || n < 0) return;
+    const prev = todayValue;
     const prevTotal = totalValue;
     const nextTotal = totalValue - todayValue + n;
     await setEntryValue(goal.id, today, n);
     setCustomInput('');
+    const justReached = isTotal
+      ? nextTotal >= target && prevTotal < target
+      : n >= target && prev < target;
+    if (justReached) {
+      celebrateTask();
+      haptic('medium');
+      if (!isTotal) toast.success('🎯 Dagsmål klart! Fortsätt gärna.', { duration: 3000 });
+    }
+    checkDouble(prev, n);
     checkMilestone(prevTotal, nextTotal);
   };
 
@@ -120,6 +148,11 @@ export function HolidayGoalCard({ goal, childId }: Props) {
                   <Flame className="w-3 h-3" />{streak}
                 </span>
               )}
+              {isTotal && reached && (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-success/15 text-success">
+                  <Trophy className="w-3 h-3" /> Mål uppnått
+                </span>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
               {isTotal && `Totalt mål: ${goal.total_target}`}
@@ -130,28 +163,48 @@ export function HolidayGoalCard({ goal, childId }: Props) {
           </div>
         </div>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Ta bort mål?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Målet "{goal.name}" och dess historik döljs.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Avbryt</AlertDialogCancel>
-              <AlertDialogAction onClick={() => deleteGoal(goal.id)}>
-                Ta bort
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <div className="flex items-center gap-0.5 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground"
+            onClick={() => setEditOpen(true)}
+            aria-label="Redigera mål"
+          >
+            <Pencil className="w-4 h-4" />
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Ta bort mål?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Målet "{goal.name}" och dess historik döljs.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                <AlertDialogAction onClick={() => deleteGoal(goal.id)}>
+                  Ta bort
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
+
+      <HolidayGoalEditor
+        childId={childId}
+        goal={goal}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        hideTrigger
+      />
+
 
       {/* Progress bar */}
       <div className="px-4">
@@ -166,14 +219,19 @@ export function HolidayGoalCard({ goal, childId }: Props) {
           </span>
           {reached && !isCheckbox && (
             <span className="text-xs font-bold text-success flex items-center gap-1">
-              <Check className="w-3 h-3" /> Klart!
+              <Check className="w-3 h-3" />
+              {currentValue > target ? `+${currentValue - target} över målet!` : 'Klart!'}
             </span>
           )}
         </div>
         <div className="h-4 bg-muted rounded-full overflow-hidden">
           <motion.div
             className="h-full rounded-full"
-            style={{ backgroundColor: goal.color }}
+            style={{
+              background: reached && !isCheckbox
+                ? `linear-gradient(90deg, ${goal.color}, hsl(var(--success)))`
+                : goal.color,
+            }}
             initial={{ width: 0 }}
             animate={{ width: `${percent}%` }}
             transition={{ type: 'spring', stiffness: 80, damping: 18 }}
