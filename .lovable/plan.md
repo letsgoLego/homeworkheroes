@@ -1,89 +1,50 @@
+## Gamifiera Lov-läget – gör progress roligare
 
-# Lov-läge (Holiday Mode)
+Målet: göra det belönande att fylla i sina lovmål varje dag, så barnet vill komma tillbaka och se sina framsteg växa.
 
-Ett nytt läge per barn där vanliga läx-notifikationer pausas och barnet istället jobbar mot 1–3 personliga lovmål med visuella staplar och en delbar veckosammanfattning.
+### 1. Streak per mål (🔥 dagar i rad)
+- Visa en liten flam-ikon + antal dagar i rad målet uppnåtts på `HolidayGoalCard`.
+- Beräknas från `holiday_goal_entries` (sammanhängande dagar där value ≥ daily_target, eller value > 0 för checkbox).
+- Mjuk "rekord"-text när nytt personligt rekord slås.
 
-## 1. Aktivering & avslutning
+### 2. Visuell stapelhistorik (sista 7 dagarna)
+- Under progress-baren på varje goal card: 7 små vertikala mini-staplar (mån–sön), fyllda i målets färg, höjd = % av dagsmål.
+- Dagens stapel pulserar mjukt. Tomma dagar = ljusgrå.
+- Direkt visuell feedback: "kolla vad jag gjort hela veckan!".
 
-- **Manuell toggle** på barnets profil/Idag-sida: "Starta lov" / "Avsluta lov".
-- **Valfritt slutdatum** vid start (datepicker). När slutdatum passeras avslutas läget automatiskt nästa gång appen öppnas (samt via cron-jobb varje natt).
-- När aktivt:
-  - Visas en tydlig banner: "🌴 Lovläge aktivt – tom [datum]".
-  - **Veckovyn** byts ut mot en Lov-vy (staplar/progress).
-  - **Idag-vyn** visar bara dagens lovmål (läxor/aktiviteter göms men raderas inte).
-  - **Push-notifikationer** för vanliga läxor (14:30/15:30/18:30) hoppas över för barn i lovläge.
-- Både förälder och barn kan starta/avsluta lovet.
+### 3. Totalsumma & milstolpar
+- Stor siffra högst upp på `HolidayPage`: "📖 142 sidor lästa · 🎸 85 min spelat · ✅ 6 dagar i rad".
+- Milstolpe-pop när man passerar runda tal (50, 100, 500, 1000) – konfetti + toast: "🎉 Du har läst 100 sidor!".
+- Lagras i state via beräkning från entries (inget nytt i DB).
 
-## 2. Lovmål (1–3 st)
+### 4. Lov-XP & nivåer (separat från vanliga XP)
+- Varje ifyllt mål = 10 XP, fullt dagsmål = 25 XP, perfekt dag (alla mål nådda) = 50 XP + konfetti.
+- Egen nivå-titel skala för lov ("🌴 Lovstartare → ☀️ Solpiraten → 🏆 Lov-legend").
+- Liten XP-bar överst på `HolidayPage` (samma stil som `StreakStats`-kortet).
 
-Förälder eller barn kan skapa upp till 3 mål. Varje mål har:
+### 5. "Perfekt dag"-firande
+- När alla aktiva mål nåtts samma dag: fullskärms `PerfectDaySplash`-variant ("🌴 Perfekt lovdag!") + heavy haptic + stjärnregn (`celebrateStars`).
+- Trigger 1 gång/dag, flagga i localStorage per child+datum.
 
-- **Namn** + **emoji** (t.ex. "📖 Läsa", "🎸 Gitarr", "🧮 Matte").
-- **Typ** (välj en):
-  - `count_per_day` – antal per dag (t.ex. 10 sidor)
-  - `minutes_per_day` – minuter per dag (t.ex. 20 min)
-  - `checkbox_per_day` – klart/ej klart
-  - `total_for_holiday` – totalmål för hela lovet (t.ex. 200 sidor)
-- **Dagligt mål / totalmål** (numeriskt, utom checkbox).
-- **Färg** (auto från en palett: turkos, gul, rosa, lila).
+### 6. Kalender-heatmap (lov-översikt)
+- Liten grid längst ner på `HolidayPage`: en ruta per dag sedan lovet startade, färgmättnad = hur stor andel av målen som nåddes.
+- Inspirerat av GitHub contributions. Gör det visuellt mätbart att man "fyllt i lovet".
 
-## 3. Daglig ifyllning
-
-Lov-vyn (ersätter veckovyn när lov är aktivt) visar per mål:
-
-- **Stapel** som fylls upp mot dagens mål (eller mot totalmålet).
-- **+ knappar** (t.ex. +1, +5, +10 sidor / +5, +15 min) och fritt sifferfält.
-- **Checkbox** för checkbox-typ.
-- **Streak-räknare** (antal dagar i rad där dagsmål nåtts).
-- **Konfetti + haptik** när dagsmål nås (återanvänder befintlig `confetti.ts`).
-
-Historik per dag sparas så veckosammanfattningen kan byggas.
-
-## 4. Anpassade lov-notifikationer
-
-- Befintlig `send-notifications` edge function utökas: om barnet är i lovläge skickas istället en **lov-påminnelse** kl. 10:00 och 17:00:
-  - "🌴 Dags för [emoji] [målnamn]! Du har gjort [X/Y] idag."
-  - Hoppas över om dagens mål redan är uppnått.
-
-## 5. Veckosammanfattning (delbar bild)
-
-- Söndag kväll (eller när man trycker "Visa veckan"): genereras en snygg sammanfattningsvy:
-  - Barnets namn + vecknummer
-  - Per mål: stapeldiagram över de 7 dagarna, total summa, antal dagar målet nåddes
-  - Streak, total tid/sidor/etc.
-  - Liten brand-footer "Läxhjälpen"
-- **Delning**: knapp "Dela bild" använder `html-to-image` för att rendera vyn till PNG → Web Share API (`navigator.share` med `files`) på iOS, fallback till nedladdning.
-
-## 6. Översikt – databas & teknik
+### 7. Förbättrad veckosammanfattning (PNG)
+- Lägg till streak-flammor, totalsumma och "veckans hjälte"-rubrik baserat på största förbättring.
+- Bättre delningsmotivation till föräldrar/kompisar.
 
 ### Tekniska detaljer
+- Allt beräknas frontend från befintliga `holiday_goal_entries` – ingen schemaändring krävs.
+- Nya hjälpfunktioner i `useHolidayMode.ts`: `getGoalStreak(goalId)`, `getLast7Days(goalId)`, `getPerfectDays()`, `getHolidayXp()`.
+- Ny komponent: `HolidayProgressHeader.tsx` (totalsumma + XP-bar + perfekta dagar).
+- Ny komponent: `HolidayHeatmap.tsx`.
+- Utöka `HolidayGoalCard.tsx` med streak-badge + 7-dagars mini-staplar.
+- Milstolpe-logik i `setEntryValue`-callback (jämför före/efter totalsumma mot trösklar).
+- Återanvänd `celebrateTask`, `celebrateStars`, `celebrateAssignment`, `haptic` från `lib/confetti.ts`.
 
-**Nya tabeller (migration):**
+### Vad jag INTE rör
+- Databasstruktur, vanliga läxor/notiser, andra sidor än `HolidayPage` + `HolidayGoalCard` + `HolidayWeekSummary`.
 
-- `holiday_modes`
-  - `child_id` (FK children, unique), `active` bool, `started_at`, `ends_at` nullable, `created_by` user_id
-- `holiday_goals`
-  - `child_id` FK, `name`, `emoji`, `type` enum (`count_per_day`/`minutes_per_day`/`checkbox_per_day`/`total_for_holiday`), `daily_target` int nullable, `total_target` int nullable, `color`, `sort_order`, `archived` bool
-  - max 3 aktiva per barn (validerings­trigger)
-- `holiday_goal_entries`
-  - `goal_id` FK, `entry_date` date, `value` int (0/1 för checkbox), unique(goal_id, entry_date)
-
-Alla med standard GRANTs (`authenticated`, `service_role`), RLS via `user_belongs_to_family` på barnets familj.
-
-**Edge functions:**
-- Utöka `send-notifications`: kolla `holiday_modes.active`, byt meddelande.
-- Utöka `cleanup-old-homework` (eller nytt cron): avsluta lov där `ends_at < today`.
-
-**Frontend:**
-- `src/hooks/useHolidayMode.ts` – läser status, mål, dagsentries (react-query).
-- `src/pages/HolidayPage.tsx` – ersätter `WeekPage` när lov aktivt (route `/week` renderar villkorligt, eller egen `/holiday`).
-- `src/components/HolidayGoalCard.tsx` – stapel + +knappar.
-- `src/components/HolidayToggle.tsx` – start/avsluta-dialog med datepicker (på `ChildProfilePage`).
-- `src/components/HolidayWeekSummary.tsx` – delbar vy.
-- `src/components/HolidayBanner.tsx` – global banner i `TodayPage`.
-- `TodayPage` & `WeekView`: filtrera bort vanliga homework/activities när `holidayMode.active`.
-- Installera `html-to-image` för PNG-export.
-
-**Svenska UI-texter** genomgående. Återanvänd teal-palett och befintliga design tokens.
-
-**Memory:** Spara `mem://features/holiday-mode` med reglerna ovan, och lägg till en rad i `mem://index.md`.
+### Vill du att jag bygger allt, eller börjar med ett urval?
+Förslag på minsta paket som ger störst effekt: **1 (streak) + 2 (7-dagars staplar) + 3 (milstolpar) + 5 (perfekt dag)**. 4 (XP) och 6 (heatmap) kan komma i steg två.

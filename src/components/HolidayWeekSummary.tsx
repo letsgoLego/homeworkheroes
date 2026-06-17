@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function HolidayWeekSummary({ childId, childName }: Props) {
-  const { goals, getWeekEntries } = useHolidayMode(childId);
+  const { goals, getWeekEntries, getGoalStreak, getGoalTotal, getPerfectDays } = useHolidayMode(childId);
   const [open, setOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
@@ -86,6 +86,26 @@ export function HolidayWeekSummary({ childId, childName }: Props) {
                 Vecka {weekNumber} · {format(weekStart, 'd MMM', { locale: sv })} – {format(weekEnd, 'd MMM', { locale: sv })}
               </p>
             </div>
+
+            {/* Hero stats */}
+            <div className="grid grid-cols-3 gap-2 mb-5">
+              <div className="rounded-xl bg-background/60 p-2 text-center">
+                <div className="text-lg">🔥</div>
+                <div className="text-base font-bold">{Math.max(0, ...goals.map(g => getGoalStreak(g.id)))}</div>
+                <div className="text-[9px] text-muted-foreground leading-tight">bästa streak</div>
+              </div>
+              <div className="rounded-xl bg-background/60 p-2 text-center">
+                <div className="text-lg">🏆</div>
+                <div className="text-base font-bold">{getPerfectDays().length}</div>
+                <div className="text-[9px] text-muted-foreground leading-tight">perfekta dagar</div>
+              </div>
+              <div className="rounded-xl bg-background/60 p-2 text-center">
+                <div className="text-lg">⭐</div>
+                <div className="text-base font-bold">{goals.reduce((a, g) => a + getGoalTotal(g.id), 0)}</div>
+                <div className="text-[9px] text-muted-foreground leading-tight">poäng totalt</div>
+              </div>
+            </div>
+
 
             <div className="space-y-4">
               {goals.map((g) => {

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
@@ -11,12 +11,27 @@ import { HolidayGoalCard } from '@/components/HolidayGoalCard';
 import { HolidayGoalEditor } from '@/components/HolidayGoalEditor';
 import { HolidayWeekSummary } from '@/components/HolidayWeekSummary';
 import { HolidayToggle } from '@/components/HolidayToggle';
+import { HolidayProgressHeader } from '@/components/HolidayProgressHeader';
+import { HolidayHeatmap } from '@/components/HolidayHeatmap';
+import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 
 export default function HolidayPage() {
   const { children, activeChildId, setActiveChildId, userRole, loading } = useFamily();
-  const { goals, mode, isActive } = useHolidayMode(activeChildId);
+  const { goals, mode, isActive, isPerfectToday, getGoalStreak } = useHolidayMode(activeChildId);
+  const [showPerfect, setShowPerfect] = useState(false);
 
   const activeChild = children.find(c => c.id === activeChildId);
+
+  // Trigger perfect-day splash once per child+day
+  useEffect(() => {
+    if (!activeChildId || !isActive || goals.length === 0) return;
+    if (!isPerfectToday()) return;
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const key = `holiday-perfect-${activeChildId}-${today}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+    setShowPerfect(true);
+  }, [activeChildId, isActive, goals, isPerfectToday]);
 
   // Auto-end if past end date (silently update flag)
   useEffect(() => {
@@ -100,19 +115,25 @@ export default function HolidayPage() {
                 </p>
               </motion.div>
             ) : (
-              <div className="space-y-3">
-                {goals.map((g) => (
-                  <HolidayGoalCard key={g.id} goal={g} childId={activeChildId} />
-                ))}
-              </div>
+              <>
+                <HolidayProgressHeader childId={activeChildId} />
+                <div className="space-y-3">
+                  {goals.map((g) => (
+                    <HolidayGoalCard key={g.id} goal={g} childId={activeChildId} />
+                  ))}
+                </div>
+              </>
             )}
 
             <HolidayGoalEditor childId={activeChildId} />
 
             {goals.length > 0 && (
-              <div className="pt-2">
-                <HolidayWeekSummary childId={activeChildId} childName={activeChild?.name ?? ''} />
-              </div>
+              <>
+                <HolidayHeatmap childId={activeChildId} />
+                <div className="pt-2">
+                  <HolidayWeekSummary childId={activeChildId} childName={activeChild?.name ?? ''} />
+                </div>
+              </>
             )}
 
             <div className="pt-4">
@@ -121,6 +142,14 @@ export default function HolidayPage() {
           </>
         )}
       </main>
+
+      <PerfectDaySplash
+        open={showPerfect}
+        streak={Math.max(0, ...goals.map(g => getGoalStreak(g.id)))}
+        childName={activeChild?.name ?? ''}
+        onClose={() => setShowPerfect(false)}
+      />
+
 
       <Navigation />
     </div>
