@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Trash2, Plus, Check, Flame } from 'lucide-react';
+import { Trash2, Plus, Check, Flame, Pencil, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { useHolidayMode, type HolidayGoal } from '@/hooks/useHolidayMode';
+import { HolidayGoalEditor } from './HolidayGoalEditor';
 import { celebrateTask, celebrateStars, haptic } from '@/lib/confetti';
 import { cn } from '@/lib/utils';
 
