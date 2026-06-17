@@ -44,8 +44,8 @@ export function HolidayGoalCard({ goal, childId }: Props) {
     // Check if reached now (compute new percent)
     const newCurrent = isTotal ? totalValue - prev + next : next;
     if (newCurrent >= target && (isTotal ? totalValue : prev) < target) {
-      fireConfetti();
-      if ('vibrate' in navigator) navigator.vibrate(40);
+      celebrateTask();
+      haptic('medium');
     }
   };
 
@@ -60,8 +60,8 @@ export function HolidayGoalCard({ goal, childId }: Props) {
     const next = todayValue > 0 ? 0 : 1;
     await setEntryValue(goal.id, today, next);
     if (next === 1) {
-      fireConfetti();
-      if ('vibrate' in navigator) navigator.vibrate(40);
+      celebrateTask();
+      haptic('medium');
     }
   };
 
