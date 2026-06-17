@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function HolidayWeekSummary({ childId, childName }: Props) {
-  const { goals, getWeekEntries } = useHolidayMode(childId);
+  const { goals, getWeekEntries, getGoalStreak, getGoalTotal, getPerfectDays } = useHolidayMode(childId);
   const [open, setOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
