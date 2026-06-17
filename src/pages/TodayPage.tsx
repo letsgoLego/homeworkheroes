@@ -26,6 +26,7 @@ import { NudgeButton } from '@/components/NudgeButton';
 import { useChildHeartbeat } from '@/hooks/useChildPresence';
 import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 import { ChildWeekDashboard } from '@/components/ChildWeekDashboard';
+import { HolidayBanner } from '@/components/HolidayBanner';
 import { computeCurrentStreak } from '@/lib/streak';
 
 export default function TodayPage() {
@@ -259,6 +260,9 @@ export default function TodayPage() {
           </TabsList>
           
           <TabsContent value="today" className="space-y-6">
+            {/* Holiday mode banner */}
+            <HolidayBanner childId={activeChildId} />
+
             {/* Child weekly dashboard - peppar barnet att komma i mål */}
             {userRole === 'child' && activeChild && (
               <ChildWeekDashboard

@@ -194,6 +194,135 @@ export type Database = {
         }
         Relationships: []
       }
+      holiday_goal_entries: {
+        Row: {
+          created_at: string
+          entry_date: string
+          goal_id: string
+          id: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          entry_date: string
+          goal_id: string
+          id?: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          goal_id?: string
+          id?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holiday_goal_entries_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "holiday_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      holiday_goals: {
+        Row: {
+          archived: boolean
+          child_id: string
+          color: string
+          created_at: string
+          daily_target: number | null
+          emoji: string
+          id: string
+          name: string
+          sort_order: number
+          total_target: number | null
+          type: Database["public"]["Enums"]["holiday_goal_type"]
+          updated_at: string
+        }
+        Insert: {
+          archived?: boolean
+          child_id: string
+          color?: string
+          created_at?: string
+          daily_target?: number | null
+          emoji?: string
+          id?: string
+          name: string
+          sort_order?: number
+          total_target?: number | null
+          type: Database["public"]["Enums"]["holiday_goal_type"]
+          updated_at?: string
+        }
+        Update: {
+          archived?: boolean
+          child_id?: string
+          color?: string
+          created_at?: string
+          daily_target?: number | null
+          emoji?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          total_target?: number | null
+          type?: Database["public"]["Enums"]["holiday_goal_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holiday_goals_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      holiday_modes: {
+        Row: {
+          active: boolean
+          child_id: string
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          child_id: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          child_id?: string
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holiday_modes_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: true
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework: {
         Row: {
           bring_to_school: string[] | null
@@ -530,6 +659,11 @@ export type Database = {
     }
     Enums: {
       app_role: "parent" | "child"
+      holiday_goal_type:
+        | "count_per_day"
+        | "minutes_per_day"
+        | "checkbox_per_day"
+        | "total_for_holiday"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -658,6 +792,12 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["parent", "child"],
+      holiday_goal_type: [
+        "count_per_day",
+        "minutes_per_day",
+        "checkbox_per_day",
+        "total_for_holiday",
+      ],
     },
   },
 } as const

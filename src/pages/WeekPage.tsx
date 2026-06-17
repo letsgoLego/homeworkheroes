@@ -10,11 +10,16 @@ import { AddChild } from '@/components/AddChild';
 import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { useFamily } from '@/hooks/useFamily';
+import { useHolidayMode } from '@/hooks/useHolidayMode';
+import HolidayPage from './HolidayPage';
 
 export default function WeekPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const { children, activeChildId, setActiveChildId, homework, loading, userRole, getActivitiesForDate } = useFamily();
+  const { isActive: holidayActive } = useHolidayMode(activeChildId);
+
+  if (holidayActive) return <HolidayPage />;
   
   const handlePrevWeek = () => {
     setSelectedDate(subWeeks(selectedDate, 1));
