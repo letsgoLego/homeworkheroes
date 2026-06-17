@@ -148,6 +148,11 @@ export function HolidayGoalCard({ goal, childId }: Props) {
                   <Flame className="w-3 h-3" />{streak}
                 </span>
               )}
+              {isTotal && reached && (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-success/15 text-success">
+                  <Trophy className="w-3 h-3" /> Mål uppnått
+                </span>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
               {isTotal && `Totalt mål: ${goal.total_target}`}
@@ -158,28 +163,48 @@ export function HolidayGoalCard({ goal, childId }: Props) {
           </div>
         </div>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Ta bort mål?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Målet "{goal.name}" och dess historik döljs.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Avbryt</AlertDialogCancel>
-              <AlertDialogAction onClick={() => deleteGoal(goal.id)}>
-                Ta bort
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <div className="flex items-center gap-0.5 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground"
+            onClick={() => setEditOpen(true)}
+            aria-label="Redigera mål"
+          >
+            <Pencil className="w-4 h-4" />
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Ta bort mål?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Målet "{goal.name}" och dess historik döljs.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                <AlertDialogAction onClick={() => deleteGoal(goal.id)}>
+                  Ta bort
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
+
+      <HolidayGoalEditor
+        childId={childId}
+        goal={goal}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        hideTrigger
+      />
+
 
       {/* Progress bar */}
       <div className="px-4">
