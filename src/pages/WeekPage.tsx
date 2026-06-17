@@ -86,7 +86,7 @@ export default function WeekPage() {
         )}
       </header>
       
-      <main className="px-4 py-4">
+      <main className="px-4 py-4 space-y-4">
         <WeekView 
           selectedDate={selectedDate} 
           onSelectDate={setSelectedDate}
@@ -94,6 +94,12 @@ export default function WeekPage() {
           activeChildId={activeChildId}
           getActivitiesForDate={getActivitiesForDate}
         />
+
+        {activeChildId && (
+          <div className="pt-2">
+            <HolidayToggle childId={activeChildId} />
+          </div>
+        )}
       </main>
 
       
