@@ -260,6 +260,9 @@ export default function TodayPage() {
           </TabsList>
           
           <TabsContent value="today" className="space-y-6">
+            {/* Holiday mode banner */}
+            <HolidayBanner childId={activeChildId} />
+
             {/* Child weekly dashboard - peppar barnet att komma i mål */}
             {userRole === 'child' && activeChild && (
               <ChildWeekDashboard
