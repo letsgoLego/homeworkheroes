@@ -46,6 +46,7 @@ export function HolidayGoalCard({ goal, childId }: Props) {
   const max7 = Math.max(target, ...last7.map(d => d.value), 1);
 
   const [customInput, setCustomInput] = useState('');
+  const [editOpen, setEditOpen] = useState(false);
 
   const checkMilestone = (prevTotal: number, nextTotal: number) => {
     const crossed = MILESTONES.find(m => prevTotal < m && nextTotal >= m);
@@ -55,6 +56,18 @@ export function HolidayGoalCard({ goal, childId }: Props) {
       haptic('heavy');
       toast.success(`🎉 ${crossed} ${unit} totalt med ${goal.name}!`, { duration: 4000 });
     }
+  };
+
+  const checkDouble = (prev: number, next: number) => {
+    // Trigger when crossing 2x target today, once per day per goal
+    if (isCheckbox || isTotal) return;
+    if (prev >= target * 2 || next < target * 2) return;
+    const key = `holiday-double-${childId}-${goal.id}-${today}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+    celebrateStars();
+    haptic('medium');
+    toast.success(`🔥 Dubbelt upp – ${next}${isMinutes ? ' min' : ''} ${goal.name}!`, { duration: 3500 });
   };
 
   const handleAdd = async (delta: number) => {
@@ -69,7 +82,11 @@ export function HolidayGoalCard({ goal, childId }: Props) {
     if (justReached) {
       celebrateTask();
       haptic('medium');
+      if (!isTotal) {
+        toast.success('🎯 Dagsmål klart! Fortsätt gärna.', { duration: 3000 });
+      }
     }
+    checkDouble(prev, next);
     checkMilestone(prevTotal, nextTotal);
   };
 
