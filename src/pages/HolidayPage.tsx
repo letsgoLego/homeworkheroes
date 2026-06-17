@@ -17,9 +17,21 @@ import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 
 export default function HolidayPage() {
   const { children, activeChildId, setActiveChildId, userRole, loading } = useFamily();
-  const { goals, mode, isActive } = useHolidayMode(activeChildId);
+  const { goals, mode, isActive, isPerfectToday, getGoalStreak } = useHolidayMode(activeChildId);
+  const [showPerfect, setShowPerfect] = useState(false);
 
   const activeChild = children.find(c => c.id === activeChildId);
+
+  // Trigger perfect-day splash once per child+day
+  useEffect(() => {
+    if (!activeChildId || !isActive || goals.length === 0) return;
+    if (!isPerfectToday()) return;
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const key = `holiday-perfect-${activeChildId}-${today}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+    setShowPerfect(true);
+  }, [activeChildId, isActive, goals, isPerfectToday]);
 
   // Auto-end if past end date (silently update flag)
   useEffect(() => {
