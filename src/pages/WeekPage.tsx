@@ -11,6 +11,7 @@ import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { useFamily } from '@/hooks/useFamily';
 import { useHolidayMode } from '@/hooks/useHolidayMode';
+import { HolidayToggle } from '@/components/HolidayToggle';
 import HolidayPage from './HolidayPage';
 
 export default function WeekPage() {
