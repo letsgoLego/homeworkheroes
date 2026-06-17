@@ -90,6 +90,9 @@ export default function ChildProfilePage() {
           <StreakStats homework={homework} childId={activeChildId} />
         )}
         
+        {/* Holiday mode */}
+        {activeChildId && <HolidayToggle childId={activeChildId} />}
+
         {/* Notification Settings */}
         <NotificationSettings />
         
