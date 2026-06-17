@@ -9,7 +9,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import { useHolidayMode, type HolidayGoal } from '@/hooks/useHolidayMode';
-import { fireConfetti } from '@/lib/confetti';
+import { celebrateTask, haptic } from '@/lib/confetti';
 import { cn } from '@/lib/utils';
 
 interface Props {
