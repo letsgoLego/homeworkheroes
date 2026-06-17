@@ -219,14 +219,19 @@ export function HolidayGoalCard({ goal, childId }: Props) {
           </span>
           {reached && !isCheckbox && (
             <span className="text-xs font-bold text-success flex items-center gap-1">
-              <Check className="w-3 h-3" /> Klart!
+              <Check className="w-3 h-3" />
+              {currentValue > target ? `+${currentValue - target} över målet!` : 'Klart!'}
             </span>
           )}
         </div>
         <div className="h-4 bg-muted rounded-full overflow-hidden">
           <motion.div
             className="h-full rounded-full"
-            style={{ backgroundColor: goal.color }}
+            style={{
+              background: reached && !isCheckbox
+                ? `linear-gradient(90deg, ${goal.color}, hsl(var(--success)))`
+                : goal.color,
+            }}
             initial={{ width: 0 }}
             animate={{ width: `${percent}%` }}
             transition={{ type: 'spring', stiffness: 80, damping: 18 }}
