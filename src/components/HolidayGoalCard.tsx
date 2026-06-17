@@ -93,10 +93,20 @@ export function HolidayGoalCard({ goal, childId }: Props) {
   const handleSetCustom = async () => {
     const n = parseInt(customInput, 10);
     if (isNaN(n) || n < 0) return;
+    const prev = todayValue;
     const prevTotal = totalValue;
     const nextTotal = totalValue - todayValue + n;
     await setEntryValue(goal.id, today, n);
     setCustomInput('');
+    const justReached = isTotal
+      ? nextTotal >= target && prevTotal < target
+      : n >= target && prev < target;
+    if (justReached) {
+      celebrateTask();
+      haptic('medium');
+      if (!isTotal) toast.success('🎯 Dagsmål klart! Fortsätt gärna.', { duration: 3000 });
+    }
+    checkDouble(prev, n);
     checkMilestone(prevTotal, nextTotal);
   };
 
