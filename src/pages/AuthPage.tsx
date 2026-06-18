@@ -12,6 +12,16 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { lovable } from '@/integrations/lovable/index';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type View = 'login' | 'signup' | 'email-sent';
 

@@ -1,43 +1,49 @@
-## Redigera mål, firande, och trophy-vy
+## Mål
 
-### 1. Redigera befintliga mål
-Återanvänd `HolidayGoalEditor.tsx` i edit-läge.
+1. Säkerställ att Google + Apple SSO fungerar för både inloggning och kontoskapande.
+2. När någon försöker logga in med e-post/lösenord men saknar konto: erbjud opt-in att skapa ett konto med samma uppgifter direkt.
 
-- Lägg till "Redigera"-knapp (penna-ikon) på `HolidayGoalCard.tsx`, bredvid soptunnan.
-- Utöka `HolidayGoalEditor` med valfri `goal?: HolidayGoal` prop. När den finns: prefyll fält, ändra rubrik till "Redigera mål", spara via UPDATE istället för INSERT.
-- Redigerbara fält: **namn, emoji, färg, dagsmål/totalmål, måltyp**.
-- Vid byte av måltyp: visa varning ("Tidigare ifyllda värden behålls men kan se konstiga ut"). Historik (`holiday_goal_entries`) rörs inte.
-- Ny funktion i `useHolidayMode.ts`: `updateGoal(goalId, partial)` som gör `UPDATE holiday_goals SET ... WHERE id = ...`.
-- Streaks och progress beräknas automatiskt om mot nya target (befintlig logik i `getGoalStreak` läser alltid aktuellt `daily_target`).
+## Bakgrund
 
-### 2. Firande när mål nås (fortsätt räkna)
-Behåller nuvarande beteende — barnet kan fortsätta fylla i efter måluppfyllelse.
+- SSO går idag via `lovable.auth.signInWithOAuth('google' | 'apple', …)` i `AuthPage.tsx`. Samma knapp används för login och signup (OAuth skapar konto automatiskt vid första inlog). Etiketten ändras redan ("Fortsätt med…" vs "Kom igång med…").
+- Auto-linking för matchande verifierad e-post finns redan (mem://auth/account-linking).
+- Vid inloggningsfel returnerar Supabase generiskt `Invalid login credentials` — vi kan inte säkert särskilja "fel lösenord" från "konto saknas". Vi visar därför ett opt-in-erbjudande istället för automatiskt skapande.
 
-- **Daily-mål nått första gången idag**: redan implementerat (`celebrateTask` + medium haptic). Lägg till liten toast: "🎯 Dagsmål klart! Fortsätt gärna."
-- **Daily-mål överträffat 2x på samma dag** (t.ex. 30 min när målet är 15): extra liten celebrate ("🔥 Dubbelt upp!"), trigger 1 gång/dag/mål via localStorage-flagga.
-- **Totalmål nått**: behåll konfetti, lägg till permanent grön "✓ Mål uppnått!"-badge överst på kortet, men input-fältet ligger kvar (kan fortsätta läsa även efter 100 sidor).
-- **Milstolpar** (befintliga 25/50/100/...): oförändrat.
-- Visuellt: när `currentValue >= target` på totalmål, byt progress-barens färg till grön-gradient och visa "X över målet!" om man fortsätter.
+## Plan
 
-### 3. Trophy-vy efter avslutat lov
-Ny komponent `HolidayTrophyView.tsx` som visas när `mode.active === false` men det finns mål med historik, ELLER när `ends_at` passerat.
+### 1. SSO-verifiering (`AuthPage.tsx`, `ChildLoginPage` rörs ej)
+- Behåll en delad `handleOAuth` — bekräftar att login- och signup-flikarna båda använder samma broker (korrekt beteende: OAuth = upsert-konto).
+- Lägg till en liten hjälptext under SSO-knapparna: "Samma knapp fungerar både för nya och befintliga konton." (svensk, dämpad text-muted-foreground, syns i båda vyer).
+- Inga ändringar i `src/integrations/lovable/index.ts` (auto-genererad).
 
-- **Visas på `HolidayPage`** i stället för "Lov-läge ej aktivt"-tomma tillståndet, om barnet just avslutat ett lov (senaste 14 dagarna).
-- För varje mål, beräkna måluppfyllnadsgrad:
-  - **Total-mål**: `totalValue / total_target`
-  - **Daily-mål**: andel dagar målet nåddes / antal lovdagar
-  - **Checkbox**: andel dagar markerade
-- Medalj-trösklar: **🥇 Guld** ≥90%, **🥈 Silver** ≥60%, **🥉 Brons** ≥30%, **🎗️ Deltagit** <30%.
-- Layout: stora medaljer per mål + total summa ("📖 142 sidor · 🎸 85 min · 7 perfekta dagar") + längsta streak + Lov-XP/nivå-titel.
-- Knappar: "📤 Dela trophy-bild" (PNG via samma html2canvas-flöde som `HolidayWeekSummary`) och "Starta nytt lov".
-- Trofén är "permanent" tills nytt lov startas.
+### 2. Opt-in "skapa konto" vid misslyckad inloggning
+När `signInWithPassword` returnerar `Invalid login credentials` i login-vyn:
+- Byt nuvarande toast mot en `AlertDialog` (shadcn) med:
+  - Titel: "Inget konto hittades – eller fel lösenord"
+  - Text: "Vill du skapa ett konto med samma e-post och lösenord? Du loggas in direkt om det går."
+  - Primär: "Skapa konto" → kör `supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + '/' } })` med samma värden.
+    - Om `data.session` finns → `navigate('/onboarding')`.
+    - Om e-postbekräftelse krävs → växla till `email-sent`-vyn.
+    - Om felet säger "already registered" → toast "E-posten finns redan – kontrollera lösenordet" och stäng dialogen.
+  - Sekundär: "Försök igen" → stäng dialog, behåll email-fältet ifyllt.
+  - Tertiär (länk): "Glömt lösenord?" → `/forgot-password`.
+- Dialogen visas ENDAST i login-vyn, ENDAST vid `Invalid login credentials`. Andra fel (t.ex. email not confirmed) behåller dagens beteende.
 
-### 4. Tekniska detaljer
-- **Inga DB-ändringar.** All logik frontend.
-- Filer som ändras: `HolidayGoalCard.tsx`, `HolidayGoalEditor.tsx`, `HolidayPage.tsx`, `useHolidayMode.ts`.
-- Nya filer: `HolidayTrophyView.tsx`, ev. `HolidayShareTrophyCard.tsx` (PNG-mall).
-- localStorage-nycklar: `holiday-double-{childId}-{goalId}-{date}` för dubbelt-upp-firandet.
-- Återanvänd `celebrateTask`, `celebrateStars`, `celebrateAssignment`, `haptic` från `lib/confetti.ts`.
+### 3. Tester (`src/pages/__tests__/AuthFlow.test.tsx`)
+Lägg till:
+- "Login with invalid credentials shows opt-in dialog and confirming creates account" → mocka `signInWithPassword` → felresponse, klicka "Skapa konto", verifiera `signUp` anropas med samma email+password och navigering till `/onboarding`.
+- "Confirming opt-in when email confirmation required shows inbox screen".
+- (Befintliga tester förblir gröna — behåll förväntad svensk text i toast för andra fel.)
 
-### 5. Vad jag INTE rör
-Databasstruktur, andra sidor än `HolidayPage`/`HolidayGoalCard`/`HolidayGoalEditor`, befintlig veckosammanfattning.
+## Tekniska detaljer
+
+Filer som ändras:
+- `src/pages/AuthPage.tsx` — lägg till `AlertDialog`-state (`showCreateOptIn`), refaktorera `Invalid login credentials`-grenen, lägg till hjälptext under SSO.
+- `src/pages/__tests__/AuthFlow.test.tsx` — nya testfall.
+
+Filer som INTE rörs:
+- `src/integrations/lovable/index.ts`, `src/integrations/supabase/client.ts` (auto-genererade)
+- `ChildLoginPage.tsx` (barnkonton, ingen SSO)
+- DB-schema, edge functions, OAuth-konfiguration (Google/Apple-providers är redan konfigurerade enligt mem://auth/social-login).
+
+Inga nya beroenden. `AlertDialog` finns redan i `src/components/ui/alert-dialog.tsx`.
