@@ -155,6 +155,40 @@ export default function AuthPage() {
     }
   };
 
+  const handleCreateFromLogin = async () => {
+    setShowCreateOptIn(false);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/` },
+      });
+      if (error) {
+        if (
+          error.message.toLowerCase().includes('already registered') ||
+          error.message.toLowerCase().includes('user already')
+        ) {
+          toast.error('E-posten finns redan – kontrollera lösenordet');
+        } else {
+          toast.error(error.message);
+        }
+        return;
+      }
+      if (data.session) {
+        toast.success('Konto skapat! 🎉');
+        navigate('/onboarding');
+      } else {
+        setSentTo(email);
+        setView('email-sent');
+      }
+    } catch {
+      toast.error('Något gick fel. Försök igen.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ---- "Check your inbox" screen ----
   if (view === 'email-sent') {
     return (
