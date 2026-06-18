@@ -312,6 +312,10 @@ export default function AuthPage() {
             </Button>
           </div>
 
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            Samma knapp fungerar både för nya och befintliga konton.
+          </p>
+
           <div className="relative my-5">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
