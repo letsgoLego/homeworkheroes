@@ -470,6 +470,30 @@ export default function AuthPage() {
         </Link>
         <p className="text-sm text-muted-foreground">Enkel läxhantering för hela familjen</p>
       </div>
+
+      <AlertDialog open={showCreateOptIn} onOpenChange={setShowCreateOptIn}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Inget konto hittades – eller fel lösenord</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vill du skapa ett konto med samma e-post och lösenord? Du loggas in direkt om det går.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-col sm:space-x-0">
+            <AlertDialogAction onClick={handleCreateFromLogin} className="w-full">
+              Skapa konto
+            </AlertDialogAction>
+            <AlertDialogCancel className="w-full mt-0">Försök igen</AlertDialogCancel>
+            <Link
+              to="/forgot-password"
+              onClick={() => setShowCreateOptIn(false)}
+              className="text-sm text-primary hover:underline text-center"
+            >
+              Glömt lösenord?
+            </Link>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
