@@ -91,7 +91,7 @@ export default function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            toast.error('Fel e-post eller lösenord');
+            setShowCreateOptIn(true);
           } else if (error.message.toLowerCase().includes('email not confirmed')) {
             toast.error('Bekräfta din e-post först – kolla inkorgen.');
             setSentTo(email);
