@@ -12,6 +12,16 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { lovable } from '@/integrations/lovable/index';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type View = 'login' | 'signup' | 'email-sent';
 
@@ -27,6 +37,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [sentTo, setSentTo] = useState('');
+  const [showCreateOptIn, setShowCreateOptIn] = useState(false);
 
   const isLogin = view === 'login';
   const emailError = emailTouched && email.length > 0 && !isValidEmail(email)
@@ -80,7 +91,7 @@ export default function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            toast.error('Fel e-post eller lösenord');
+            setShowCreateOptIn(true);
           } else if (error.message.toLowerCase().includes('email not confirmed')) {
             toast.error('Bekräfta din e-post först – kolla inkorgen.');
             setSentTo(email);
@@ -139,6 +150,40 @@ export default function AuthPage() {
       });
       if (error) toast.error('Kunde inte skicka om mejlet');
       else toast.success('Mejlet är skickat igen ✉️');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateFromLogin = async () => {
+    setShowCreateOptIn(false);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/` },
+      });
+      if (error) {
+        if (
+          error.message.toLowerCase().includes('already registered') ||
+          error.message.toLowerCase().includes('user already')
+        ) {
+          toast.error('E-posten finns redan – kontrollera lösenordet');
+        } else {
+          toast.error(error.message);
+        }
+        return;
+      }
+      if (data.session) {
+        toast.success('Konto skapat! 🎉');
+        navigate('/onboarding');
+      } else {
+        setSentTo(email);
+        setView('email-sent');
+      }
+    } catch {
+      toast.error('Något gick fel. Försök igen.');
     } finally {
       setLoading(false);
     }
@@ -266,6 +311,10 @@ export default function AuthPage() {
                 : isLogin ? 'Fortsätt med Apple' : 'Kom igång med Apple'}
             </Button>
           </div>
+
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            Samma knapp fungerar både för nya och befintliga konton.
+          </p>
 
           <div className="relative my-5">
             <div className="absolute inset-0 flex items-center">
@@ -421,6 +470,30 @@ export default function AuthPage() {
         </Link>
         <p className="text-sm text-muted-foreground">Enkel läxhantering för hela familjen</p>
       </div>
+
+      <AlertDialog open={showCreateOptIn} onOpenChange={setShowCreateOptIn}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Inget konto hittades – eller fel lösenord</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vill du skapa ett konto med samma e-post och lösenord? Du loggas in direkt om det går.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-col sm:space-x-0">
+            <AlertDialogAction onClick={handleCreateFromLogin} className="w-full">
+              Skapa konto
+            </AlertDialogAction>
+            <AlertDialogCancel className="w-full mt-0">Försök igen</AlertDialogCancel>
+            <Link
+              to="/forgot-password"
+              onClick={() => setShowCreateOptIn(false)}
+              className="text-sm text-primary hover:underline text-center"
+            >
+              Glömt lösenord?
+            </Link>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
