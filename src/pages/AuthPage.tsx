@@ -37,6 +37,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [sentTo, setSentTo] = useState('');
+  const [showCreateOptIn, setShowCreateOptIn] = useState(false);
 
   const isLogin = view === 'login';
   const emailError = emailTouched && email.length > 0 && !isValidEmail(email)
