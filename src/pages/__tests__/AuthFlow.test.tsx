@@ -118,6 +118,54 @@ describe("AuthPage", () => {
     await user.click(submitButton());
     expect(signInMock).not.toHaveBeenCalled();
   });
+
+  it("shows opt-in dialog on invalid credentials and creates account on confirm", async () => {
+    const user = userEvent.setup();
+    signInMock.mockResolvedValue({
+      data: { user: null },
+      error: { message: "Invalid login credentials" },
+    });
+    signUpMock.mockResolvedValue({
+      data: { user: { id: "u4" }, session: { access_token: "t" } },
+      error: null,
+    });
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: /^Logga in$/i }));
+    await user.type(screen.getByPlaceholderText(/du@exempel/i), "new@x.se");
+    await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
+    await user.click(submitButton());
+    const createBtn = await screen.findByRole("button", { name: /^Skapa konto$/i });
+    await user.click(createBtn);
+    await waitFor(() => {
+      expect(signUpMock).toHaveBeenCalledWith(
+        expect.objectContaining({ email: "new@x.se", password: "secret123" })
+      );
+      expect(navigateMock).toHaveBeenCalledWith("/onboarding");
+    });
+  });
+
+  it("opt-in create with email confirmation required shows inbox screen", async () => {
+    const user = userEvent.setup();
+    signInMock.mockResolvedValue({
+      data: { user: null },
+      error: { message: "Invalid login credentials" },
+    });
+    signUpMock.mockResolvedValue({
+      data: { user: { id: "u5" }, session: null },
+      error: null,
+    });
+    renderAuth();
+    await user.click(screen.getByRole("button", { name: /^Logga in$/i }));
+    await user.type(screen.getByPlaceholderText(/du@exempel/i), "new2@x.se");
+    await user.type(screen.getByPlaceholderText(/••••••••/i), "secret123");
+    await user.click(submitButton());
+    const createBtn = await screen.findByRole("button", { name: /^Skapa konto$/i });
+    await user.click(createBtn);
+    await waitFor(() => {
+      expect(signUpMock).toHaveBeenCalled();
+      expect(screen.getByText(/Kolla din inkorg/i)).toBeInTheDocument();
+    });
+  });
 });
 
 describe("ChildLoginPage", () => {
