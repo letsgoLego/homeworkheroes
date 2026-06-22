@@ -6,6 +6,17 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Module-level VAPID cache — survives across warm invocations
+let cachedVapid: { publicKey: string; privateKey: string } | null = null;
+async function getVapidKeys(admin: ReturnType<typeof createClient>) {
+  if (cachedVapid) return cachedVapid;
+  const { data: pub } = await admin.from("app_config").select("value").eq("key", "vapid_public_key").single();
+  const { data: priv } = await admin.from("app_config").select("value").eq("key", "vapid_private_key").single();
+  if (!pub || !priv) return null;
+  cachedVapid = { publicKey: pub.value as string, privateKey: priv.value as string };
+  return cachedVapid;
+}
+
 // ====== Web Push (copied from send-notifications, trimmed comments) ======
 function base64UrlDecode(str: string): Uint8Array {
   const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
