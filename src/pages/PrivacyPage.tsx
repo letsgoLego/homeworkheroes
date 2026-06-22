@@ -7,12 +7,12 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Integritetspolicy – Homework Heroes</title>
-        <meta name="description" content="Läs Homework Heroes integritetspolicy. Så hanterar vi familjers personuppgifter enligt GDPR i vår läxapp." />
-        <link rel="canonical" href="https://homeworkheroes.lovable.app/privacy" />
-        <meta property="og:title" content="Integritetspolicy – Homework Heroes" />
-        <meta property="og:description" content="Så hanterar Homework Heroes personuppgifter enligt GDPR." />
-        <meta property="og:url" content="https://homeworkheroes.lovable.app/privacy" />
+        <title>Integritetspolicy – Läxhjälp</title>
+        <meta name="description" content="Läs Läxhjälp integritetspolicy. Så hanterar vi familjers personuppgifter enligt GDPR i vår läxapp." />
+        <link rel="canonical" href="https://laxhjalp.app/privacy" />
+        <meta property="og:title" content="Integritetspolicy – Läxhjälp" />
+        <meta property="og:description" content="Så hanterar Läxhjälp personuppgifter enligt GDPR." />
+        <meta property="og:url" content="https://laxhjalp.app/privacy" />
       </Helmet>
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
 
         <h2>1. Personuppgiftsansvarig</h2>
         <p>
-          Homework Heroes ("vi", "oss", "vår") är personuppgiftsansvarig för behandlingen av dina personuppgifter.
+          Läxhjälp ("vi", "oss", "vår") är personuppgiftsansvarig för behandlingen av dina personuppgifter.
           Kontakta oss på: <strong>[din e-postadress]</strong>
         </p>
 

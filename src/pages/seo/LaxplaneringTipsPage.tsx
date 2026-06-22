@@ -25,7 +25,7 @@ export default function LaxplaneringTipsPage() {
       <p>
         Sätt er ner tillsammans i fem minuter varje söndag och gå igenom veckans läxor, prov och
         aktiviteter. En snabb överblick hjälper barnet att se helheten och planera sin tid bättre.
-        Använd en digital familjeplanerare som <strong>Homework Heroes</strong> för att alla i
+        Använd en digital familjeplanerare som <strong>Läxhjälp</strong> för att alla i
         familjen ska ha samma bild.
       </p>
 
@@ -53,7 +53,7 @@ export default function LaxplaneringTipsPage() {
       <h2>5. Fira framsteg</h2>
       <p>
         Varje avklarad läxa är en liten seger. Använd en streak-räknare eller belöningssystem för
-        att göra det roligt att hålla i. I Homework Heroes får barnen konfetti och emojis när de
+        att göra det roligt att hålla i. I Läxhjälp får barnen konfetti och emojis när de
         bockar av uppgifter.
       </p>
 

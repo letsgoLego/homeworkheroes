@@ -34,7 +34,7 @@ export default function TonaringarLaxorPage() {
         <li><strong>Fråga öppet:</strong> "Hur ligger du till med skolarbetet?" istället för "Har du gjort läxan?"</li>
         <li><strong>Erbjud hjälp:</strong> "Vill du att jag kollar igenom uppsatsen?" — utan att insistera</li>
         <li><strong>Respektera deras tid:</strong> Tonåringar har ett socialt liv som är viktigt för deras utveckling</li>
-        <li><strong>Ge verktyg, inte regler:</strong> Visa dem planeringsappar som <strong>Homework Heroes</strong> och låt dem använda dem på sitt sätt</li>
+        <li><strong>Ge verktyg, inte regler:</strong> Visa dem planeringsappar som <strong>Läxhjälp</strong> och låt dem använda dem på sitt sätt</li>
         <li><strong>Var tillgänglig:</strong> Ibland behöver de bara veta att du finns där om de kör fast</li>
       </ul>
 
@@ -57,7 +57,7 @@ export default function TonaringarLaxorPage() {
       <p>
         Tonåringar lever i sina mobiler. En app som låter dem snabbt logga och bocka av
         uppgifter — med emojis, snabbval och streaks — har mycket bättre chans att användas
-        än en papperskalender. <strong>Homework Heroes</strong> är designad just för detta:
+        än en papperskalender. <strong>Läxhjälp</strong> är designad just för detta:
         snabbt, visuellt och anpassat för unga användare.
       </p>
 

@@ -5,7 +5,7 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
 - **Målspråk:** Svenska
 - **Målgrupp:** Familjer med skolbarn
 - **Plattform:** PWA (installeras på hemskärmen på iPhone/iPad/Android)
-- **Publicerad URL:** https://homeworkheroes.lovable.app
+- **Publicerad URL:** https://laxhjalp.app
 
 ---
 

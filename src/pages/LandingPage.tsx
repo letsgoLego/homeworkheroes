@@ -31,7 +31,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <Link to="/landing" className="flex items-center gap-2">
             <span className="text-2xl">📚</span>
-            <span className="text-xl font-extrabold text-foreground">Homework Heroes</span>
+            <span className="text-xl font-extrabold text-foreground">Läxhjälp</span>
           </Link>
           <div className="flex items-center gap-1 sm:gap-3">
             <Link to="/tips" className="hidden sm:inline-flex">
@@ -118,7 +118,7 @@ export default function LandingPage() {
             >
               <img
                 src={screenshotToday}
-                alt="Homework Heroes dagvy med uppgifter"
+                alt="Läxhjälp dagvy med uppgifter"
                 width={320}
                 height={568}
                 className="w-64 sm:w-72 rounded-[2rem] shadow-elevated"
@@ -300,7 +300,7 @@ export default function LandingPage() {
               Steg-för-steg guide 📖
             </motion.h2>
             <motion.p variants={fadeUp} className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Lär dig allt du kan göra i Homework Heroes
+              Lär dig allt du kan göra i Läxhjälp
             </motion.p>
           </motion.div>
 
@@ -549,7 +549,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-lg">📚</span>
-            <span className="font-bold text-foreground">Homework Heroes</span>
+            <span className="font-bold text-foreground">Läxhjälp</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
             <Link to="/tips" className="text-muted-foreground hover:text-primary transition-colors">
@@ -569,7 +569,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Homework Heroes. Gör läxläsning enklare.
+            © {new Date().getFullYear()} Läxhjälp. Gör läxläsning enklare.
           </p>
         </div>
       </footer>

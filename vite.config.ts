@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => ({
       },
       includeAssets: ["favicon.ico", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
-        name: "HomeWork Hero",
+        name: "Läxhjälp",
         short_name: "HW Hero",
         description: "Track homework together as a family",
         theme_color: "#2eb8a6",

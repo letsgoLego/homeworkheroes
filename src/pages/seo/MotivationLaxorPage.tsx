@@ -49,7 +49,7 @@ export default function MotivationLaxorPage() {
       <h3>3. Gör det visuellt</h3>
       <p>
         Barn älskar att se sina framsteg. En streak-räknare som visar "5 dagar i rad!" eller
-        en progressbar som fylls upp ger en känsla av prestation. I <strong>Homework Heroes</strong>
+        en progressbar som fylls upp ger en känsla av prestation. I <strong>Läxhjälp</strong>
         får barnet konfetti och emojis varje gång de bockar av en uppgift.
       </p>
 

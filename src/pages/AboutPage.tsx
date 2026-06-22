@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 
 export default function AboutPage() {
   useEffect(() => {
-    document.title = 'Om oss | Homework Heroes';
+    document.title = 'Om oss | Läxhjälp';
     const setMeta = (name: string, content: string, attr = 'name') => {
       let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
       if (!el) {
@@ -16,8 +16,8 @@ export default function AboutPage() {
       }
       el.setAttribute('content', content);
     };
-    setMeta('description', 'Om Homework Heroes – appen som hjälper svenska familjer att planera läxor, minska stress och fira framgång tillsammans.');
-    setMeta('og:title', 'Om Homework Heroes', 'property');
+    setMeta('description', 'Om Läxhjälp – appen som hjälper svenska familjer att planera läxor, minska stress och fira framgång tillsammans.');
+    setMeta('og:title', 'Om Läxhjälp', 'property');
     setMeta('og:type', 'website', 'property');
   }, []);
 
@@ -31,7 +31,7 @@ export default function AboutPage() {
             </Button>
             <div className="flex items-center gap-2">
               <span className="text-2xl">📚</span>
-              <span className="font-bold text-foreground">Homework Heroes</span>
+              <span className="font-bold text-foreground">Läxhjälp</span>
             </div>
           </Link>
           <Link to="/auth">
@@ -54,7 +54,7 @@ export default function AboutPage() {
             Vi vill göra läxläsning enklare för hela familjen
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-            Homework Heroes är skapat av föräldrar som själva kämpat med kaoset kring läxor – glömda inlämningar, stressiga söndagskvällar och tjat som ingen mår bra av. Vi visste att det måste finnas ett bättre sätt.
+            Läxhjälp är skapat av föräldrar som själva kämpat med kaoset kring läxor – glömda inlämningar, stressiga söndagskvällar och tjat som ingen mår bra av. Vi visste att det måste finnas ett bättre sätt.
           </p>
 
           <div className="prose prose-base dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground">
@@ -65,7 +65,7 @@ export default function AboutPage() {
 
             <h2>Vad vi gör</h2>
             <p>
-              Homework Heroes är en svenskutvecklad app som hjälper familjer att:
+              Läxhjälp är en svenskutvecklad app som hjälper familjer att:
             </p>
             <ul>
               <li><strong>Planera läxor</strong> tillsammans, vecka för vecka</li>
@@ -121,7 +121,7 @@ export default function AboutPage() {
           <div className="mt-12 p-8 rounded-3xl bg-primary/10 border border-primary/20 text-center">
             <Users className="w-10 h-10 text-primary mx-auto mb-3" />
             <h2 className="text-2xl font-extrabold text-foreground mb-3">
-              Bli en del av Homework Heroes
+              Bli en del av Läxhjälp
             </h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
               Tusentals svenska familjer använder redan appen. Skapa ditt gratis konto och prova själv.

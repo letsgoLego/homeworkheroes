@@ -1,13 +1,13 @@
-# Homework Heroes (Läxhjälpen)
+# Läxhjälp (Läxhjälpen)
 
 > En svensk familjeapp för att hålla koll på barnens läxor, prov, packlistor och fritidsaktiviteter. Designad som PWA för iPhone/iPad med separata föräldrar- och barnkonton.
 
-Homework Heroes hjälper familjer att planera läxor, dela upp arbete på lugna dagar, undvika krockar med träningar och minska läxstress. Föräldrar administrerar familjen; barnen får en förenklad vy med streaks, XP och konfetti.
+Läxhjälp hjälper familjer att planera läxor, dela upp arbete på lugna dagar, undvika krockar med träningar och minska läxstress. Föräldrar administrerar familjen; barnen får en förenklad vy med streaks, XP och konfetti.
 
 ## Pages
 
 - [Start / Marknadsföring](/landing): Översikt av appen, funktioner och prissättning.
-- [Om oss](/om-oss): Bakgrund och vision för Homework Heroes.
+- [Om oss](/om-oss): Bakgrund och vision för Läxhjälp.
 - [Tips och guider](/tips): Artikelhubb om läxplanering, studieteknik och motivation.
 - [Logga in / Skapa konto](/auth): Inloggning för föräldrar (e-post, Google, Apple).
 - [Barninloggning](/child-login): Förenklad inloggning för barnkonton.
