@@ -68,6 +68,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      <main>
       {/* ============ HERO SECTION ============ */}
       <section className="relative pt-12 pb-16 sm:pt-20 sm:pb-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -553,6 +554,7 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
+      </main>
 
       {/* ============ FOOTER ============ */}
       <footer className="py-8 border-t border-border">
