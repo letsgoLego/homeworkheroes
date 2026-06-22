@@ -431,25 +431,17 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Get VAPID keys
-    const { data: vapidPublic } = await supabase
-      .from("app_config")
-      .select("value")
-      .eq("key", "vapid_public_key")
-      .single();
-
-    const { data: vapidPrivate } = await supabase
-      .from("app_config")
-      .select("value")
-      .eq("key", "vapid_private_key")
-      .single();
-
-    if (!vapidPublic || !vapidPrivate) {
+    // Get VAPID keys (module-cached)
+    const vapid = await getVapidKeys(supabase);
+    if (!vapid) {
       return new Response(
         JSON.stringify({ error: "VAPID keys not configured. Call get-push-config first." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    const vapidPublic = { value: vapid.publicKey };
+    const vapidPrivate = { value: vapid.privateKey };
+
 
     // Get all active subscriptions
     const { data: subscriptions } = await supabase
