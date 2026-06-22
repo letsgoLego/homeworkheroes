@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://homeworkheroes.lovable.app/sitemap.xml
+Sitemap: https://laxhjalp.app/sitemap.xml

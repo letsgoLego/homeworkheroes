@@ -7,12 +7,12 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Användarvillkor – Homework Heroes</title>
-        <meta name="description" content="Användarvillkor för Homework Heroes – villkoren som gäller när din familj använder vår läx- och skolapp." />
-        <link rel="canonical" href="https://homeworkheroes.lovable.app/terms" />
-        <meta property="og:title" content="Användarvillkor – Homework Heroes" />
-        <meta property="og:description" content="Villkoren som gäller när din familj använder Homework Heroes." />
-        <meta property="og:url" content="https://homeworkheroes.lovable.app/terms" />
+        <title>Användarvillkor – Läxhjälp</title>
+        <meta name="description" content="Användarvillkor för Läxhjälp – villkoren som gäller när din familj använder vår läx- och skolapp." />
+        <link rel="canonical" href="https://laxhjalp.app/terms" />
+        <meta property="og:title" content="Användarvillkor – Läxhjälp" />
+        <meta property="og:description" content="Villkoren som gäller när din familj använder Läxhjälp." />
+        <meta property="og:url" content="https://laxhjalp.app/terms" />
       </Helmet>
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
@@ -34,8 +34,8 @@ export default function TermsPage() {
 
         <h2>1. Om tjänsten</h2>
         <p>
-          Homework Heroes ("tjänsten") är en webbapplikation för familjer att hantera barns läxor, 
-          packlistor och skoluppgifter. Tjänsten tillhandahålls av Homework Heroes ("vi", "oss").
+          Läxhjälp ("tjänsten") är en webbapplikation för familjer att hantera barns läxor, 
+          packlistor och skoluppgifter. Tjänsten tillhandahålls av Läxhjälp ("vi", "oss").
         </p>
 
         <h2>2. Konton</h2>
@@ -97,7 +97,7 @@ export default function TermsPage() {
 
         <h2>6. Immateriella rättigheter</h2>
         <p>
-          Allt innehåll, design och kod i tjänsten tillhör Homework Heroes. 
+          Allt innehåll, design och kod i tjänsten tillhör Läxhjälp. 
           Du får inte kopiera, modifiera eller distribuera någon del av tjänsten utan skriftligt tillstånd.
           Det innehåll du skapar (läxor, anteckningar) tillhör dig.
         </p>
@@ -148,7 +148,7 @@ export default function TermsPage() {
 
         <div className="mt-12 pt-6 border-t border-border">
           <p className="text-sm text-muted-foreground">
-            Genom att använda Homework Heroes godkänner du dessa villkor.
+            Genom att använda Läxhjälp godkänner du dessa villkor.
           </p>
         </div>
       </main>

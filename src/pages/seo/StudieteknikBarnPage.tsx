@@ -44,7 +44,7 @@ export default function StudieteknikBarnPage() {
       <h2>4. Sprid ut pluggandet</h2>
       <p>
         Att plugga lite varje dag är mycket effektivare än att försöka trycka in allt kvällen
-        innan. Använd en planeringsapp som <strong>Homework Heroes</strong> för att automatiskt
+        innan. Använd en planeringsapp som <strong>Läxhjälp</strong> för att automatiskt
         fördela pluggpass över veckan.
       </p>
 

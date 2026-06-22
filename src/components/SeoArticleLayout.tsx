@@ -65,8 +65,8 @@ export default function SeoArticleLayout({
     "@type": "Article",
     "headline": metaTitle,
     "description": metaDescription,
-    "url": `https://homeworkheroes.lovable.app/tips/${slug}`,
-    "publisher": { "@type": "Organization", "name": "Homework Heroes" },
+    "url": `https://laxhjalp.app/tips/${slug}`,
+    "publisher": { "@type": "Organization", "name": "Läxhjälp" },
     "inLanguage": "sv",
   } : null;
 
@@ -85,7 +85,7 @@ export default function SeoArticleLayout({
             </Link>
             <div className="flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-primary" />
-              <span className="font-bold text-foreground">Homework Heroes</span>
+              <span className="font-bold text-foreground">Läxhjälp</span>
             </div>
           </div>
           <Link to="/auth">
@@ -102,7 +102,7 @@ export default function SeoArticleLayout({
 
         {/* CTA */}
         <div className="mt-12 p-6 sm:p-8 rounded-2xl bg-primary/10 border border-primary/20 text-center">
-          <h2 className="text-xl font-bold text-foreground mb-2">Testa Homework Heroes gratis</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">Testa Läxhjälp gratis</h2>
           <p className="text-muted-foreground mb-4">
             Planera läxor, skapa packlistor och håll koll på aktiviteter — hela familjen tillsammans.
           </p>

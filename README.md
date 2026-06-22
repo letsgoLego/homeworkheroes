@@ -2,7 +2,7 @@
 
 En svensk PWA som hjälper familjer att hålla koll på läxor, prov, inlämningar och fritidsaktiviteter – designad för iPhone och iPad och anpassad för både föräldrar och barn.
 
-**Live:** https://homeworkheroes.lovable.app
+**Live:** https://laxhjalp.app
 
 ## Funktioner
 

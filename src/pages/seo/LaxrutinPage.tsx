@@ -62,7 +62,7 @@ export default function LaxrutinPage() {
 
       <h2>Steg 5: Använd digitalt stöd</h2>
       <p>
-        En familjeplanerare som <strong>Homework Heroes</strong> gör det enkelt att se vad som
+        En familjeplanerare som <strong>Läxhjälp</strong> gör det enkelt att se vad som
         ska göras varje dag, bocka av uppgifter och hålla motivationen uppe med streaks och
         belöningar. Både föräldrar och barn ser samma vy.
       </p>

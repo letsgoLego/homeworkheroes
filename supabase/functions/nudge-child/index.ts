@@ -37,7 +37,7 @@ async function createVapidJwt(endpoint: string, vapidPublicKey: string, vapidPri
   const jwk = { kty: "EC", crv: "P-256", x, y, d: vapidPrivateKey };
   const privateKey = await crypto.subtle.importKey("jwk", jwk, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
   const header = { typ: "JWT", alg: "ES256" };
-  const payload = { aud: audience, exp, sub: "mailto:notifications@homeworkheroes.lovable.app" };
+  const payload = { aud: audience, exp, sub: "mailto:notifications@laxhjalp.app" };
   const headerB64 = base64UrlEncode(new TextEncoder().encode(JSON.stringify(header)));
   const payloadB64 = base64UrlEncode(new TextEncoder().encode(JSON.stringify(payload)));
   const input = `${headerB64}.${payloadB64}`;

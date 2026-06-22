@@ -41,7 +41,7 @@ export default function LaxstressBarnPage() {
       <h3>2. Dela upp i små bitar</h3>
       <p>
         "Plugga matte" är vagt och skrämmande. "Gör uppgift 1–5 på sidan 42" är konkret och
-        hanterbart. En app som <strong>Homework Heroes</strong> hjälper barnet att bryta ner
+        hanterbart. En app som <strong>Läxhjälp</strong> hjälper barnet att bryta ner
         läxor i dagliga studieuppgifter automatiskt.
       </p>
 

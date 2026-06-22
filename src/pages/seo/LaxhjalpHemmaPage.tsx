@@ -54,7 +54,7 @@ export default function LaxhjalpHemmaPage() {
       <p>
         Erbjud dig att hjälpa men insistera inte. Fokusera på struktur: "Har du en plan
         för uppsatsen?" istället för att skriva den åt dem. Använd verktyg som
-        <strong> Homework Heroes</strong> för att ge överblick utan att behöva fråga varje dag.
+        <strong> Läxhjälp</strong> för att ge överblick utan att behöva fråga varje dag.
       </p>
 
       <h2>Vad gör man när man inte kan ämnet?</h2>
@@ -76,7 +76,7 @@ export default function LaxhjalpHemmaPage() {
       <h2>Digitala hjälpmedel</h2>
       <p>
         En familjeplaneringsapp gör det enklare för alla i familjen att ha koll. Med
-        <strong> Homework Heroes</strong> kan barnet själv lägga till läxor med snabbval,
+        <strong> Läxhjälp</strong> kan barnet själv lägga till läxor med snabbval,
         se sin veckoplanering och bocka av uppgifter — medan föräldrarna har överblick
         utan att behöva fråga "Har du läxor idag?"
       </p>

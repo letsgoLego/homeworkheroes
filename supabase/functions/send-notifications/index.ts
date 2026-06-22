@@ -72,7 +72,7 @@ async function createVapidJwt(
   const payload = {
     aud: audience,
     exp: expiration,
-    sub: "mailto:notifications@homeworkheroes.lovable.app",
+    sub: "mailto:notifications@laxhjalp.app",
   };
 
   const headerB64 = base64UrlEncode(new TextEncoder().encode(JSON.stringify(header)));

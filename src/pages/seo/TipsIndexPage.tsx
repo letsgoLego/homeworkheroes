@@ -65,7 +65,7 @@ const ARTICLES = [
 
 export default function TipsIndexPage() {
   useEffect(() => {
-    document.title = 'Tips & guider om läxor och studieteknik | Homework Heroes';
+    document.title = 'Tips & guider om läxor och studieteknik | Läxhjälp';
     const setMeta = (name: string, content: string, attr = 'name') => {
       let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
       if (!el) {
@@ -90,7 +90,7 @@ export default function TipsIndexPage() {
             </Button>
             <div className="flex items-center gap-2">
               <span className="text-2xl">📚</span>
-              <span className="font-bold text-foreground">Homework Heroes</span>
+              <span className="font-bold text-foreground">Läxhjälp</span>
             </div>
           </Link>
           <Link to="/auth">
@@ -162,7 +162,7 @@ export default function TipsIndexPage() {
             Vill du också ha koll på läxorna?
           </h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            Homework Heroes hjälper hela familjen att planera, prioritera och fira avklarade läxor – helt gratis att komma igång.
+            Läxhjälp hjälper hela familjen att planera, prioritera och fira avklarade läxor – helt gratis att komma igång.
           </p>
           <Link to="/auth">
             <Button size="lg" className="rounded-full gap-2 font-bold shadow-glow-primary">
