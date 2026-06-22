@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, BookOpen, Calendar, Brain, Heart, Sparkles, Users, Home, GraduationCap } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
 
 const ARTICLES = [
   {
