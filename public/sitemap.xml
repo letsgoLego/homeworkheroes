@@ -17,4 +17,9 @@
   <url><loc>https://laxhjalp.app/forgot-password</loc><priority>0.2</priority></url>
   <url><loc>https://laxhjalp.app/reset-password</loc><priority>0.2</priority></url>
   <url><loc>https://laxhjalp.app/join-family-start</loc><priority>0.4</priority></url>
+  <url><loc>https://laxhjalp.app/join-family</loc><priority>0.2</priority></url>
+  <url><loc>https://laxhjalp.app/onboarding</loc><priority>0.2</priority></url>
+  <url><loc>https://laxhjalp.app/week</loc><priority>0.2</priority></url>
+  <url><loc>https://laxhjalp.app/add</loc><priority>0.2</priority></url>
+  <url><loc>https://laxhjalp.app/family</loc><priority>0.2</priority></url>
 </urlset>

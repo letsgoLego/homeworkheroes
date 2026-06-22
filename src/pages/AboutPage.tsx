@@ -1,32 +1,25 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Mail, Heart, Shield, Users, BookOpen, Sparkles } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
 
 export default function AboutPage() {
-  useEffect(() => {
-    document.title = 'Om oss | Läxhjälp';
-    const setMeta = (name: string, content: string, attr = 'name') => {
-      let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute(attr, name);
-        document.head.appendChild(el);
-      }
-      el.setAttribute('content', content);
-    };
-    setMeta('description', 'Om Läxhjälp – appen som hjälper svenska familjer att planera läxor, minska stress och fira framgång tillsammans.');
-    setMeta('og:title', 'Om Läxhjälp', 'property');
-    setMeta('og:type', 'website', 'property');
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Om oss | Läxhjälp</title>
+        <meta name="description" content="Om Läxhjälp – appen som hjälper svenska familjer att planera läxor, minska stress och fira framgång tillsammans." />
+        <link rel="canonical" href="https://laxhjalp.app/om-oss" />
+        <meta property="og:title" content="Om Läxhjälp" />
+        <meta property="og:description" content="Bakgrund och vision för Läxhjälp – familjeappen för läxor och prov." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://laxhjalp.app/om-oss" />
+      </Helmet>
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <Link to="/landing" className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Tillbaka till startsidan">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2">

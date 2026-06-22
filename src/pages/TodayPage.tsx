@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Helmet } from 'react-helmet-async';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, addDays, parseISO } from 'date-fns';
@@ -204,6 +205,13 @@ export default function TodayPage() {
   
   return (
     <div className="min-h-screen bg-background pb-24">
+      <Helmet>
+        <title>Idag – Läxhjälp</title>
+        <meta name="description" content="Dagens läxor, prov och packlistor – samlat på ett ställe i Läxhjälp." />
+        <link rel="canonical" href="https://laxhjalp.app/" />
+        <meta property="og:title" content="Idag – Läxhjälp" />
+        <meta property="og:url" content="https://laxhjalp.app/" />
+      </Helmet>
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
         <div className="px-4 py-4">

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { 
   BookOpen, Calendar, CheckCircle2, Backpack, Users, 
@@ -26,6 +27,15 @@ const stagger = {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <Helmet>
+        <title>Läxhjälp – familjeappen för läxor, prov och packlistor</title>
+        <meta name="description" content="Planera läxor, prov och packlistor tillsammans i familjen. Mindre läxstress, fler firade framgångar. Gratis att komma igång." />
+        <link rel="canonical" href="https://laxhjalp.app/landing" />
+        <meta property="og:title" content="Läxhjälp – familjeappen för läxor och prov" />
+        <meta property="og:description" content="Planera läxor och packlistor tillsammans – som familj." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://laxhjalp.app/landing" />
+      </Helmet>
       {/* Navigation bar */}
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
@@ -58,6 +68,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
+      <main>
       {/* ============ HERO SECTION ============ */}
       <section className="relative pt-12 pb-16 sm:pt-20 sm:pb-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -543,6 +554,7 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </section>
+      </main>
 
       {/* ============ FOOTER ============ */}
       <footer className="py-8 border-t border-border">

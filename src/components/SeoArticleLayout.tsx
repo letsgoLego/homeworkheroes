@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen, ArrowRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef } from 'react';
 import { useAdSense } from '@/hooks/useAdSense';
@@ -13,30 +14,6 @@ interface SeoArticleLayoutProps {
   slug?: string;
 }
 
-function useDocumentMeta(title: string, description: string) {
-  useEffect(() => {
-    const prevTitle = document.title;
-    document.title = title;
-
-    const setMeta = (name: string, content: string, attr = 'name') => {
-      let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute(attr, name);
-        document.head.appendChild(el);
-      }
-      el.setAttribute('content', content);
-    };
-
-    setMeta('description', description);
-    setMeta('og:title', title, 'property');
-    setMeta('og:description', description, 'property');
-    setMeta('og:type', 'article', 'property');
-
-    return () => { document.title = prevTitle; };
-  }, [title, description]);
-}
-
 export default function SeoArticleLayout({
   title,
   metaTitle,
@@ -45,7 +22,6 @@ export default function SeoArticleLayout({
   relatedArticles = [],
   slug,
 }: SeoArticleLayoutProps) {
-  useDocumentMeta(metaTitle, metaDescription);
   useAdSense();
   const adPushed = useRef(false);
 
@@ -60,26 +36,39 @@ export default function SeoArticleLayout({
     return () => clearTimeout(timer);
   }, []);
 
+  const canonicalUrl = slug
+    ? `https://laxhjalp.app/tips/${slug}`
+    : 'https://laxhjalp.app/tips';
+
   const jsonLd = slug ? {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": metaTitle,
     "description": metaDescription,
-    "url": `https://laxhjalp.app/tips/${slug}`,
+    "url": canonicalUrl,
     "publisher": { "@type": "Organization", "name": "Läxhjälp" },
     "inLanguage": "sv",
   } : null;
 
   return (
     <div className="min-h-screen bg-background">
-      {jsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      )}
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        {jsonLd && (
+          <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        )}
+      </Helmet>
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/landing">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Tillbaka till startsidan">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
@@ -93,6 +82,7 @@ export default function SeoArticleLayout({
           </Link>
         </div>
       </nav>
+
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <article className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground">
