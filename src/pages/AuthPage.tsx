@@ -257,10 +257,10 @@ export default function AuthPage() {
           className="w-full max-w-sm"
         >
           {/* Toggle */}
-          <div className="flex rounded-xl bg-muted p-1 mb-5">
+          <div className="grid grid-cols-3 rounded-xl bg-muted p-1 mb-5 gap-1">
             <button
               onClick={() => setView('login')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+              className={`py-2 px-2 rounded-lg text-sm font-medium transition-all ${
                 isLogin ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
               }`}
             >
@@ -268,13 +268,20 @@ export default function AuthPage() {
             </button>
             <button
               onClick={() => setView('signup')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+              className={`py-2 px-2 rounded-lg text-sm font-medium transition-all ${
                 !isLogin ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
               }`}
             >
               Skapa konto
             </button>
+            <button
+              onClick={() => navigate('/child-login')}
+              className="py-2 px-2 rounded-lg text-sm font-medium transition-all text-muted-foreground hover:text-foreground"
+            >
+              Barnkonto
+            </button>
           </div>
+
 
           {/* Social FIRST — converts 2-3x better */}
           <div className="space-y-2.5">
