@@ -108,8 +108,8 @@ export default function AboutPage() {
             </div>
             <div>
               <h3 className="font-bold text-foreground mb-1">E-post</h3>
-              <a href="mailto:hello@homeworkheroes.se" className="text-primary font-semibold hover:underline">
-                hello@homeworkheroes.se
+              <a href="mailto:hello@laxhjalp.app" className="text-primary font-semibold hover:underline">
+                hello@laxhjalp.app
               </a>
               <p className="text-sm text-muted-foreground mt-1">
                 Vi svarar normalt inom 1–2 arbetsdagar.
