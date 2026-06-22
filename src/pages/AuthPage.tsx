@@ -436,28 +436,19 @@ export default function AuthPage() {
           )}
 
           {/* Alt actions */}
-          <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="mt-6">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => navigate('/join-family-start')}
-              className="h-11"
+              className="h-11 w-full"
             >
               <Users className="w-4 h-4 mr-2" />
               Gå med i familj
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/child-login')}
-              className="h-11"
-            >
-              <User className="w-4 h-4 mr-2" />
-              Barnkonto
-            </Button>
           </div>
+
         </motion.div>
       </div>
 
