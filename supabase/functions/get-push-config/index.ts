@@ -63,6 +63,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Fast path: serve cached public key without touching the database
+    if (cachedPublicKey) {
+      return new Response(
+        JSON.stringify({ publicKey: cachedPublicKey }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Check if VAPID keys already exist
@@ -73,8 +81,9 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existingKey) {
+      cachedPublicKey = existingKey.value as string;
       return new Response(
-        JSON.stringify({ publicKey: existingKey.value }),
+        JSON.stringify({ publicKey: cachedPublicKey }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -87,6 +96,8 @@ Deno.serve(async (req) => {
       { key: "vapid_public_key", value: vapidKeys.publicKey },
       { key: "vapid_private_key", value: vapidKeys.privateKey },
     ]);
+    cachedPublicKey = vapidKeys.publicKey;
+
 
     return new Response(
       JSON.stringify({ publicKey: vapidKeys.publicKey }),
