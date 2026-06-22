@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Helmet } from 'react-helmet-async';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, addDays, parseISO } from 'date-fns';
