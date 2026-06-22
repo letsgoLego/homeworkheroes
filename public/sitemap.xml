@@ -22,4 +22,6 @@
   <url><loc>https://laxhjalp.app/week</loc><priority>0.2</priority></url>
   <url><loc>https://laxhjalp.app/add</loc><priority>0.2</priority></url>
   <url><loc>https://laxhjalp.app/family</loc><priority>0.2</priority></url>
+  <url><loc>https://laxhjalp.app/insights</loc><priority>0.2</priority></url>
+  <url><loc>https://laxhjalp.app/profile</loc><priority>0.2</priority></url>
 </urlset>
