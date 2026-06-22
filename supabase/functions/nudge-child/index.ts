@@ -6,6 +6,17 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Module-level VAPID cache — survives across warm invocations
+let cachedVapid: { publicKey: string; privateKey: string } | null = null;
+async function getVapidKeys(admin: ReturnType<typeof createClient>) {
+  if (cachedVapid) return cachedVapid;
+  const { data: pub } = await admin.from("app_config").select("value").eq("key", "vapid_public_key").single();
+  const { data: priv } = await admin.from("app_config").select("value").eq("key", "vapid_private_key").single();
+  if (!pub || !priv) return null;
+  cachedVapid = { publicKey: pub.value as string, privateKey: priv.value as string };
+  return cachedVapid;
+}
+
 // ====== Web Push (copied from send-notifications, trimmed comments) ======
 function base64UrlDecode(str: string): Uint8Array {
   const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
@@ -154,10 +165,8 @@ Deno.serve(async (req) => {
 
     let delivered = false;
     if (targetUserIds.length > 0) {
-      const { data: vapidPub } = await admin.from("app_config").select("value").eq("key", "vapid_public_key").single();
-      const { data: vapidPriv } = await admin.from("app_config").select("value").eq("key", "vapid_private_key").single();
-
-      if (vapidPub && vapidPriv) {
+      const vapid = await getVapidKeys(admin);
+      if (vapid) {
         const { data: subs } = await admin.from("push_subscriptions").select("*").in("user_id", targetUserIds);
         const payload = JSON.stringify({
           title: `🫵 ${parentName} petar dig`,
@@ -167,11 +176,12 @@ Deno.serve(async (req) => {
         });
 
         for (const sub of subs ?? []) {
-          const ok = await sendPush(sub.endpoint, sub.p256dh, sub.auth_key, vapidPub.value, vapidPriv.value, payload);
+          const ok = await sendPush(sub.endpoint, sub.p256dh, sub.auth_key, vapid.publicKey, vapid.privateKey, payload);
           if (ok) delivered = true;
           else await admin.from("push_subscriptions").delete().eq("id", sub.id);
         }
       }
+
     }
 
     if (delivered) {

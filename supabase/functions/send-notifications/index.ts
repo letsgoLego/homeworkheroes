@@ -6,6 +6,17 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Module-level VAPID cache — survives across warm invocations to avoid hammering app_config
+let cachedVapid: { publicKey: string; privateKey: string } | null = null;
+async function getVapidKeys(supabase: ReturnType<typeof createClient>) {
+  if (cachedVapid) return cachedVapid;
+  const { data: pub } = await supabase.from("app_config").select("value").eq("key", "vapid_public_key").single();
+  const { data: priv } = await supabase.from("app_config").select("value").eq("key", "vapid_private_key").single();
+  if (!pub || !priv) return null;
+  cachedVapid = { publicKey: pub.value as string, privateKey: priv.value as string };
+  return cachedVapid;
+}
+
 // ============ Web Push implementation using Web Crypto API ============
 
 function base64UrlDecode(str: string): Uint8Array {
@@ -420,25 +431,17 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    // Get VAPID keys
-    const { data: vapidPublic } = await supabase
-      .from("app_config")
-      .select("value")
-      .eq("key", "vapid_public_key")
-      .single();
-
-    const { data: vapidPrivate } = await supabase
-      .from("app_config")
-      .select("value")
-      .eq("key", "vapid_private_key")
-      .single();
-
-    if (!vapidPublic || !vapidPrivate) {
+    // Get VAPID keys (module-cached)
+    const vapid = await getVapidKeys(supabase);
+    if (!vapid) {
       return new Response(
         JSON.stringify({ error: "VAPID keys not configured. Call get-push-config first." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+    const vapidPublic = { value: vapid.publicKey };
+    const vapidPrivate = { value: vapid.privateKey };
+
 
     // Get all active subscriptions
     const { data: subscriptions } = await supabase
