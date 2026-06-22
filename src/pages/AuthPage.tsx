@@ -244,7 +244,7 @@ export default function AuthPage() {
           <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 shadow-glow-primary">
             <BookOpen className="w-10 h-10 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Läxhjälpen</h1>
+          <h1 className="text-3xl font-bold mb-2">Läxhjälp — Planera läxor tillsammans</h1>
           <p className="text-muted-foreground">
             {isLogin ? 'Välkommen tillbaka' : 'Kom igång på under en minut'}
           </p>

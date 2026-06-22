@@ -64,28 +64,21 @@ const ARTICLES = [
 ];
 
 export default function TipsIndexPage() {
-  useEffect(() => {
-    document.title = 'Tips & guider om läxor och studieteknik | Läxhjälp';
-    const setMeta = (name: string, content: string, attr = 'name') => {
-      let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute(attr, name);
-        document.head.appendChild(el);
-      }
-      el.setAttribute('content', content);
-    };
-    setMeta('description', 'Praktiska guider om läxplanering, studieteknik, läxstress och motivation – skrivna för svenska föräldrar och barn.');
-    setMeta('og:title', 'Tips & guider om läxor och studieteknik', 'property');
-    setMeta('og:type', 'website', 'property');
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Tips & guider om läxor och studieteknik | Läxhjälp</title>
+        <meta name="description" content="Praktiska guider om läxplanering, studieteknik, läxstress och motivation – skrivna för svenska föräldrar och barn." />
+        <link rel="canonical" href="https://laxhjalp.app/tips" />
+        <meta property="og:title" content="Tips & guider om läxor och studieteknik" />
+        <meta property="og:description" content="Praktiska guider om läxplanering, studieteknik, läxstress och motivation." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://laxhjalp.app/tips" />
+      </Helmet>
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <Link to="/landing" className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Tillbaka till startsidan">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2">

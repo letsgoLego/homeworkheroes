@@ -17,7 +17,7 @@ export default function TermsPage() {
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
           <Link to="/landing">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Tillbaka till startsidan">
               <ArrowLeft className="w-5 h-5" />
             </Button>
           </Link>
