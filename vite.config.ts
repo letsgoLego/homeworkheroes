@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => ({
       includeAssets: ["favicon.ico", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
         name: "Läxhjälp",
-        short_name: "HW Hero",
-        description: "Track homework together as a family",
+        short_name: "Läxhjälp",
+        description: "Håll koll på läxorna tillsammans som familj",
         theme_color: "#2eb8a6",
         background_color: "#f7f9fc",
         display: "standalone",
