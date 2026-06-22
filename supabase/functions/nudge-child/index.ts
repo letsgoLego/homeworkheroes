@@ -165,10 +165,8 @@ Deno.serve(async (req) => {
 
     let delivered = false;
     if (targetUserIds.length > 0) {
-      const { data: vapidPub } = await admin.from("app_config").select("value").eq("key", "vapid_public_key").single();
-      const { data: vapidPriv } = await admin.from("app_config").select("value").eq("key", "vapid_private_key").single();
-
-      if (vapidPub && vapidPriv) {
+      const vapid = await getVapidKeys(admin);
+      if (vapid) {
         const { data: subs } = await admin.from("push_subscriptions").select("*").in("user_id", targetUserIds);
         const payload = JSON.stringify({
           title: `🫵 ${parentName} petar dig`,
@@ -178,11 +176,12 @@ Deno.serve(async (req) => {
         });
 
         for (const sub of subs ?? []) {
-          const ok = await sendPush(sub.endpoint, sub.p256dh, sub.auth_key, vapidPub.value, vapidPriv.value, payload);
+          const ok = await sendPush(sub.endpoint, sub.p256dh, sub.auth_key, vapid.publicKey, vapid.privateKey, payload);
           if (ok) delivered = true;
           else await admin.from("push_subscriptions").delete().eq("id", sub.id);
         }
       }
+
     }
 
     if (delivered) {
