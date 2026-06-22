@@ -257,10 +257,10 @@ export default function AuthPage() {
           className="w-full max-w-sm"
         >
           {/* Toggle */}
-          <div className="flex rounded-xl bg-muted p-1 mb-5">
+          <div className="grid grid-cols-3 rounded-xl bg-muted p-1 mb-5 gap-1">
             <button
               onClick={() => setView('login')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+              className={`py-2 px-2 rounded-lg text-sm font-medium transition-all ${
                 isLogin ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
               }`}
             >
@@ -268,13 +268,20 @@ export default function AuthPage() {
             </button>
             <button
               onClick={() => setView('signup')}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+              className={`py-2 px-2 rounded-lg text-sm font-medium transition-all ${
                 !isLogin ? 'bg-card shadow-soft text-foreground' : 'text-muted-foreground'
               }`}
             >
               Skapa konto
             </button>
+            <button
+              onClick={() => navigate('/child-login')}
+              className="py-2 px-2 rounded-lg text-sm font-medium transition-all text-muted-foreground hover:text-foreground"
+            >
+              Barnkonto
+            </button>
           </div>
+
 
           {/* Social FIRST — converts 2-3x better */}
           <div className="space-y-2.5">
@@ -429,28 +436,19 @@ export default function AuthPage() {
           )}
 
           {/* Alt actions */}
-          <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="mt-6">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => navigate('/join-family-start')}
-              className="h-11"
+              className="h-11 w-full"
             >
               <Users className="w-4 h-4 mr-2" />
               Gå med i familj
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/child-login')}
-              className="h-11"
-            >
-              <User className="w-4 h-4 mr-2" />
-              Barnkonto
-            </Button>
           </div>
+
         </motion.div>
       </div>
 
