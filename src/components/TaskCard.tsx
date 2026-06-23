@@ -42,10 +42,15 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
     
     if (newCompleted) {
       if (result.allCompleted && result.homework) {
+        track('assignment_completed', {
+          subject: result.homework.subject,
+          homework_type: result.homework.homeworkType,
+        });
         celebrateAssignment();
         setCompletedHomework(homework);
         setShowCompletionModal(true);
       } else {
+        track('task_completed', { subject: homework.subject });
         celebrateTask();
       }
     }
