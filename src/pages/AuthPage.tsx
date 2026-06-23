@@ -180,9 +180,11 @@ export default function AuthPage() {
         return;
       }
       if (data.session) {
+        track('sign_up', { method: 'password', confirmed: true, from: 'login_fallback' });
         toast.success('Konto skapat! 🎉');
         navigate('/onboarding');
       } else {
+        track('sign_up', { method: 'password', confirmed: false, from: 'login_fallback' });
         setSentTo(email);
         setView('email-sent');
       }
