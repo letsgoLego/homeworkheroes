@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Check, Trash2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { celebrateStars } from '@/lib/confetti';
+import { track } from '@/lib/analytics';
 
 interface AdhocTask {
   id: string;
