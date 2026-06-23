@@ -9,8 +9,8 @@ export function presenceStatus(lastSeenAt: string | null | undefined, hasAccount
   const last = new Date(lastSeenAt).getTime();
   const now = Date.now();
   const diffMs = now - last;
-  const ONE_HOUR = 60 * 60 * 1000;
-  if (diffMs <= ONE_HOUR) return 'online';
+  const FOUR_HOURS = 4 * 60 * 60 * 1000;
+  if (diffMs <= FOUR_HOURS) return 'online';
   // "today" if same calendar day in local time
   const lastDate = new Date(last);
   const nowDate = new Date(now);
