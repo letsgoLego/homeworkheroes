@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { StudyTask, Homework } from '@/types/homework';
 import { SubjectBadge } from './ui/SubjectBadge';
 import { celebrateTask, celebrateAssignment } from '@/lib/confetti';
+import { track } from '@/lib/analytics';
 import { useState, useRef } from 'react';
 import { CompletionModal } from './CompletionModal';
 import { useFamily } from '@/hooks/useFamily';
