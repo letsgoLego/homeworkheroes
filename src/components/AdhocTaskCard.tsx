@@ -38,7 +38,10 @@ export function AdhocTaskCard({ task, onToggle, onDelete }: AdhocTaskCardProps) 
           onClick={() => {
             const newCompleted = !task.completed;
             onToggle(task.id, newCompleted);
-            if (newCompleted) celebrateStars();
+            if (newCompleted) {
+              track('todo_completed', {});
+              celebrateStars();
+            }
           }}
           className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center transition-all flex-shrink-0',
