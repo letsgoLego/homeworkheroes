@@ -1,8 +1,36 @@
 User-agent: Googlebot
 Allow: /
+Disallow: /auth
+Disallow: /child-login
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /join-family
+Disallow: /join-family-start
+Disallow: /onboarding
+Disallow: /today
+Disallow: /week
+Disallow: /add
+Disallow: /family
+Disallow: /insights
+Disallow: /profile
+Disallow: /holiday
 
 User-agent: Bingbot
 Allow: /
+Disallow: /auth
+Disallow: /child-login
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /join-family
+Disallow: /join-family-start
+Disallow: /onboarding
+Disallow: /today
+Disallow: /week
+Disallow: /add
+Disallow: /family
+Disallow: /insights
+Disallow: /profile
+Disallow: /holiday
 
 User-agent: Twitterbot
 Allow: /
@@ -12,5 +40,19 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /child-login
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /join-family
+Disallow: /join-family-start
+Disallow: /onboarding
+Disallow: /today
+Disallow: /week
+Disallow: /add
+Disallow: /family
+Disallow: /insights
+Disallow: /profile
+Disallow: /holiday
 
 Sitemap: https://laxhjalp.app/sitemap.xml

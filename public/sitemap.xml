@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://laxhjalp.app/landing</loc><priority>1.0</priority></url>
-  <url><loc>https://laxhjalp.app/tips</loc><priority>0.9</priority></url>
-  <url><loc>https://laxhjalp.app/om-oss</loc><priority>0.7</priority></url>
-  <url><loc>https://laxhjalp.app/tips/laxplanering</loc><priority>0.8</priority></url>
-  <url><loc>https://laxhjalp.app/tips/studieteknik-barn</loc><priority>0.8</priority></url>
-  <url><loc>https://laxhjalp.app/tips/laxstress</loc><priority>0.8</priority></url>
-  <url><loc>https://laxhjalp.app/tips/laxrutin</loc><priority>0.8</priority></url>
-  <url><loc>https://laxhjalp.app/tips/motivation-laxor</loc><priority>0.8</priority></url>
-  <url><loc>https://laxhjalp.app/tips/tonaringar-laxor</loc><priority>0.8</priority></url>
-  <url><loc>https://laxhjalp.app/tips/laxhjalp-hemma</loc><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/landing</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://laxhjalp.app/tips</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://laxhjalp.app/om-oss</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://laxhjalp.app/tips/laxplanering</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/studieteknik-barn</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/laxstress</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/laxrutin</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/motivation-laxor</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/tonaringar-laxor</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/laxhjalp-hemma</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/lasforstaelse-barn</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/matematik-hjalp-barn</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/engelska-glosor</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/skarmtid-och-laxor</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/adhd-laxor</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/laxor-arskurs-1-3</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/laxor-arskurs-4-6</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
+  <url><loc>https://laxhjalp.app/tips/hogstadiet-studieteknik</loc><lastmod>2026-06-23</lastmod><priority>0.8</priority></url>
   <url><loc>https://laxhjalp.app/privacy</loc><priority>0.3</priority></url>
   <url><loc>https://laxhjalp.app/terms</loc><priority>0.3</priority></url>
-  <url><loc>https://laxhjalp.app/auth</loc><priority>0.4</priority></url>
-  <url><loc>https://laxhjalp.app/child-login</loc><priority>0.3</priority></url>
-  <url><loc>https://laxhjalp.app/forgot-password</loc><priority>0.2</priority></url>
-  <url><loc>https://laxhjalp.app/reset-password</loc><priority>0.2</priority></url>
-  <url><loc>https://laxhjalp.app/join-family-start</loc><priority>0.4</priority></url>
-  <url><loc>https://laxhjalp.app/join-family</loc><priority>0.2</priority></url>
-  <url><loc>https://laxhjalp.app/onboarding</loc><priority>0.2</priority></url>
-  <url><loc>https://laxhjalp.app/week</loc><priority>0.2</priority></url>
-  <url><loc>https://laxhjalp.app/add</loc><priority>0.2</priority></url>
-  <url><loc>https://laxhjalp.app/family</loc><priority>0.2</priority></url>
-  <url><loc>https://laxhjalp.app/insights</loc><priority>0.2</priority></url>
-  <url><loc>https://laxhjalp.app/profile</loc><priority>0.2</priority></url>
 </urlset>
