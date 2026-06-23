@@ -115,7 +115,7 @@ export default function LaxorArskurs4_6Page() {
 
       <h3>Svenska</h3>
       <ul>
-        <li>Läs mycket. Vad som helst som engagerar. Mängd > genre.</li>
+        <li>Läs mycket. Vad som helst som engagerar. Mängd &gt; genre.</li>
         <li>Skriv ofta — bloggar, dagbok, recensioner. Aktivt skapande bygger meningsbyggnad.</li>
         <li>Grammatik vinns inte med flashcards utan genom att läsa många meningar.</li>
       </ul>
