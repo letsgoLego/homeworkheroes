@@ -29,6 +29,7 @@ import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 import { ChildWeekDashboard } from '@/components/ChildWeekDashboard';
 import { HolidayBanner } from '@/components/HolidayBanner';
 import { computeCurrentStreak } from '@/lib/streak';
+import { track } from '@/lib/analytics';
 
 export default function TodayPage() {
   const { user } = useAuth();
