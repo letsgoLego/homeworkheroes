@@ -34,6 +34,15 @@ import ParentRouteGuard from "./components/ParentRouteGuard";
 import CookieBanner from "./components/CookieBanner";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { OfflineBanner } from "./components/OfflineBanner";
+import SeoNoIndex from "./components/SeoNoIndex";
+import LasforstaelseBarnPage from "./pages/seo/LasforstaelseBarnPage";
+import MatematikHjalpBarnPage from "./pages/seo/MatematikHjalpBarnPage";
+import EngelskaGlosorPage from "./pages/seo/EngelskaGlosorPage";
+import SkarmtidLaxorPage from "./pages/seo/SkarmtidLaxorPage";
+import AdhdLaxorPage from "./pages/seo/AdhdLaxorPage";
+import LaxorArskurs1_3Page from "./pages/seo/LaxorArskurs1_3Page";
+import LaxorArskurs4_6Page from "./pages/seo/LaxorArskurs4_6Page";
+import HogstadietStudieteknikPage from "./pages/seo/HogstadietStudieteknikPage";
 
 
 const queryClient = new QueryClient();
@@ -95,6 +104,14 @@ function AppRoutes() {
       <Route path="/tips/motivation-laxor" element={<MotivationLaxorPage />} />
       <Route path="/tips/tonaringar-laxor" element={<TonaringarLaxorPage />} />
       <Route path="/tips/laxhjalp-hemma" element={<LaxhjalpHemmaPage />} />
+      <Route path="/tips/lasforstaelse-barn" element={<LasforstaelseBarnPage />} />
+      <Route path="/tips/matematik-hjalp-barn" element={<MatematikHjalpBarnPage />} />
+      <Route path="/tips/engelska-glosor" element={<EngelskaGlosorPage />} />
+      <Route path="/tips/skarmtid-och-laxor" element={<SkarmtidLaxorPage />} />
+      <Route path="/tips/adhd-laxor" element={<AdhdLaxorPage />} />
+      <Route path="/tips/laxor-arskurs-1-3" element={<LaxorArskurs1_3Page />} />
+      <Route path="/tips/laxor-arskurs-4-6" element={<LaxorArskurs4_6Page />} />
+      <Route path="/tips/hogstadiet-studieteknik" element={<HogstadietStudieteknikPage />} />
       <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
       <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
@@ -118,6 +135,7 @@ const App = () => (
         <AuthProvider>
           <SubscriptionProvider>
             <OfflineBanner />
+            <SeoNoIndex />
             <AppRoutes />
             <CookieBanner />
           </SubscriptionProvider>
