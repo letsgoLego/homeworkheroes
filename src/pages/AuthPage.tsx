@@ -475,6 +475,54 @@ export default function AuthPage() {
         <p className="text-sm text-muted-foreground">Enkel läxhantering för hela familjen</p>
       </div>
 
+      {/* Tips-länkar */}
+      <footer className="border-t border-border bg-muted/30 px-6 py-8 mt-4">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-foreground">Tips & guider</h2>
+            <Link to="/tips" className="text-xs text-primary font-medium hover:underline">
+              Se alla →
+            </Link>
+          </div>
+          <nav aria-label="Tips och guider">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              {[
+                { path: '/tips/laxplanering', title: 'Läxplanering' },
+                { path: '/tips/laxrutin', title: 'Läxrutin som håller' },
+                { path: '/tips/studieteknik-barn', title: 'Studieteknik för barn' },
+                { path: '/tips/hogstadiet-studieteknik', title: 'Studieteknik högstadiet' },
+                { path: '/tips/lasforstaelse-barn', title: 'Läsförståelse' },
+                { path: '/tips/matematik-hjalp-barn', title: 'Hjälpa med matte' },
+                { path: '/tips/engelska-glosor', title: 'Engelska glosor' },
+                { path: '/tips/laxor-arskurs-1-3', title: 'Läxor åk 1–3' },
+                { path: '/tips/laxor-arskurs-4-6', title: 'Läxor åk 4–6' },
+                { path: '/tips/tonaringar-laxor', title: 'Tonåringar & läxor' },
+                { path: '/tips/laxstress', title: 'Läxstress' },
+                { path: '/tips/motivation-laxor', title: 'Motivation' },
+                { path: '/tips/adhd-laxor', title: 'Läxor med ADHD' },
+                { path: '/tips/skarmtid-och-laxor', title: 'Skärmtid & läxor' },
+                { path: '/tips/laxhjalp-hemma', title: 'Läxhjälp hemma' },
+              ].map((a) => (
+                <li key={a.path}>
+                  <Link
+                    to={a.path}
+                    className="text-muted-foreground hover:text-primary hover:underline underline-offset-2"
+                  >
+                    {a.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <p className="text-xs text-muted-foreground mt-6 text-center">
+            © {new Date().getFullYear()} Läxhjälp ·{' '}
+            <Link to="/om-oss" className="hover:underline">Om oss</Link> ·{' '}
+            <Link to="/privacy" className="hover:underline">Integritet</Link> ·{' '}
+            <Link to="/terms" className="hover:underline">Villkor</Link>
+          </p>
+        </div>
+      </footer>
+
       <AlertDialog open={showCreateOptIn} onOpenChange={setShowCreateOptIn}>
         <AlertDialogContent>
           <AlertDialogHeader>
