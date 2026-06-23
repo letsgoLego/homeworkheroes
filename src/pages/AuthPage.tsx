@@ -126,10 +126,12 @@ export default function AuthPage() {
 
         // If session exists, email-confirm is off – go straight to onboarding.
         if (data.session) {
+          track('sign_up', { method: 'password', confirmed: true });
           toast.success('Konto skapat! 🎉');
           navigate('/onboarding');
         } else {
           // Email confirmation required – show "check inbox" screen so users don't get stuck.
+          track('sign_up', { method: 'password', confirmed: false });
           setSentTo(email);
           setView('email-sent');
         }
