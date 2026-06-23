@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { celebrateTask } from '@/lib/confetti';
+import { track } from '@/lib/analytics';
 
 const WEEKDAYS = [
   { value: 1, label: 'Mån' },
