@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { celebrateTask } from '@/lib/confetti';
+import { track } from '@/lib/analytics';
 
 const WEEKDAYS = [
   { value: 1, label: 'Mån' },
@@ -80,6 +81,7 @@ export function AddTodo({ open, onClose, childId, onAdd }: AddTodoProps) {
     if (mode === 'once') {
       const ok = await onAdd(childId, title.trim(), format(date, 'yyyy-MM-dd'));
       if (ok) {
+        track('todo_created', { mode: 'once' });
         celebrateTask();
         handleClose();
       }
@@ -91,6 +93,7 @@ export function AddTodo({ open, onClose, childId, onAdd }: AddTodoProps) {
         if (ok) success++;
       }
       if (success > 0) {
+        track('todo_created', { mode: 'recurring', count: success, weekdays: weekdays.length });
         toast.success(`${success} uppgifter planerade ⭐`);
         celebrateTask();
         handleClose();

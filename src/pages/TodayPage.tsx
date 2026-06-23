@@ -29,6 +29,7 @@ import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 import { ChildWeekDashboard } from '@/components/ChildWeekDashboard';
 import { HolidayBanner } from '@/components/HolidayBanner';
 import { computeCurrentStreak } from '@/lib/streak';
+import { track } from '@/lib/analytics';
 
 export default function TodayPage() {
   const { user } = useAuth();
@@ -103,6 +104,10 @@ export default function TodayPage() {
         const streak = computeCurrentStreak(homework, adhocTasks, activeChildId);
         setSplashStreak(streak);
         setSplashOpen(true);
+        track('perfect_day', { streak });
+        if (streak > 0 && [2, 3, 7, 14, 30].includes(streak)) {
+          track('streak_milestone', { streak });
+        }
         localStorage.setItem(flagKey, '1');
       }
     }

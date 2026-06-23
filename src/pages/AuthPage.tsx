@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { track } from '@/lib/analytics';
 import {
   BookOpen, Mail, Lock, ArrowRight, Users, User, Info,
   Eye, EyeOff, CheckCircle2, ShieldCheck, Sparkles,
@@ -101,6 +102,7 @@ export default function AuthPage() {
           }
           return;
         }
+        track('login', { method: 'password' });
         toast.success('Välkommen tillbaka! 👋');
         navigate('/');
       } else {
@@ -124,10 +126,12 @@ export default function AuthPage() {
 
         // If session exists, email-confirm is off – go straight to onboarding.
         if (data.session) {
+          track('sign_up', { method: 'password', confirmed: true });
           toast.success('Konto skapat! 🎉');
           navigate('/onboarding');
         } else {
           // Email confirmation required – show "check inbox" screen so users don't get stuck.
+          track('sign_up', { method: 'password', confirmed: false });
           setSentTo(email);
           setView('email-sent');
         }
@@ -176,9 +180,11 @@ export default function AuthPage() {
         return;
       }
       if (data.session) {
+        track('sign_up', { method: 'password', confirmed: true, from: 'login_fallback' });
         toast.success('Konto skapat! 🎉');
         navigate('/onboarding');
       } else {
+        track('sign_up', { method: 'password', confirmed: false, from: 'login_fallback' });
         setSentTo(email);
         setView('email-sent');
       }

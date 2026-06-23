@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { StudyTask, Homework } from '@/types/homework';
 import { SubjectBadge } from './ui/SubjectBadge';
 import { celebrateTask, celebrateAssignment } from '@/lib/confetti';
+import { track } from '@/lib/analytics';
 import { useState, useRef } from 'react';
 import { CompletionModal } from './CompletionModal';
 import { useFamily } from '@/hooks/useFamily';
@@ -41,10 +42,15 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
     
     if (newCompleted) {
       if (result.allCompleted && result.homework) {
+        track('assignment_completed', {
+          subject: result.homework.subject,
+          homework_type: result.homework.homeworkType,
+        });
         celebrateAssignment();
         setCompletedHomework(homework);
         setShowCompletionModal(true);
       } else {
+        track('task_completed', { subject: homework.subject });
         celebrateTask();
       }
     }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { track } from '@/lib/analytics';
 
 interface SubscriptionState {
   subscribed: boolean;
@@ -111,11 +112,14 @@ export function useSubscription() {
 
   const createCheckout = useCallback(async (priceId: string) => {
     try {
+      const plan = priceId === YEARLY_PRICE_ID ? 'yearly' : priceId === MONTHLY_PRICE_ID ? 'monthly' : 'other';
+      track('begin_checkout', { price_id: priceId, plan });
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { priceId },
       });
       if (error) throw error;
       if (data?.url) {
+        track('checkout_redirect', { price_id: priceId, plan });
         window.open(data.url, '_blank');
       }
     } catch (err) {

@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { celebrateTask } from '@/lib/confetti';
+import { track } from '@/lib/analytics';
 
 interface AddHomeworkProps {
   open: boolean;
@@ -312,6 +313,14 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       for (const dateStr of taskDates) {
         await addTask(hw.id, autoTitle, dateStr);
       }
+
+      track('homework_created', {
+        subject,
+        homework_type: homeworkType,
+        is_recurring: isRecurring,
+        study_days: taskDates.length,
+        has_bring_items: bringItems.length > 0,
+      });
       
       if (targetChildId !== activeChildId) {
         setActiveChildId(targetChildId);
