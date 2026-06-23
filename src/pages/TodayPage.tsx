@@ -104,6 +104,10 @@ export default function TodayPage() {
         const streak = computeCurrentStreak(homework, adhocTasks, activeChildId);
         setSplashStreak(streak);
         setSplashOpen(true);
+        track('perfect_day', { streak });
+        if (streak > 0 && [2, 3, 7, 14, 30].includes(streak)) {
+          track('streak_milestone', { streak });
+        }
         localStorage.setItem(flagKey, '1');
       }
     }
