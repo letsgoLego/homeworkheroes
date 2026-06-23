@@ -68,6 +68,43 @@ export default function AboutPage() {
               <li><strong>Stötta varandra</strong> – föräldrar får insyn, barn får självständighet</li>
             </ul>
 
+            <h2>Vår redaktionella process</h2>
+            <p>
+              Förutom appen driver vi en kunskapsbank med fördjupade guider om läxor,
+              studieteknik, motivation och välmående — du hittar dem under <Link to="/tips">Tips
+              &amp; guider</Link>. Varje artikel skrivs av Läxhjälp-redaktionen, ett svenskt team
+              som arbetar dagligen med föräldrar, lärare och elever via appen. Vi baserar våra
+              råd på tre källor:
+            </p>
+            <ul>
+              <li><strong>Forskning</strong> — Skolverket, Karolinska Institutet, OECD och peer-reviewade studier inom inlärning och utvecklingspsykologi.</li>
+              <li><strong>Praktisk erfarenhet</strong> — vad vi själva ser fungera i tusentals svenska familjers vardag.</li>
+              <li><strong>Expertinput</strong> — samtal med lärare, specialpedagoger och föräldrarådgivare.</li>
+            </ul>
+            <p>
+              Vi tar inga pengar för länkar, omnämnanden eller "sponsrat innehåll". Om vi tipsar
+              om en bok, en app eller en hemsida är det för att vi själva använt den. Artiklar
+              uppdateras minst en gång per år och datumet syns alltid i sidhuvudet.
+            </p>
+            <p>
+              Vi vill vara en pålitlig källa för svenska föräldrar — inte sensationsdrivna och
+              inte amerikanskt parenting-bloggsmaskerat. Vår ton är konkret, ärlig och hänger med
+              barnet hela vägen från lågstadiet till gymnasiet.
+            </p>
+
+            <h2>Vilka är vi?</h2>
+            <p>
+              Läxhjälp grundades av en grupp svenska föräldrar och utvecklare som själva upplevde
+              kaoset runt läxor i hemmet. Vi är inte en stor koncern — vi är ett litet team som
+              bygger Läxhjälp med omsorg från Stockholm. När du mejlar oss är det en av oss som
+              svarar, inte en supportbot.
+            </p>
+            <p>
+              Allt utvecklas i Sverige enligt svensk lagstiftning. Personuppgifter lagras inom
+              EU och vi följer GDPR fullt ut. Barnens data är extra skyddad — vi delar inget
+              med tredje part i annonseringssyfte, någonsin.
+            </p>
+
             <h2>Våra värderingar</h2>
           </div>
 
