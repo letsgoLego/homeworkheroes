@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { celebrateTask } from '@/lib/confetti';
+import { track } from '@/lib/analytics';
 
 interface AddHomeworkProps {
   open: boolean;
