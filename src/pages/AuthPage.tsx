@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { track } from '@/lib/analytics';
 import {
   BookOpen, Mail, Lock, ArrowRight, Users, User, Info,
   Eye, EyeOff, CheckCircle2, ShieldCheck, Sparkles,
