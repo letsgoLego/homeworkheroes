@@ -101,6 +101,7 @@ export default function AuthPage() {
           }
           return;
         }
+        track('login', { method: 'password' });
         toast.success('Välkommen tillbaka! 👋');
         navigate('/');
       } else {
