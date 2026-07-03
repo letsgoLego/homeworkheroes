@@ -104,7 +104,7 @@ function AppRoutes() {
       <Route path="/child-login" element={<PublicRoute><ChildLoginPage /></PublicRoute>} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/landing" element={<LandingPage />} />
+      <Route path="/landing" element={<Navigate to="/" replace />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/tips" element={<TipsIndexPage />} />
