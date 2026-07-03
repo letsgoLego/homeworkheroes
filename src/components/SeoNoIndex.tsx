@@ -21,9 +21,7 @@ const NON_INDEXABLE_PREFIXES = [
   '/holiday',
 ];
 
-const NON_INDEXABLE_EXACT = new Set<string>([
-  '/',
-]);
+const NON_INDEXABLE_EXACT = new Set<string>([]);
 
 export default function SeoNoIndex() {
   const { pathname } = useLocation();
