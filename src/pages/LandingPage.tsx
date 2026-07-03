@@ -30,11 +30,11 @@ export default function LandingPage() {
       <Helmet>
         <title>Läxhjälp – familjeappen för läxor, prov och packlistor</title>
         <meta name="description" content="Planera läxor, prov och packlistor tillsammans i familjen. Mindre läxstress, fler firade framgångar. Gratis att komma igång." />
-        <link rel="canonical" href="https://laxhjalp.app/landing" />
+        <link rel="canonical" href="https://laxhjalp.app/" />
         <meta property="og:title" content="Läxhjälp – familjeappen för läxor och prov" />
         <meta property="og:description" content="Planera läxor och packlistor tillsammans – som familj." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://laxhjalp.app/landing" />
+        <meta property="og:url" content="https://laxhjalp.app/" />
       </Helmet>
       {/* Navigation bar */}
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border">

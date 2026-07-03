@@ -84,6 +84,18 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 
+function HomeRoute() {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+  return user ? <TodayPage /> : <LandingPage />;
+}
+
 function AppRoutes() {
   
   return (
@@ -92,7 +104,7 @@ function AppRoutes() {
       <Route path="/child-login" element={<PublicRoute><ChildLoginPage /></PublicRoute>} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/landing" element={<LandingPage />} />
+      <Route path="/landing" element={<Navigate to="/" replace />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/tips" element={<TipsIndexPage />} />
@@ -115,7 +127,7 @@ function AppRoutes() {
       <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
       <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
-      <Route path="/" element={<ProtectedRoute><TodayPage /></ProtectedRoute>} />
+      <Route path="/" element={<HomeRoute />} />
       <Route path="/week" element={<ProtectedRoute><WeekPage /></ProtectedRoute>} />
       <Route path="/add" element={<ProtectedRoute><AddPage /></ProtectedRoute>} />
       <Route path="/family" element={<ProtectedRoute><ParentRouteGuard><FamilyPage /></ParentRouteGuard></ProtectedRoute>} />
