@@ -127,7 +127,7 @@ function AppRoutes() {
       <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
       <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
-      <Route path="/" element={<ProtectedRoute><TodayPage /></ProtectedRoute>} />
+      <Route path="/" element={<HomeRoute />} />
       <Route path="/week" element={<ProtectedRoute><WeekPage /></ProtectedRoute>} />
       <Route path="/add" element={<ProtectedRoute><AddPage /></ProtectedRoute>} />
       <Route path="/family" element={<ProtectedRoute><ParentRouteGuard><FamilyPage /></ParentRouteGuard></ProtectedRoute>} />
