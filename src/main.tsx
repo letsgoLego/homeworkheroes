@@ -22,6 +22,24 @@ if (isPreviewHost || isInIframe) {
   });
 }
 
+// Canonical host redirect: send visitors on the published Lovable domain
+// or the www subdomain to the canonical apex laxhjalp.app. Skip iframe/preview
+// so in-editor development keeps working.
+if (!isInIframe && !isPreviewHost) {
+  const host = window.location.hostname;
+  const shouldRedirect =
+    host === "homeworkheroes.lovable.app" || host === "www.laxhjalp.app";
+  if (shouldRedirect) {
+    const target =
+      "https://laxhjalp.app" +
+      window.location.pathname +
+      window.location.search +
+      window.location.hash;
+    window.location.replace(target);
+  }
+}
+
+
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
     <App />
