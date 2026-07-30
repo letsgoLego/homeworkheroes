@@ -49,3 +49,45 @@ Krav: Node.js & npm ([installera via nvm](https://github.com/nvm-sh/nvm#installi
 ## Custom domain
 
 Gå till **Project → Settings → Domains** och klicka **Connect Domain**. Mer info: [docs.lovable.dev](https://docs.lovable.dev/features/custom-domain#custom-domain).
+
+## Native app (App Store / Google Play)
+
+Appen är förberedd för native-bygge med Capacitor (`capacitor.config.ts`), inklusive
+riktig haptik (`@capacitor/haptics`), lokala påminnelser (`@capacitor/local-notifications`)
+och push (`@capacitor/push-notifications`). Webb/PWA-versionen påverkas inte – all
+native-kod ligger bakom en `isNative()`-guard (`src/lib/platform.ts`).
+
+### Kom igång lokalt
+
+```sh
+git pull
+npm install
+npx cap add ios       # och/eller: npx cap add android
+npx cap update ios    # och/eller: npx cap update android
+npm run build
+npx cap sync
+npx cap run ios       # kräver Mac + Xcode. Android: npx cap run android
+```
+
+Kör `npx cap sync` varje gång du har gjort `git pull` eller ändrat native-plugins.
+
+### Notiser
+
+- **Lokala påminnelser** fungerar direkt efter installation: 14:30 (nya läxor),
+  15:30 (ogjorda uppgifter) och 18:30 (kvällspåminnelse). De följer samma togglar
+  som webben och pausas automatiskt när Lov-läge är aktivt.
+- **Push från servern** går via FCM HTTP v1 (Android direkt, iOS via APNs-nyckel
+  uppladdad i Firebase). Lägg till secreten `FIREBASE_SERVICE_ACCOUNT` (hela
+  service account-JSON:en) i backend-inställningarna för att aktivera den.
+
+### iOS-checklista
+
+1. I Xcode: aktivera **Push Notifications** och **Background Modes → Remote notifications**
+   under *Signing & Capabilities*.
+2. Ladda upp din APNs-nyckel (.p8) i Firebase Console → Project settings → Cloud Messaging.
+3. Se till att `Info.plist` innehåller `UIBackgroundModes` med `remote-notification`.
+
+### Android-checklista
+
+1. Lägg `google-services.json` från Firebase i `android/app/`.
+2. Notiskanalen heter `laxhjalp-reminders`.
