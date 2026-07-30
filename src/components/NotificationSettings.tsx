@@ -69,11 +69,16 @@ export function NotificationSettings() {
           <div>
             <h3 className="font-bold">Notifieringar</h3>
             <p className="text-sm text-muted-foreground">
-              {isSubscribed ? 'Påminnelser aktiverade' : 'Få påminnelser om läxor'}
+              {isSubscribed
+                ? isNativeApp
+                  ? 'Påminnelser skickas från din telefon'
+                  : 'Påminnelser aktiverade'
+                : 'Få påminnelser om läxor'}
             </p>
           </div>
         </div>
       </div>
+
 
       {/* Enable/disable button */}
       {!isSubscribed ? (
