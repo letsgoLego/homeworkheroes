@@ -60,12 +60,18 @@ export function useNotifications() {
   const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
+    if (isNative()) {
+      // Native app always supports notifications (local + push)
+      setIsSupported(true);
+      return;
+    }
     const supported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
     setIsSupported(supported);
     if (supported) {
       setPermission(Notification.permission);
     }
   }, []);
+
 
   const loadSubscription = useCallback(async () => {
     if (!user) {
