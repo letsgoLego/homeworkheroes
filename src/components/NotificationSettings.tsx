@@ -143,9 +143,12 @@ export function NotificationSettings() {
 
       {permission === 'denied' && (
         <p className="text-xs text-destructive text-center">
-          Notifieringar är blockerade. Ändra i din webbläsares inställningar.
+          {isNativeApp
+            ? 'Notiser är blockerade. Ändra under Inställningar på din telefon.'
+            : 'Notifieringar är blockerade. Ändra i din webbläsares inställningar.'}
         </p>
       )}
+
     </motion.div>
   );
 }
