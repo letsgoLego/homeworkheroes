@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendFcmNotification } from "./fcm.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -308,6 +309,39 @@ async function sendPushNotification(
   }
 }
 
+// ============ Delivery dispatcher (web push vs native FCM) ============
+
+interface NotificationPayload {
+  title: string;
+  body: string;
+  tag?: string;
+  url?: string;
+}
+
+async function deliver(
+  sub: Record<string, any>,
+  payload: NotificationPayload,
+  vapidPublicKey: string,
+  vapidPrivateKey: string
+): Promise<boolean> {
+  const platform = sub.platform ?? "web";
+
+  if (platform === "ios" || platform === "android") {
+    if (!sub.device_token) return true; // nothing to send to yet
+    return await sendFcmNotification(sub.device_token, payload);
+  }
+
+  if (!sub.endpoint || !sub.p256dh || !sub.auth_key) return true;
+  return await sendPushNotification(
+    sub.endpoint,
+    sub.p256dh,
+    sub.auth_key,
+    vapidPublicKey,
+    vapidPrivateKey,
+    JSON.stringify(payload)
+  );
+}
+
 // ============ Main handler ============
 
 function getUserTimeInfo(timezone: string): { hours: number; minutes: number; dayOfWeek: number; dateStr: string } {
@@ -470,17 +504,14 @@ Deno.serve(async (req) => {
           sub.notify_new_homework &&
           sub.last_homework_notify !== userToday
         ) {
-          const payload = JSON.stringify({
+          const payload = ({
             title: "📚 Nya läxor idag?",
             body: "Har du fått några nya läxor idag? Logga dem nu så glömmer du inte!",
             tag: "new-homework",
             url: "/add",
           });
 
-          const success = await sendPushNotification(
-            sub.endpoint, sub.p256dh, sub.auth_key,
-            vapidPublic.value, vapidPrivate.value, payload
-          );
+          const success = await deliver(sub, payload, vapidPublic.value, vapidPrivate.value);
 
           if (success) {
             await supabase
@@ -503,17 +534,14 @@ Deno.serve(async (req) => {
         ) {
           const hasUnfinished = await checkUnfinishedTasks(supabase, sub.user_id, userToday);
           if (hasUnfinished) {
-            const payload = JSON.stringify({
+            const payload = ({
               title: "✏️ Du har uppgifter kvar!",
               body: "Du har fortfarande ogjorda uppgifter idag. Kör på, du klarar det!",
               tag: "unfinished-tasks",
               url: "/",
             });
 
-            const success = await sendPushNotification(
-              sub.endpoint, sub.p256dh, sub.auth_key,
-              vapidPublic.value, vapidPrivate.value, payload
-            );
+            const success = await deliver(sub, payload, vapidPublic.value, vapidPrivate.value);
 
             if (success) {
               await supabase
@@ -536,17 +564,14 @@ Deno.serve(async (req) => {
         ) {
           const hasUnfinished = await checkUnfinishedTasks(supabase, sub.user_id, userToday);
           if (hasUnfinished) {
-            const payload = JSON.stringify({
+            const payload = ({
               title: "⏰ Sista påminnelsen!",
               body: "Kvällen närmar sig - glöm inte att göra klart dagens uppgifter!",
               tag: "reminder-tasks",
               url: "/",
             });
 
-            const success = await sendPushNotification(
-              sub.endpoint, sub.p256dh, sub.auth_key,
-              vapidPublic.value, vapidPrivate.value, payload
-            );
+            const success = await deliver(sub, payload, vapidPublic.value, vapidPrivate.value);
 
             if (success) {
               await supabase
