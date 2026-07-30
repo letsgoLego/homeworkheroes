@@ -2,12 +2,35 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { isNative, nativePlatform } from '@/lib/platform';
+import {
+  requestLocalPermission,
+  scheduleLocalReminders,
+  cancelLocalReminders,
+  registerPushDevice,
+  unregisterPushDevice,
+} from '@/lib/nativeNotifications';
 
 interface NotificationPreferences {
   notify_new_homework: boolean;
   notify_unfinished: boolean;
   notify_reminder: boolean;
 }
+
+/** Lov-läge pauses reminders – RLS scopes this to the user's own family. */
+async function holidayModeActive(): Promise<boolean> {
+  try {
+    const { data } = await (supabase as any)
+      .from('holiday_modes')
+      .select('id')
+      .eq('active', true)
+      .limit(1);
+    return !!(data && data.length > 0);
+  } catch {
+    return false;
+  }
+}
+
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
