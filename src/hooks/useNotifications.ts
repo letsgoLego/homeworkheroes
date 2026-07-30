@@ -310,6 +310,7 @@ export function useNotifications() {
 
 
   return {
+    isNativeApp: isNative(),
     permission,
     isSubscribed,
     isSupported,
