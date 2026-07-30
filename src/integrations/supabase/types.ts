@@ -527,9 +527,10 @@ export type Database = {
       }
       push_subscriptions: {
         Row: {
-          auth_key: string
+          auth_key: string | null
           created_at: string
-          endpoint: string
+          device_token: string | null
+          endpoint: string | null
           id: string
           last_homework_notify: string | null
           last_reminder_notify: string | null
@@ -537,14 +538,16 @@ export type Database = {
           notify_new_homework: boolean
           notify_reminder: boolean
           notify_unfinished: boolean
-          p256dh: string
+          p256dh: string | null
+          platform: string
           timezone: string
           user_id: string
         }
         Insert: {
-          auth_key: string
+          auth_key?: string | null
           created_at?: string
-          endpoint: string
+          device_token?: string | null
+          endpoint?: string | null
           id?: string
           last_homework_notify?: string | null
           last_reminder_notify?: string | null
@@ -552,14 +555,16 @@ export type Database = {
           notify_new_homework?: boolean
           notify_reminder?: boolean
           notify_unfinished?: boolean
-          p256dh: string
+          p256dh?: string | null
+          platform?: string
           timezone?: string
           user_id: string
         }
         Update: {
-          auth_key?: string
+          auth_key?: string | null
           created_at?: string
-          endpoint?: string
+          device_token?: string | null
+          endpoint?: string | null
           id?: string
           last_homework_notify?: string | null
           last_reminder_notify?: string | null
@@ -567,7 +572,8 @@ export type Database = {
           notify_new_homework?: boolean
           notify_reminder?: boolean
           notify_unfinished?: boolean
-          p256dh?: string
+          p256dh?: string | null
+          platform?: string
           timezone?: string
           user_id?: string
         }

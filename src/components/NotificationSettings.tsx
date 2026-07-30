@@ -8,6 +8,7 @@ export function NotificationSettings() {
   const {
     isSupported,
     isSubscribed,
+    isNativeApp,
     permission,
     preferences,
     loading,
@@ -15,6 +16,7 @@ export function NotificationSettings() {
     unsubscribe,
     updatePreference,
   } = useNotifications();
+
 
   if (!isSupported) {
     return (
@@ -67,11 +69,16 @@ export function NotificationSettings() {
           <div>
             <h3 className="font-bold">Notifieringar</h3>
             <p className="text-sm text-muted-foreground">
-              {isSubscribed ? 'Påminnelser aktiverade' : 'Få påminnelser om läxor'}
+              {isSubscribed
+                ? isNativeApp
+                  ? 'Påminnelser skickas från din telefon'
+                  : 'Påminnelser aktiverade'
+                : 'Få påminnelser om läxor'}
             </p>
           </div>
         </div>
       </div>
+
 
       {/* Enable/disable button */}
       {!isSubscribed ? (
@@ -136,9 +143,12 @@ export function NotificationSettings() {
 
       {permission === 'denied' && (
         <p className="text-xs text-destructive text-center">
-          Notifieringar är blockerade. Ändra i din webbläsares inställningar.
+          {isNativeApp
+            ? 'Notiser är blockerade. Ändra under Inställningar på din telefon.'
+            : 'Notifieringar är blockerade. Ändra i din webbläsares inställningar.'}
         </p>
       )}
+
     </motion.div>
   );
 }

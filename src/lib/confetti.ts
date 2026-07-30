@@ -1,4 +1,5 @@
 import confetti from 'canvas-confetti';
+import { isNative } from './platform';
 
 type HapticStyle = 'light' | 'medium' | 'heavy' | 'success';
 
@@ -7,6 +8,26 @@ const supportsVibrate = () =>
   'vibrate' in navigator &&
   // iOS Safari exposes navigator.vibrate but it's a no-op
   !/iPad|iPhone|iPod/.test(navigator.userAgent);
+
+// Real device haptics inside the native app (iOS/Android)
+const nativeHaptic = async (style: HapticStyle) => {
+  try {
+    const { Haptics, ImpactStyle, NotificationType } = await import('@capacitor/haptics');
+    if (style === 'success') {
+      await Haptics.notification({ type: NotificationType.Success });
+      return;
+    }
+    const map = {
+      light: ImpactStyle.Light,
+      medium: ImpactStyle.Medium,
+      heavy: ImpactStyle.Heavy,
+    } as const;
+    await Haptics.impact({ style: map[style] });
+  } catch {
+    /* ignore – visual pulse still runs */
+  }
+};
+
 
 const visualPulse = (style: HapticStyle) => {
   if (typeof document === 'undefined') return;
@@ -43,6 +64,13 @@ const visualPulse = (style: HapticStyle) => {
 };
 
 export const haptic = (style: HapticStyle = 'medium') => {
+  // Native app: real device haptics + the visual pulse as a complement
+  if (isNative()) {
+    void nativeHaptic(style);
+    visualPulse(style);
+    return;
+  }
+
   if (supportsVibrate()) {
     const patterns: Record<HapticStyle, number | number[]> = {
       light: [25],
@@ -53,9 +81,10 @@ export const haptic = (style: HapticStyle = 'medium') => {
     (navigator as Navigator).vibrate(patterns[style]);
     return;
   }
-  // Visual fallback for iOS (and other platforms without vibration)
+  // Visual fallback for iOS Safari (and other platforms without vibration)
   visualPulse(style);
 };
+
 
 export const celebrateTask = () => {
   haptic('success');

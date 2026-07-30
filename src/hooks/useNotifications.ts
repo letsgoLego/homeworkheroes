@@ -2,12 +2,35 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { isNative, nativePlatform } from '@/lib/platform';
+import {
+  requestLocalPermission,
+  scheduleLocalReminders,
+  cancelLocalReminders,
+  registerPushDevice,
+  unregisterPushDevice,
+} from '@/lib/nativeNotifications';
 
 interface NotificationPreferences {
   notify_new_homework: boolean;
   notify_unfinished: boolean;
   notify_reminder: boolean;
 }
+
+/** Lov-läge pauses reminders – RLS scopes this to the user's own family. */
+async function holidayModeActive(): Promise<boolean> {
+  try {
+    const { data } = await (supabase as any)
+      .from('holiday_modes')
+      .select('id')
+      .eq('active', true)
+      .limit(1);
+    return !!(data && data.length > 0);
+  } catch {
+    return false;
+  }
+}
+
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -37,12 +60,18 @@ export function useNotifications() {
   const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
+    if (isNative()) {
+      // Native app always supports notifications (local + push)
+      setIsSupported(true);
+      return;
+    }
     const supported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
     setIsSupported(supported);
     if (supported) {
       setPermission(Notification.permission);
     }
   }, []);
+
 
   const loadSubscription = useCallback(async () => {
     if (!user) {
@@ -78,8 +107,80 @@ export function useNotifications() {
     loadSubscription();
   }, [loadSubscription]);
 
+  // Native app: keep the device schedule in sync with the stored preferences
+  useEffect(() => {
+    if (!isNative() || loading || !isSubscribed) return;
+    (async () => {
+      const paused = await holidayModeActive();
+      await scheduleLocalReminders(preferences, paused);
+    })();
+  }, [loading, isSubscribed, preferences]);
+
+  const subscribeNative = async (): Promise<boolean> => {
+    if (!user) return false;
+
+    const localGranted = await requestLocalPermission();
+    if (!localGranted) {
+      toast.error('Notiser blockerades. Ändra i telefonens inställningar.');
+      setPermission('denied');
+      return false;
+    }
+    setPermission('granted');
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const device = await registerPushDevice();
+
+    if (device) {
+      const { error } = await (supabase as any)
+        .from('push_subscriptions')
+        .upsert(
+          {
+            user_id: user.id,
+            device_token: device.token,
+            platform: device.platform,
+            timezone,
+          },
+          { onConflict: 'user_id,device_token' }
+        );
+      if (error) {
+        console.error('Failed to store device token:', error);
+      }
+    } else {
+      // No push token (e.g. simulator or declined) – still store prefs so the
+      // toggles persist for the local schedule.
+      const { data: existing } = await (supabase as any)
+        .from('push_subscriptions')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('platform', nativePlatform())
+        .limit(1);
+      if (!existing || existing.length === 0) {
+        await (supabase as any)
+          .from('push_subscriptions')
+          .insert({ user_id: user.id, platform: nativePlatform(), timezone });
+      }
+    }
+
+    const paused = await holidayModeActive();
+    await scheduleLocalReminders(preferences, paused);
+
+    setIsSubscribed(true);
+    toast.success('Notiser aktiverade! 🔔');
+    return true;
+  };
+
   const subscribe = async (): Promise<boolean> => {
     if (!user || !isSupported) return false;
+
+    if (isNative()) {
+      try {
+        return await subscribeNative();
+      } catch (err) {
+        console.error('Error enabling native notifications:', err);
+        toast.error('Kunde inte aktivera notiser');
+        return false;
+      }
+    }
 
     try {
       // Request notification permission
@@ -122,6 +223,7 @@ export function useNotifications() {
           endpoint: json.endpoint,
           p256dh: json.keys.p256dh,
           auth_key: json.keys.auth,
+          platform: 'web',
           timezone,
         }, { onConflict: 'user_id,endpoint' });
 
@@ -145,11 +247,16 @@ export function useNotifications() {
     if (!user) return false;
 
     try {
-      // Unsubscribe from browser push
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await (registration as any).pushManager.getSubscription();
-      if (subscription) {
-        await subscription.unsubscribe();
+      if (isNative()) {
+        await cancelLocalReminders();
+        await unregisterPushDevice();
+      } else {
+        // Unsubscribe from browser push
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await (registration as any).pushManager.getSubscription();
+        if (subscription) {
+          await subscription.unsubscribe();
+        }
       }
 
       // Remove from database
@@ -187,7 +294,13 @@ export function useNotifications() {
         return false;
       }
 
-      setPreferences(prev => ({ ...prev, [key]: value }));
+      const next = { ...preferences, [key]: value };
+      setPreferences(next);
+
+      if (isNative()) {
+        const paused = await holidayModeActive();
+        await scheduleLocalReminders(next, paused);
+      }
       return true;
     } catch (err) {
       console.error('Error updating preference:', err);
@@ -195,7 +308,9 @@ export function useNotifications() {
     }
   };
 
+
   return {
+    isNativeApp: isNative(),
     permission,
     isSubscribed,
     isSupported,
