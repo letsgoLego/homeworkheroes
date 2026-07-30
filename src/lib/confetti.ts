@@ -64,6 +64,13 @@ const visualPulse = (style: HapticStyle) => {
 };
 
 export const haptic = (style: HapticStyle = 'medium') => {
+  // Native app: real device haptics + the visual pulse as a complement
+  if (isNative()) {
+    void nativeHaptic(style);
+    visualPulse(style);
+    return;
+  }
+
   if (supportsVibrate()) {
     const patterns: Record<HapticStyle, number | number[]> = {
       light: [25],
@@ -74,9 +81,10 @@ export const haptic = (style: HapticStyle = 'medium') => {
     (navigator as Navigator).vibrate(patterns[style]);
     return;
   }
-  // Visual fallback for iOS (and other platforms without vibration)
+  // Visual fallback for iOS Safari (and other platforms without vibration)
   visualPulse(style);
 };
+
 
 export const celebrateTask = () => {
   haptic('success');
