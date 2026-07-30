@@ -8,6 +8,7 @@ export function NotificationSettings() {
   const {
     isSupported,
     isSubscribed,
+    isNativeApp,
     permission,
     preferences,
     loading,
@@ -15,6 +16,7 @@ export function NotificationSettings() {
     unsubscribe,
     updatePreference,
   } = useNotifications();
+
 
   if (!isSupported) {
     return (
