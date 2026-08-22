@@ -133,3 +133,40 @@ export async function unregisterPushDevice(): Promise<void> {
     /* not supported on all platforms */
   }
 }
+
+const INBOX_NOTIFICATION_ID = 4;
+
+/**
+ * Schedule a one-off local reminder about homework waiting in the inbox
+ * (parent sent it, the child has not planned the days yet). Max once per day.
+ */
+export async function scheduleInboxReminder(count: number): Promise<void> {
+  if (!isNative() || count <= 0) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const key = 'laxhjalp_inbox_reminder';
+  if (localStorage.getItem(key) === today) return;
+
+  const { LocalNotifications } = await import('@capacitor/local-notifications');
+  const granted = await requestLocalPermission();
+  if (!granted) return;
+
+  const at = new Date();
+  at.setHours(16, 0, 0, 0);
+  if (at.getTime() < Date.now()) at.setTime(Date.now() + 60 * 60 * 1000);
+
+  await LocalNotifications.cancel({ notifications: [{ id: INBOX_NOTIFICATION_ID }] });
+  await LocalNotifications.schedule({
+    notifications: [
+      {
+        id: INBOX_NOTIFICATION_ID,
+        title: '📥 Läxor väntar på planering',
+        body:
+          count === 1
+            ? 'Du har 1 läxa i inkorgen – välj vilka dagar du gör den!'
+            : `Du har ${count} läxor i inkorgen – planera dagarna nu!`,
+        schedule: { at },
+      },
+    ],
+  });
+  localStorage.setItem(key, today);
+}

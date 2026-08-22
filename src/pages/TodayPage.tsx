@@ -32,6 +32,7 @@ import { HolidayBanner } from '@/components/HolidayBanner';
 import { HomeworkInbox } from '@/components/HomeworkInbox';
 import { computeCurrentStreak } from '@/lib/streak';
 import { track } from '@/lib/analytics';
+import { scheduleInboxReminder } from '@/lib/nativeNotifications';
 
 export default function TodayPage() {
   const { user } = useAuth();
@@ -118,6 +119,14 @@ export default function TodayPage() {
       }
     }
   }, [homework, adhocTasks, activeChildId, todayStr]);
+
+  // Remind the child (on device) about homework waiting in the inbox
+  const inboxForChild = inboxHomework.filter(hw => hw.child_id === activeChildId);
+  useEffect(() => {
+    if (userRole !== 'child') return;
+    if (inboxForChild.length === 0) return;
+    scheduleInboxReminder(inboxForChild.length);
+  }, [userRole, inboxForChild.length]);
   
   // Don't redirect while still loading user role information
   // This prevents premature redirects for child accounts and invited parents
@@ -285,7 +294,7 @@ export default function TodayPage() {
 
             {/* Homework inbox: parent sends, child plans */}
             <HomeworkInbox
-              items={inboxHomework.filter(hw => hw.child_id === activeChildId)}
+              items={inboxForChild}
               readOnly={userRole !== 'child'}
               childNameById={Object.fromEntries(children.map(c => [c.id, c.name]))}
             />
