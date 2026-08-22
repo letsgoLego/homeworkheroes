@@ -32,10 +32,14 @@ export default function AddPage() {
   const [showAddTodo, setShowAddTodo] = useState(false);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
-  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, deleteActivity, addAdhocTask } = useFamily();
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, updateActivity, deleteActivity, addAdhocTask } = useFamily();
   
   const today = startOfDay(new Date());
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
+  const childActivities = activities.filter((a) => a.child_id === activeChildId);
+  const editingActivity = childActivities.find((a) => a.id === editingActivityId) || null;
+
   
   // Split into: overdue (past due, not completed), active (not past due, not completed), completed
   const overdueHomework = childHomework.filter((hw) => !hw.completed && isPast(parseISO(hw.due_date)) && parseISO(hw.due_date) < today);
