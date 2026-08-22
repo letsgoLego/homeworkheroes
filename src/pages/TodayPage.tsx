@@ -29,6 +29,7 @@ import { useChildHeartbeat } from '@/hooks/useChildPresence';
 import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 import { ChildWeekDashboard } from '@/components/ChildWeekDashboard';
 import { HolidayBanner } from '@/components/HolidayBanner';
+import { HomeworkInbox } from '@/components/HomeworkInbox';
 import { computeCurrentStreak } from '@/lib/streak';
 import { track } from '@/lib/analytics';
 
@@ -40,6 +41,7 @@ export default function TodayPage() {
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
   const {
     homework,
+    inboxHomework,
     children,
     activeChildId,
     setActiveChildId,
@@ -280,6 +282,13 @@ export default function TodayPage() {
           <TabsContent value="today" className="space-y-6">
             {/* Holiday mode banner */}
             <HolidayBanner childId={activeChildId} />
+
+            {/* Homework inbox: parent sends, child plans */}
+            <HomeworkInbox
+              items={inboxHomework.filter(hw => hw.child_id === activeChildId)}
+              readOnly={userRole !== 'child'}
+              childNameById={Object.fromEntries(children.map(c => [c.id, c.name]))}
+            />
 
             {/* Child weekly dashboard - peppar barnet att komma i mål */}
             {userRole === 'child' && activeChild && (

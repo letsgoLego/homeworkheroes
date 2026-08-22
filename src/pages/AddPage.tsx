@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Navigation } from '@/components/Navigation';
 import { AddHomework } from '@/components/AddHomework';
+import { SendHomeworkToChild } from '@/components/SendHomeworkToChild';
+import { HomeworkInbox } from '@/components/HomeworkInbox';
 import { EditHomework } from '@/components/EditHomework';
 import { AddActivity } from '@/components/AddActivity';
 import { AddTodo } from '@/components/AddTodo';
@@ -11,7 +13,7 @@ import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { useFamily } from '@/hooks/useFamily';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
-import { Plus, Calendar, Trash2, Pencil, Repeat, Flag, AlertTriangle, ListTodo } from 'lucide-react';
+import { Plus, Calendar, Trash2, Pencil, Repeat, Flag, AlertTriangle, ListTodo, Send } from 'lucide-react';
 import { HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 import { Button } from '@/components/ui/button';
 import { format, isPast, parseISO, startOfDay } from 'date-fns';
@@ -28,12 +30,13 @@ interface HomeworkWithTasks extends Homework {
 
 export default function AddPage() {
   const [showAddHomework, setShowAddHomework] = useState(false);
+  const [showSendHomework, setShowSendHomework] = useState(false);
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showAddTodo, setShowAddTodo] = useState(false);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
-  const { homework, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, updateActivity, deleteActivity, addAdhocTask } = useFamily();
+  const { homework, inboxHomework, userRole, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, updateActivity, deleteActivity, addAdhocTask } = useFamily();
   
   const today = startOfDay(new Date());
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
@@ -104,6 +107,26 @@ export default function AddPage() {
             <span>Aktivitet 🏃</span>
           </Button>
         </div>
+
+        {/* Send homework to child (parents only) */}
+        {userRole !== 'child' && (
+          <Button
+            onClick={() => setShowSendHomework(true)}
+            variant="outline"
+            className="w-full h-auto py-3 gap-2 border-2 border-dashed"
+            disabled={!activeChildId}
+          >
+            <Send className="w-4 h-4" />
+            <span>Skicka läxa – barnet planerar 📥</span>
+          </Button>
+        )}
+
+        {/* Inbox */}
+        <HomeworkInbox
+          items={inboxHomework.filter(hw => hw.child_id === activeChildId)}
+          readOnly={userRole !== 'child'}
+          childNameById={Object.fromEntries(children.map(c => [c.id, c.name]))}
+        />
 
         {/* Activities */}
         {childActivities.length > 0 && (
@@ -334,6 +357,8 @@ export default function AddPage() {
       
       
       <Navigation />
+      <SendHomeworkToChild open={showSendHomework} onClose={() => setShowSendHomework(false)} />
+
       <AddHomework open={showAddHomework} onClose={() => setShowAddHomework(false)} />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
       {activeChildId && (
