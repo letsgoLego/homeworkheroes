@@ -13,17 +13,20 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
 
 - [Huvudfunktioner](#huvudfunktioner)
   - [Läxor & hemuppgifter](#läxor--hemuppgifter)
+  - [Läxinkorg (förälder → barn)](#läxinkorg-förälder--barn)
   - [Barnvyn](#barnvyn)
   - [Familj & roller](#familj--roller)
   - [Aktiviteter](#aktiviteter)
   - [Todos](#todos)
   - [Progress & gamification](#progress--gamification)
   - [Smart schemaläggning](#smart-schemaläggning)
+  - [Lov-läge](#lov-läge)
   - [Påminnelser & notiser](#påminnelser--notiser)
   - [Onboarding & introtur](#onboarding--introtur)
 - [Prenumeration](#prenumeration)
 - [Autentisering](#autentisering)
 - [PWA & offline](#pwa--offline)
+- [Native app (iOS & Android)](#native-app-ios--android)
 - [Marknadsföring & SEO](#marknadsföring--seo)
 - [Säkerhet & efterlevnad](#säkerhet--efterlevnad)
 - [Teknisk stack](#teknisk-stack)
@@ -48,6 +51,15 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
 - **Sortering i "Idag"-vyn** – nyaste uppgifter överst, äldre/försenade i botten.
 - **Swipe-to-delete** – 2-stegs swipe för att radera i Idag-vyn.
 
+### Läxinkorg (förälder → barn)
+
+- **Förälder skickar läxa** – titel, ämne, beskrivning och deadline fylls i av föräldern via "Skicka läxa".
+- **Föreslagna delmoment** – föräldern kan lägga till delmoment (t.ex. "läs kapitel 1") som sparas som `homework_plan_items`.
+- **Barnets inkorg** – oplanerade läxor visas högst upp på Idag- och Läxor-sidan med notisbricka i navigeringen.
+- **Barnet planerar dagarna** – barnet fördelar delmomenten på dagar mellan idag och deadline; först då blir läxan synlig i Idag/Vecka.
+- **Påminnelse kl 16:00** – push/lokal notis om det finns oplanerade läxor kvar i inkorgen.
+- **Statuslägen** – `planning_status`: `pending` (i inkorgen) eller `planned` (klar att göra).
+
 ### Barnvyn
 
 - **Förenklad dashboard** som lyfter fram veckans viktigaste och peppar barnet att komma i mål.
@@ -68,6 +80,9 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
 ### Aktiviteter
 
 - **Fritidsaktiviteter** (sport, hobbies m.m.) med automatisk **krockdetektering** mot läxor och andra åtaganden.
+- **Återkommande eller engångsaktiviteter** – välj veckodagar eller ett enskilt datum.
+- **Full redigering (CRUD)** – skapa, uppdatera och ta bort aktiviteter direkt på Idag-sidan eller i aktivitetslistan på Läxor-sidan.
+- **Föräldrastyrt** – redigera/ta bort är dolt för barnkonton.
 - **Förinstallda mallar** för vanliga aktiviteter, varje med passande emoji.
 
 ### Todos
@@ -83,6 +98,17 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
 ### Smart schemaläggning
 
 - Algoritm som föreslår studiedagar baserat på arbetsbörda och deadlines, för att jämna ut veckan och minska läxstress.
+
+### Lov-läge
+
+- **Aktiveras på lov** från barnets profil eller direkt i veckovyn – vanliga läxpåminnelser pausas automatiskt.
+- **1–3 egna mål** per barn med emoji, färg, måltyp (dagligt eller totalt) och målvärde.
+- **Daglig ifyllning** – barnet registrerar sina resultat varje dag (`holiday_goal_entries`).
+- **Gamification** – streaks (🔥), 7-dagars sparkline, Lov-XP med nivåer ("Lovstartare" → "Lov-legend"), milstolpar och "perfekt dag"-splash.
+- **Heatmap** över hela lovet som visar konsekvens.
+- **Veckosammanfattning** som delbar PNG-bild (html-to-image) att skicka till förälder eller kompis.
+- **Redigera mål** när som helst – namn, emoji, färg, mål och typ.
+- **Troféer när lovet är slut** – guld/silver/brons per mål baserat på måluppfyllnad, med egen delbar trofébild.
 
 ### Påminnelser & notiser
 
@@ -127,9 +153,27 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
 
 ---
 
+## Native app (iOS & Android)
+
+- **Capacitor-uppsättning** (`capacitor.config.ts`) för bygge till App Store och Google Play.
+- **Riktig haptik** via `@capacitor/haptics` – visuell puls som fallback på webben/iOS Safari.
+- **Lokala notiser** via `@capacitor/local-notifications` (14:30, 15:30, 18:30 samt 16:00 för inkorgen).
+- **Native push** via `@capacitor/push-notifications` och FCM HTTP v1 i `send-notifications` (kräver secret `FIREBASE_SERVICE_ACCOUNT`).
+- **Plattformsabstraktion** i `src/lib/platform.ts` och `src/lib/nativeNotifications.ts` – all native-kod ligger bakom `isNative()`, webbversionen påverkas inte.
+- `push_subscriptions` innehåller `platform` ('web' | 'ios' | 'android') och `device_token`.
+
+---
+
+## Analys & mätning
+
+- **Google Analytics 4** med egna händelser: `sign_up`, `login`, `begin_checkout`, `checkout_redirect`, `homework_created`, `todo_created`, `task_completed`, `assignment_completed`, `homework_sent_to_child`, `homework_planned_by_child`, `perfect_day`, `streak_milestone`.
+- **Föräldrainsikter** – analysvy med t.ex. beredskap inför prov och friktionspunkter.
+
+---
+
 ## Marknadsföring & SEO
 
-- **Publik landningssida** på `/landing` med how-to och prissättning.
+- **Publik landningssida** på `/` (kanonisk `https://laxhjalp.app/`) med how-to och prissättning; `/landing` omdirigerar dit.
 - **Om oss-sida** på `/om-oss`.
 - **SEO-artiklar** på `/tips/*` med JSON-LD Article-schema:
   - Läxplanering
@@ -139,6 +183,7 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
   - Motivation till läxor
   - Tonåringar och läxor
   - Läxhjälp hemma
+- **15+ pelarartiklar** (~2000 ord) om bl.a. ADHD och läxor, mattehjälp och läsförståelse, med FAQ- och Article-schema, brödsmulor och författarpresentation.
 - **AdSense är strikt begränsat** till `/tips/*` – inga annonser inne i appen.
 
 ---
@@ -177,6 +222,7 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
 | `send-notifications` | Schemalagda push-notiser (14:30/15:30/18:30). |
 | `nudge-child` | Förälder skickar peppande notis till barn. |
 | `cleanup-old-homework` | Tar bort gamla läxor >7 dagar försenade. |
+| `send-notifications` (FCM) | Native push till iOS/Android via FCM HTTP v1. |
 
 ---
 

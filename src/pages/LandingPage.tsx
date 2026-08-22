@@ -6,7 +6,7 @@ import {
   BookOpen, Calendar, CheckCircle2, Backpack, Users, 
   ArrowRight, Sparkles, Bell, BarChart3, ChevronDown,
   Plus, Flag, Repeat, Moon, Smartphone, UserPlus, Eye,
-  Clock, Star, Zap, Heart, Shield, Crown
+  Clock, Star, Zap, Heart, Shield, Crown, Inbox, Sun
 } from 'lucide-react';
 import screenshotToday from '@/assets/screenshot-today.png';
 import screenshotAdd from '@/assets/screenshot-add.png';
@@ -414,6 +414,60 @@ export default function LandingPage() {
               { icon: Shield, title: 'Roller', desc: 'Föräldrar ser allt och kan hantera. Barn ser bara sina egna läxor och uppgifter.' },
               { icon: Smartphone, title: 'Barnkonto', desc: 'Barn loggar in med eget användarnamn eller e-post – enkelt och säkert.' },
               { icon: Bell, title: 'Påminnelser', desc: 'Ställ in notiser för nya läxor, deadlines och ogjorda uppgifter.' },
+            ]}
+          />
+
+          {/* Guide 8: Läxinkorg */}
+          <HowToStep
+            stepNumber={8}
+            title="Skicka läxa till barnet"
+            description="Föräldern fyller i första steget – barnet planerar själv vilka dagar läxan ska göras."
+            items={[
+              { icon: Inbox, title: 'Inkorg för barnet', desc: 'Nya läxor från föräldern landar i barnets inkorg med en tydlig notisbricka.' },
+              { icon: Flag, title: 'Delmoment', desc: 'Föräldern kan föreslå delmoment – t.ex. "läs kapitel 1" och "gör instuderingsfrågor".' },
+              { icon: Calendar, title: 'Barnet planerar', desc: 'Barnet fördelar delmomenten på dagarna fram till deadline. Då dyker läxan upp i Idag och Vecka.' },
+              { icon: Bell, title: 'Påminnelse kl 16:00', desc: 'Finns oplanerade läxor kvar i inkorgen skickas en vänlig påminnelse.' },
+            ]}
+          />
+
+          {/* Guide 9: Aktiviteter */}
+          <HowToStep
+            stepNumber={9}
+            title="Håll koll på aktiviteter"
+            description="Fotboll, kör, ridning – lägg in fritidsaktiviteter så att pluggplaneringen tar hänsyn till dem."
+            reverse
+            items={[
+              { icon: Repeat, title: 'Återkommande eller enstaka', desc: 'Välj veckodagar för träningar eller lägg in en engångsaktivitet.' },
+              { icon: Zap, title: 'Krockdetektering', desc: 'Appen varnar när en aktivitet krockar med en läxa eller ett pluggpass.' },
+              { icon: Plus, title: 'Redigera och ta bort', desc: 'Uppdatera tid, dag eller namn direkt på Idag-sidan eller i aktivitetslistan.' },
+              { icon: Eye, title: 'Föräldrastyrt', desc: 'Bara föräldrar kan ändra aktiviteter – barnen ser dem i sin dag.' },
+            ]}
+          />
+
+          {/* Guide 10: Lov-läge */}
+          <HowToStep
+            stepNumber={10}
+            title="Lov-läge på loven"
+            description="När skolan är slut pausas läxnotiserna – istället sätter ni 1–3 egna mål för lovet."
+            items={[
+              { icon: Sun, title: 'Aktivera lovläge', desc: 'Slå på lovläget på barnets profil eller direkt i veckovyn. Vanliga läxpåminnelser tystnar.' },
+              { icon: Star, title: '1–3 egna mål', desc: 'T.ex. "räkna 300 mattetal" eller "läs 20 minuter om dagen" – med egen emoji och färg.' },
+              { icon: BarChart3, title: 'Streak, XP och heatmap', desc: 'Fyll i varje dag och se streaks, Lov-XP-nivåer och ett aktivitetsrutnät över hela lovet.' },
+              { icon: Crown, title: 'Veckosammanfattning', desc: 'Varje vecka får ni en delbar bild att skicka till förälder eller kompis – och troféer när lovet är slut.' },
+            ]}
+          />
+
+          {/* Guide 11: Appen i mobilen */}
+          <HowToStep
+            stepNumber={11}
+            title="Appen i mobilen"
+            description="Läxhjälp fungerar som en riktig app – både installerad från webben och som native-app."
+            reverse
+            items={[
+              { icon: Smartphone, title: 'Installera på hemskärmen', desc: 'Lägg till appen på iPhone, iPad eller Android och kör den i helskärm.' },
+              { icon: Bell, title: 'Notiser kl 14:30, 15:30 och 18:30', desc: 'Påminnelser om nya läxor, ogjorda uppgifter och kvällskoll – både push och lokala notiser.' },
+              { icon: Sparkles, title: 'Vibration och firande', desc: 'Haptisk feedback i native-appen och visuell puls där vibration saknas.' },
+              { icon: Clock, title: 'Fungerar offline', desc: 'Dagens läxor finns kvar även när uppkopplingen strular.' },
             ]}
           />
         </div>
