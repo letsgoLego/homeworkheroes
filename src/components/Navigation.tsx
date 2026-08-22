@@ -27,8 +27,9 @@ interface NavItem {
 
 export function Navigation() {
   const location = useLocation();
-  const { userRole } = useFamily();
+  const { userRole, inboxHomework, activeChildId } = useFamily();
   const navItems = userRole === 'child' ? childNavItems : parentNavItems;
+  const inboxCount = inboxHomework.filter(hw => !activeChildId || hw.child_id === activeChildId).length;
   
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border safe-area-bottom z-50">
@@ -61,7 +62,14 @@ export function Navigation() {
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
-                <Icon className="w-6 h-6" />
+                <div className="relative">
+                  <Icon className="w-6 h-6" />
+                  {item.path === '/' && inboxCount > 0 && (
+                    <span className="absolute -top-1 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-warning text-[10px] font-bold text-warning-foreground flex items-center justify-center">
+                      {inboxCount}
+                    </span>
+                  )}
+                </div>
                 <span className="text-xs font-medium">{item.label}</span>
                 {isActive && (
                   <motion.div
