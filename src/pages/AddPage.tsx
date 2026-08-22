@@ -343,6 +343,15 @@ export default function AddPage() {
           onAdd={(data) => addActivity(activeChildId, data)}
         />
       )}
+      {editingActivity && (
+        <AddActivity
+          open={true}
+          onClose={() => setEditingActivityId(null)}
+          activity={editingActivity}
+          onUpdate={updateActivity}
+        />
+      )}
+
       {activeChildId && (
         <AddTodo
           open={showAddTodo}
