@@ -104,6 +104,26 @@ export default function AddPage() {
             <span>Aktivitet 🏃</span>
           </Button>
         </div>
+
+        {/* Activities */}
+        {childActivities.length > 0 && (
+          <section>
+            <h2 className="text-lg font-bold mb-3">Aktiviteter 🏃 ({childActivities.length})</h2>
+            <div className="space-y-2">
+              {childActivities.map((act) => (
+                <ActivityCard
+                  key={act.id}
+                  activity={act}
+                  showSchedule
+                  onEdit={setEditingActivityId}
+                  onDelete={deleteActivity}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+        
+
         
         {/* Overdue homework */}
         {overdueHomework.length > 0 && (
