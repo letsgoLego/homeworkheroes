@@ -1,50 +1,36 @@
-## Mål
+# Läx-inkorg: förälder skickar, barnet planerar
 
-Göra Läxhjälp till en riktig native-app (iOS/Android) med äkta vibrationer (haptik) och notiser – både lokala påminnelser direkt och server-push via APNs/FCM när certifikaten finns på plats. Webb/PWA-versionen fortsätter fungera exakt som idag.
+## Idé
+Föräldern skapar läxans "steg 1" (titel, ämne, deadline, ev. delmoment) och skickar den till barnet. Läxan landar i barnets **Inkorg** utan planerade dagar. Barnet gör "steg 2": fördelar delmomenten på dagar fram till deadline. Först då dyker läxan upp i Idag/Vecka som vanligt.
 
-## 1. Capacitor-grund
+## Flöde
+```text
+Förälder: Skicka läxa  ->  Barnets inkorg (oplanerad)  ->  Barnet planerar dagar  ->  Vanlig läxa
+```
 
-- Lägg till `@capacitor/core`, `@capacitor/cli` (dev), `@capacitor/ios`, `@capacitor/android`.
-- Skapa `capacitor.config.ts` med appId `app.lovable.35a2792688ca43f9806912710e01c9f1`, appName `homeworkheroes`, `webDir: "dist"` och `server.url` mot sandbox-URL:en för hot reload under utveckling.
-- Ny hjälpmodul `src/lib/platform.ts` som exponerar `isNative()` (Capacitor-plattform ≠ web) så all ny kod kan välja native- eller webbväg.
+## Vad som byggs
 
-## 2. Vibrationer (haptik) – både native och visuellt
+### 1. Förälderns "Skicka läxa"
+- Ny flik/knapp i formuläret för att lägga till läxa: "Skicka till barnet att planera".
+- Fält: titel, ämne, beskrivning, deadline och en valfri lista med delmoment (t.ex. "Läs s. 12-18", "Öva glosor").
+- Föräldern väljer inga dagar. Läxan sparas som "väntar på planering".
 
-- Lägg till `@capacitor/haptics`.
-- Bygg ut `src/lib/confetti.ts`:
-  - I native-appen: `Haptics.impact({ style: Light/Medium/Heavy })` respektive `Haptics.notification()` för `success`.
-  - Kvarhåll den visuella pulsen som komplement på alla plattformar (ditt val: "både haptik och visuell effekt").
-  - Webbläge oförändrat: `navigator.vibrate` där det stöds, annars visuell puls.
-- Ingen ändring i anropande komponenter – de använder redan `haptic()`.
+### 2. Barnets inkorg
+- Ny sektion högst upp på Idag-sidan: "📥 Inkorg (2)" med kort per oplanerad läxa (ämne, deadline, antal delmoment, dagar kvar).
+- Barnet öppnar kortet och får en planeringsvy: en rad per delmoment där man väljer dag (endast dagar fram till deadline). Kan lägga till egna delmoment och slå ihop flera på samma dag.
+- "Klart – planera!" skapar studieuppgifterna och tar bort läxan från inkorgen. Kort konfetti/haptik som belöning.
+- Om inga delmoment finns skickade väljer barnet själv en eller flera studiedagar.
 
-## 3. Lokala notiser (fungerar direkt, utan Apple/Google-setup)
+### 3. Påminnelser och förälderns status
+- Barnet påminns om oplanerade läxor: badge i navigeringen + notis (samma push/lokala notiser som idag) så länge något ligger i inkorgen.
+- Föräldern ser status på läxan: "Väntar på planering" (gul) vs "Planerad av barnet" med vilka dagar barnet valt.
+- Barn kan fortsätta skapa egna läxor precis som idag – inkorgen gäller bara det föräldern skickar.
 
-- Lägg till `@capacitor/local-notifications`.
-- Ny hook `src/hooks/useLocalNotifications.ts` som i native-appen:
-  - begär tillstånd,
-  - schemalägger dagliga återkommande notiser kl. 14:30 (nya läxor), 15:30 (ogjorda uppgifter) och 18:30 (kvällspåminnelse) – samma tider som dagens serverpush,
-  - respekterar samma tre inställningar som redan finns (`notify_new_homework`, `notify_unfinished`, `notify_reminder`) och avbokar/omschemalägger när en toggle ändras,
-  - hoppar över notiser när Lov-läge är aktivt (samma regel som idag).
-- `NotificationSettings.tsx` får en native-gren: samma UI och togglar, men texten förklarar att påminnelserna kommer från telefonen.
-
-## 4. Native push (APNs/FCM)
-
-- Lägg till `@capacitor/push-notifications`.
-- Databas: utöka `push_subscriptions` med `platform` ('web' | 'ios' | 'android') och `device_token` (nullable), och gör `endpoint`/`p256dh`/`auth_key` nullable så native-tokens kan sparas i samma tabell med befintliga RLS-policyer.
-- Klient: i native-appen registreras enheten via `PushNotifications` och token sparas som en rad med `platform` + `device_token`; på webben används dagens VAPID-flöde oförändrat.
-- Edge function `send-notifications` utökas med en FCM v1-gren (HTTP v1 med service-account-JWT) för native-rader, medan webbraderna fortsätter gå via befintlig Web Push-kod. Notisinnehåll, dedupe-fälten (`last_*_notify`) och tidszonlogik återanvänds.
-- Ett service account-JSON från Firebase behövs som secret innan native push kan skickas skarpt; jag lägger in koden och ber om värdet när vi är där. Fram till dess ger lokala notiser full funktion i appen.
-
-## 5. iOS/Android-specifikt
-
-- iOS: `Info.plist`-noteringar för push-behörighet och background modes dokumenteras i README (filerna skapas när du kör `npx cap add ios` lokalt).
-- Android: `google-services.json` placeras i `android/app/` – dokumenteras i README.
-- README får ett avsnitt "Native app (App Store / Play Store)" med exakta steg: exportera till GitHub, `npm install`, `npx cap add ios/android`, `npm run build`, `npx cap sync`, `npx cap run ios`.
-
-## Tekniska detaljer
-
-- Ingen befintlig webbfunktionalitet tas bort: service worker, VAPID-push och PWA-manifest lämnas intakta.
-- All native-kod ligger bakom `isNative()`-guards så webbbygget inte påverkas och tester fortsätter gå igenom.
-- Migrationen är additiv (nya nullable-kolumner + default `'web'`), så inga befintliga prenumerationer går sönder.
-
-Efter implementationen: `git pull` i ditt repo och kör `npx cap sync` innan du bygger i Xcode.
+## Teknisk sammanfattning
+- **Migration** på `homework`: `planning_status text not null default 'planned'` ('pending' | 'planned'), `created_by uuid`, `planned_at timestamptz`. Befintliga rader blir 'planned' så inget ändras retroaktivt.
+- **Ny tabell** `homework_plan_items` (förslag på delmoment från föräldern innan barnet lagt ut dem): `homework_id`, `title`, `sort_order`. GRANT till authenticated/service_role, RLS via `user_belongs_to_family` på barnets familj, samma mönster som `study_tasks`.
+- **Filtrering**: `useHomeworkData`/`useFamily` exponerar `inboxHomework` (planning_status = 'pending') och exkluderar dem från Idag/Vecka-listor, streaks, XP och workload-punkter.
+- **Nya komponenter**: `SendHomeworkToChild.tsx` (förälderläge i `AddHomework`), `HomeworkInbox.tsx` (lista på TodayPage), `PlanHomeworkSheet.tsx` (barnets dagfördelning).
+- **Hook**: `planHomework(homeworkId, [{title, date}])` skapar `study_tasks`, sätter `planning_status='planned'` + `planned_at`, rensar plan-items, invalidate.
+- **Notiser**: nytt fall i `send-notifications` + lokala notiser för "oplanerad läxa", hoppas över under Lov-läge.
+- **Analytics**: `homework_sent_to_child`, `homework_planned_by_child`.
