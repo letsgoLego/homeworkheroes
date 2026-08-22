@@ -20,12 +20,25 @@ export interface Activity {
   created_at: string;
 }
 
+export interface HomeworkPlanItem {
+  id: string;
+  homework_id: string;
+  title: string;
+  sort_order: number;
+}
+
 export interface HomeworkWithTasks extends Homework {
   tasks: StudyTask[];
 }
 
+export interface InboxHomework extends Homework {
+  tasks: StudyTask[];
+  planItems: HomeworkPlanItem[];
+}
+
 interface HomeworkDataResult {
   homework: HomeworkWithTasks[];
+  inboxHomework: InboxHomework[];
   recurringPackItems: RecurringPackItem[];
   adhocTasks: AdhocTask[];
   activities: Activity[];
@@ -33,7 +46,7 @@ interface HomeworkDataResult {
 
 async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult> {
   if (childIds.length === 0) {
-    return { homework: [], recurringPackItems: [], adhocTasks: [], activities: [] };
+    return { homework: [], inboxHomework: [], recurringPackItems: [], adhocTasks: [], activities: [] };
   }
 
   const thirtyDaysAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
@@ -41,7 +54,7 @@ async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult
   const [hwRes, packRes, adhocRes, actRes] = await Promise.all([
     supabase
       .from('homework')
-      .select('*, study_tasks(*)')
+      .select('*, study_tasks(*), homework_plan_items(*)')
       .in('child_id', childIds)
       .or(`due_date.gte.${thirtyDaysAgo},completed.eq.false`),
     supabase
@@ -63,14 +76,26 @@ async function fetchHomeworkData(childIds: string[]): Promise<HomeworkDataResult
   if (adhocRes.error) throw adhocRes.error;
   if (actRes.error) throw actRes.error;
 
-  const homework: HomeworkWithTasks[] = (hwRes.data || []).map((hw: any) => ({
+  const allHomework = (hwRes.data || []).map((hw: any) => ({
     ...hw,
     tasks: hw.study_tasks || [],
+    planItems: (hw.homework_plan_items || []).sort(
+      (a: HomeworkPlanItem, b: HomeworkPlanItem) => a.sort_order - b.sort_order
+    ),
     study_tasks: undefined,
+    homework_plan_items: undefined,
   }));
+
+  const homework: HomeworkWithTasks[] = allHomework.filter(
+    (hw: any) => hw.planning_status !== 'pending'
+  );
+  const inboxHomework: InboxHomework[] = allHomework.filter(
+    (hw: any) => hw.planning_status === 'pending'
+  );
 
   return {
     homework,
+    inboxHomework,
     recurringPackItems: packRes.data || [],
     adhocTasks: adhocRes.data || [],
     activities: (actRes.data || []) as Activity[],
