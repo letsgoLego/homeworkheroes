@@ -22,6 +22,7 @@ import { RecurringPackItems } from '@/components/RecurringPackItems';
 import { AddAdhocTask } from '@/components/AddAdhocTask';
 import { AdhocTaskCard } from '@/components/AdhocTaskCard';
 import { ActivityCard } from '@/components/ActivityCard';
+import { AddActivity } from '@/components/AddActivity';
 import { IntroTour } from '@/components/IntroTour';
 import { NudgeButton } from '@/components/NudgeButton';
 import { useChildHeartbeat } from '@/hooks/useChildPresence';
@@ -36,6 +37,7 @@ export default function TodayPage() {
   const navigate = useNavigate();
   const [showAddChild, setShowAddChild] = useState(false);
   const [refetchAttempted, setRefetchAttempted] = useState(false);
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
   const {
     homework,
     children,
@@ -59,6 +61,8 @@ export default function TodayPage() {
     getAdhocTasksForDate,
     toggleHomeworkComplete,
     getActivitiesForDate,
+    activities,
+    updateActivity,
     deleteActivity,
     refetch,
   } = useFamily();
@@ -158,6 +162,7 @@ export default function TodayPage() {
   const itemsToBringData = activeChildId ? getItemsToBringForDate(activeChildId, bringToSchoolDate) : { homeworkItems: [], recurringItems: [] };
   const hasItemsToBring = itemsToBringData.homeworkItems.length > 0 || itemsToBringData.recurringItems.length > 0;
   const todayActivities = activeChildId ? getActivitiesForDate(activeChildId, today) : [];
+  const editingActivity = activities.find((a) => a.id === editingActivityId) || null;
   
   // Get homework due on pack date (today before 12, tomorrow after 12)
   const packDateHomework = homework.filter(hw => {
@@ -327,7 +332,12 @@ export default function TodayPage() {
                 </h2>
                 <div className="space-y-2">
                   {todayActivities.map((act) => (
-                    <ActivityCard key={act.id} activity={act} onDelete={deleteActivity} />
+                    <ActivityCard
+                      key={act.id}
+                      activity={act}
+                      onEdit={userRole !== 'child' ? setEditingActivityId : undefined}
+                      onDelete={userRole !== 'child' ? deleteActivity : undefined}
+                    />
                   ))}
                 </div>
               </section>
@@ -672,6 +682,14 @@ export default function TodayPage() {
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
       <IntroTour />
+      {editingActivity && (
+        <AddActivity
+          open={true}
+          onClose={() => setEditingActivityId(null)}
+          activity={editingActivity}
+          onUpdate={updateActivity}
+        />
+      )}
       <PerfectDaySplash
         open={splashOpen}
         streak={splashStreak}
