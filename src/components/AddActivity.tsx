@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,17 +9,32 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { celebrateTask } from '@/lib/confetti';
 
+export interface ActivityFormData {
+  title: string;
+  emoji: string;
+  weekdays: number[];
+  specificDate?: string;
+  startTime?: string;
+  endTime?: string;
+}
+
+interface EditableActivity {
+  id: string;
+  title: string;
+  emoji: string;
+  weekdays: number[];
+  specific_date?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+}
+
 interface AddActivityProps {
   open: boolean;
   onClose: () => void;
-  onAdd: (activity: {
-    title: string;
-    emoji: string;
-    weekdays: number[];
-    specificDate?: string;
-    startTime?: string;
-    endTime?: string;
-  }) => Promise<boolean>;
+  onAdd?: (activity: ActivityFormData) => Promise<boolean>;
+  /** When set, the dialog works in edit mode */
+  activity?: EditableActivity | null;
+  onUpdate?: (id: string, activity: ActivityFormData) => Promise<boolean>;
 }
 
 const EMOJI_OPTIONS = [
@@ -50,7 +65,8 @@ const WEEKDAYS = [
   { value: 0, label: 'Sön' },
 ];
 
-export function AddActivity({ open, onClose, onAdd }: AddActivityProps) {
+export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddActivityProps) {
+  const isEdit = !!activity;
   const [title, setTitle] = useState('');
   const [emoji, setEmoji] = useState('⚽');
   const [isRecurring, setIsRecurring] = useState(true);
@@ -69,6 +85,23 @@ export function AddActivity({ open, onClose, onAdd }: AddActivityProps) {
     setStartTime('');
     setEndTime('');
   };
+
+  // Prefill when opening in edit mode
+  useEffect(() => {
+    if (open && activity) {
+      setTitle(activity.title);
+      setEmoji(activity.emoji || '⚽');
+      const days = activity.weekdays || [];
+      setIsRecurring(days.length > 0 || !activity.specific_date);
+      setWeekdays(days);
+      setSpecificDate(activity.specific_date || '');
+      setStartTime(activity.start_time?.slice(0, 5) || '');
+      setEndTime(activity.end_time?.slice(0, 5) || '');
+    }
+    if (open && !activity) {
+      resetForm();
+    }
+  }, [open, activity]);
 
   const handleClose = () => {
     resetForm();
@@ -100,18 +133,22 @@ export function AddActivity({ open, onClose, onAdd }: AddActivityProps) {
       return;
     }
 
-    setLoading(true);
-    const success = await onAdd({
+    const payload: ActivityFormData = {
       title: title.trim(),
       emoji,
       weekdays: isRecurring ? weekdays : [],
       specificDate: !isRecurring ? specificDate : undefined,
       startTime: startTime || undefined,
       endTime: endTime || undefined,
-    });
+    };
+
+    setLoading(true);
+    const success = isEdit
+      ? await onUpdate?.(activity!.id, payload)
+      : await onAdd?.(payload);
 
     if (success) {
-      celebrateTask();
+      if (!isEdit) celebrateTask();
       handleClose();
     }
     setLoading(false);
@@ -122,7 +159,7 @@ export function AddActivity({ open, onClose, onAdd }: AddActivityProps) {
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
-            🏃 Ny aktivitet
+            {isEdit ? '✏️ Redigera aktivitet' : '🏃 Ny aktivitet'}
           </DialogTitle>
         </DialogHeader>
 
@@ -244,7 +281,7 @@ export function AddActivity({ open, onClose, onAdd }: AddActivityProps) {
             className="w-full"
             size="lg"
           >
-            {loading ? 'Sparar...' : 'Lägg till aktivitet 🎉'}
+            {loading ? 'Sparar...' : isEdit ? 'Spara ändringar' : 'Lägg till aktivitet 🎉'}
           </Button>
         </div>
       </DialogContent>
