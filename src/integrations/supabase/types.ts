@@ -417,12 +417,15 @@ export type Database = {
           completed: boolean
           completed_at: string | null
           created_at: string
+          created_by: string | null
           description: string | null
           due_date: string
           homework_type: string
           id: string
           is_recurring: boolean
           needs_more_practice: boolean | null
+          planned_at: string | null
+          planning_status: string
           recurrence_days: number[] | null
           recurrence_end_date: string | null
           reminder_date: string | null
@@ -438,12 +441,15 @@ export type Database = {
           completed?: boolean
           completed_at?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           due_date: string
           homework_type?: string
           id?: string
           is_recurring?: boolean
           needs_more_practice?: boolean | null
+          planned_at?: string | null
+          planning_status?: string
           recurrence_days?: number[] | null
           recurrence_end_date?: string | null
           reminder_date?: string | null
@@ -459,12 +465,15 @@ export type Database = {
           completed?: boolean
           completed_at?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           due_date?: string
           homework_type?: string
           id?: string
           is_recurring?: boolean
           needs_more_practice?: boolean | null
+          planned_at?: string | null
+          planning_status?: string
           recurrence_days?: number[] | null
           recurrence_end_date?: string | null
           reminder_date?: string | null
@@ -480,6 +489,38 @@ export type Database = {
             columns: ["child_id"]
             isOneToOne: false
             referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_plan_items: {
+        Row: {
+          created_at: string
+          homework_id: string
+          id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          homework_id: string
+          id?: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          homework_id?: string
+          id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_plan_items_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "homework"
             referencedColumns: ["id"]
           },
         ]
