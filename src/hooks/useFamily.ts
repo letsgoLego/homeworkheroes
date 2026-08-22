@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { format, addDays, getDay, subDays } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { useFamilyData } from './queries/useFamilyData';
-import { useHomeworkData, type HomeworkWithTasks, type Activity } from './queries/useHomeworkData';
+import { useHomeworkData, type HomeworkWithTasks, type Activity, type InboxHomework } from './queries/useHomeworkData';
 
 type Child = Tables<'children'>;
 type Family = Tables<'families'>;
@@ -66,6 +66,7 @@ export function useFamily() {
   const { data: hwData, isLoading: hwLoading } = useHomeworkData(childIds);
 
   const homework = hwData?.homework ?? [];
+  const inboxHomework = hwData?.inboxHomework ?? [];
   const recurringPackItems = hwData?.recurringPackItems ?? [];
   const adhocTasks = hwData?.adhocTasks ?? [];
   const activities = hwData?.activities ?? [];
@@ -187,6 +188,77 @@ export function useFamily() {
     toast.success('Läxa tillagd! 📚');
     invalidateHomework();
     return data;
+  };
+
+  // Send homework to child's inbox (parent fills step 1, child plans the days)
+  const sendHomeworkToChild = async (input: {
+    title: string;
+    subject: string;
+    description?: string;
+    dueDate: string;
+    childId: string;
+    homeworkType?: 'inlamning' | 'forhor';
+    items?: string[];
+  }) => {
+    const { data, error } = await supabase
+      .from('homework')
+      .insert({
+        title: input.title,
+        subject: input.subject,
+        description: input.description,
+        due_date: input.dueDate,
+        child_id: input.childId,
+        homework_type: input.homeworkType || 'inlamning',
+        planning_status: 'pending',
+        created_by: user?.id ?? null,
+      })
+      .select()
+      .single();
+    if (error || !data) {
+      toast.error('Kunde inte skicka läxan');
+      return null;
+    }
+    const items = (input.items || []).map(t => t.trim()).filter(Boolean);
+    if (items.length > 0) {
+      const { error: itemsError } = await supabase
+        .from('homework_plan_items')
+        .insert(items.map((title, i) => ({ homework_id: data.id, title, sort_order: i })));
+      if (itemsError) toast.error('Kunde inte spara alla delmoment');
+    }
+    toast.success('Skickat till barnet att planera! 📥');
+    invalidateHomework();
+    return data;
+  };
+
+  // Child plans an inbox homework: create study tasks on chosen days
+  const planHomework = async (
+    homeworkId: string,
+    assignments: { title: string; date: string }[]
+  ) => {
+    const valid = assignments.filter(a => a.title.trim() && a.date);
+    if (valid.length === 0) {
+      toast.error('Välj minst en dag');
+      return false;
+    }
+    const { error: tasksError } = await supabase
+      .from('study_tasks')
+      .insert(valid.map(a => ({ homework_id: homeworkId, title: a.title.trim(), task_date: a.date })));
+    if (tasksError) {
+      toast.error('Kunde inte spara planeringen');
+      return false;
+    }
+    const { error } = await supabase
+      .from('homework')
+      .update({ planning_status: 'planned', planned_at: new Date().toISOString() })
+      .eq('id', homeworkId);
+    if (error) {
+      toast.error('Kunde inte spara planeringen');
+      return false;
+    }
+    await supabase.from('homework_plan_items').delete().eq('homework_id', homeworkId);
+    toast.success('Planerat! 🎉');
+    invalidateHomework();
+    return true;
   };
 
   // Update homework
@@ -580,6 +652,7 @@ export function useFamily() {
     family,
     children,
     homework,
+    inboxHomework,
     recurringPackItems,
     adhocTasks,
     activities,
@@ -591,6 +664,8 @@ export function useFamily() {
     getActiveHomeworkCount,
     addChild,
     addHomework,
+    sendHomeworkToChild,
+    planHomework,
     updateHomework,
     addTask,
     deleteTask,

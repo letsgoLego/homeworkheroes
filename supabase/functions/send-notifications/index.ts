@@ -379,6 +379,41 @@ function getUserTimeInfo(timezone: string): { hours: number; minutes: number; da
   };
 }
 
+async function countUnplannedHomework(
+  supabase: ReturnType<typeof createClient>,
+  userId: string
+): Promise<number> {
+  const { data: roles } = await supabase
+    .from("user_roles")
+    .select("family_id, child_id")
+    .eq("user_id", userId)
+    .limit(1);
+
+  if (!roles?.length) return 0;
+
+  let childIds: string[] = [];
+  if (roles[0].child_id) {
+    childIds = [roles[0].child_id];
+  } else if (roles[0].family_id) {
+    const { data: children } = await supabase
+      .from("children")
+      .select("id")
+      .eq("family_id", roles[0].family_id);
+    childIds = children?.map((c: { id: string }) => c.id) || [];
+  }
+
+  if (!childIds.length) return 0;
+
+  const { count } = await supabase
+    .from("homework")
+    .select("id", { count: "exact", head: true })
+    .in("child_id", childIds)
+    .eq("planning_status", "pending")
+    .eq("completed", false);
+
+  return count || 0;
+}
+
 async function checkUnfinishedTasks(
   supabase: ReturnType<typeof createClient>,
   userId: string,
@@ -548,6 +583,28 @@ Deno.serve(async (req) => {
                 .from("push_subscriptions")
                 .update({ last_unfinished_notify: userToday })
                 .eq("id", sub.id);
+              sentCount++;
+            } else {
+              await supabase.from("push_subscriptions").delete().eq("id", sub.id);
+            }
+          }
+        }
+
+        // Type 4: 16:00 - Unplanned homework waiting in the inbox
+        if (hours === 16 && minutes === 0 && sub.notify_unfinished) {
+          const unplanned = await countUnplannedHomework(supabase, sub.user_id);
+          if (unplanned > 0) {
+            const payload = ({
+              title: "📥 Läxor väntar på planering",
+              body: unplanned === 1
+                ? "Du har 1 läxa i inkorgen – välj vilka dagar du gör den!"
+                : `Du har ${unplanned} läxor i inkorgen – planera dagarna nu!`,
+              tag: "inbox-unplanned",
+              url: "/",
+            });
+
+            const success = await deliver(sub, payload, vapidPublic.value, vapidPrivate.value);
+            if (success) {
               sentCount++;
             } else {
               await supabase.from("push_subscriptions").delete().eq("id", sub.id);
