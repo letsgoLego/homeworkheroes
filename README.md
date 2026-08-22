@@ -11,11 +11,16 @@ En komplett översikt över appens funktioner finns i [FEATURES.md](./FEATURES.m
 Kort sammanfattning:
 
 - Läxor med inlämningar, förhör, återkommande uppgifter och extrauppgifter
+- Läxinkorg: föräldern skickar läxan, barnet planerar dagarna själv
+- Aktiviteter med krockdetektering – skapa, redigera och ta bort
+- Lov-läge med 1–3 egna mål, streaks, XP, heatmap och delbar veckosammanfattning
 - Barnvy med dashboard, packlista, väder och peppande animationer
 - Familjehantering med upp till 6 medlemmar och separata barnkonton
 - Smart schemaläggning, snooze och påminnelser
 - XP-system och veckostatistik
-- Push-notiser kl 14:30, 15:30 och 18:30
+- Push-notiser kl 14:30, 15:30 och 18:30 (samt 16:00 för oplanerade läxor)
+- Native app via Capacitor med riktig haptik och lokala notiser
+- Google Analytics 4 med händelser för läxor, mål och prenumeration
 - Offlinestöd via PWA
 - Gratis (3 läxor/barn) och Pro (39 SEK/mån) via Stripe
 
