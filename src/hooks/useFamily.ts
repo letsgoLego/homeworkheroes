@@ -523,15 +523,45 @@ export function useFamily() {
     return true;
   };
 
+  const updateActivity = async (id: string, activityData: {
+    title: string;
+    emoji: string;
+    weekdays: number[];
+    specificDate?: string;
+    startTime?: string;
+    endTime?: string;
+  }) => {
+    const { error } = await supabase
+      .from('activities')
+      .update({
+        title: activityData.title,
+        emoji: activityData.emoji,
+        weekdays: activityData.weekdays,
+        specific_date: activityData.specificDate || null,
+        start_time: activityData.startTime || null,
+        end_time: activityData.endTime || null,
+      })
+      .eq('id', id);
+    if (error) {
+      toast.error('Kunde inte uppdatera aktivitet');
+      return false;
+    }
+    toast.success('Aktivitet uppdaterad! ✏️');
+    invalidateHomework();
+    return true;
+  };
+
   const deleteActivity = async (id: string) => {
     const { error } = await supabase.from('activities').delete().eq('id', id);
     if (error) {
       toast.error('Kunde inte ta bort aktivitet');
       return false;
     }
+    toast.success('Aktivitet borttagen');
     invalidateHomework();
     return true;
   };
+
 
   const getActivitiesForDate = (childId: string, date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -581,7 +611,9 @@ export function useFamily() {
     getAdhocTasksForDate,
     toggleHomeworkComplete,
     addActivity,
+    updateActivity,
     deleteActivity,
+
     getActivitiesForDate,
     refetch,
   };
