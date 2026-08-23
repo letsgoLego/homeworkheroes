@@ -83,6 +83,8 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
   const [specificDate, setSpecificDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [skippedDates, setSkippedDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
@@ -93,6 +95,8 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
     setSpecificDate('');
     setStartTime('');
     setEndTime('');
+    setEndDate('');
+    setSkippedDates([]);
   };
 
   // Prefill when opening in edit mode
@@ -106,11 +110,14 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
       setSpecificDate(activity.specific_date || '');
       setStartTime(activity.start_time?.slice(0, 5) || '');
       setEndTime(activity.end_time?.slice(0, 5) || '');
+      setEndDate(activity.end_date || '');
+      setSkippedDates(activity.excluded_dates || []);
     }
     if (open && !activity) {
       resetForm();
     }
   }, [open, activity]);
+
 
   const handleClose = () => {
     resetForm();
