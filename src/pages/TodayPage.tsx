@@ -40,6 +40,8 @@ export default function TodayPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [refetchAttempted, setRefetchAttempted] = useState(false);
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const [deletingActivityId, setDeletingActivityId] = useState<string | null>(null);
+
   const {
     homework,
     inboxHomework,
