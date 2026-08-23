@@ -731,6 +731,8 @@ export function useFamily() {
     deleteActivity,
     skipActivityDate,
     unskipActivityDate,
+    getActivitiesForDate,
+
 
     refetch,
   };
