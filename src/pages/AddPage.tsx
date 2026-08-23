@@ -145,7 +145,7 @@ export default function AddPage() {
                   activity={act}
                   showSchedule
                   onEdit={setEditingActivityId}
-                  onDelete={deleteActivity}
+                  onDelete={setDeletingActivityId}
                 />
               ))}
             </div>
