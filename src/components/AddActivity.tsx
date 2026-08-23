@@ -20,6 +20,8 @@ export interface ActivityFormData {
   specificDate?: string;
   startTime?: string;
   endTime?: string;
+  endDate?: string | null;
+  excludedDates?: string[];
 }
 
 interface EditableActivity {
@@ -30,7 +32,10 @@ interface EditableActivity {
   specific_date?: string | null;
   start_time?: string | null;
   end_time?: string | null;
+  end_date?: string | null;
+  excluded_dates?: string[] | null;
 }
+
 
 interface AddActivityProps {
   open: boolean;
