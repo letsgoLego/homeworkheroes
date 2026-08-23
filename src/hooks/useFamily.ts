@@ -602,6 +602,8 @@ export function useFamily() {
     specificDate?: string;
     startTime?: string;
     endTime?: string;
+    endDate?: string | null;
+    excludedDates?: string[];
   }) => {
     const { error } = await supabase
       .from('activities')
@@ -612,13 +614,15 @@ export function useFamily() {
         specific_date: activityData.specificDate || null,
         start_time: activityData.startTime || null,
         end_time: activityData.endTime || null,
+        end_date: activityData.endDate || null,
+        ...(activityData.excludedDates ? { excluded_dates: activityData.excludedDates } : {}),
       })
       .eq('id', id);
     if (error) {
       toast.error('Kunde inte uppdatera aktivitet');
       return false;
     }
-    toast.success('Aktivitet uppdaterad! ✏️');
+    toast.success('Hela serien uppdaterad! ✏️');
     invalidateHomework();
     return true;
   };
@@ -629,17 +633,53 @@ export function useFamily() {
       toast.error('Kunde inte ta bort aktivitet');
       return false;
     }
-    toast.success('Aktivitet borttagen');
+    toast.success('Serien borttagen');
     invalidateHomework();
     return true;
   };
 
+  /** Hoppa över ett enstaka datum utan att röra resten av serien */
+  const skipActivityDate = async (id: string, date: string) => {
+    const activity = activities.find(a => a.id === id);
+    const current = activity?.excluded_dates ?? [];
+    if (current.includes(date)) return true;
+    const { error } = await supabase
+      .from('activities')
+      .update({ excluded_dates: [...current, date].sort() })
+      .eq('id', id);
+    if (error) {
+      toast.error('Kunde inte hoppa över dagen');
+      return false;
+    }
+    toast.success('Aktiviteten hoppas över den dagen');
+    invalidateHomework();
+    return true;
+  };
+
+  /** Ångra ett hoppat datum */
+  const unskipActivityDate = async (id: string, date: string) => {
+    const activity = activities.find(a => a.id === id);
+    const current = activity?.excluded_dates ?? [];
+    const { error } = await supabase
+      .from('activities')
+      .update({ excluded_dates: current.filter(d => d !== date) })
+      .eq('id', id);
+    if (error) {
+      toast.error('Kunde inte återställa dagen');
+      return false;
+    }
+    toast.success('Dagen är tillbaka');
+    invalidateHomework();
+    return true;
+  };
 
   const getActivitiesForDate = (childId: string, date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     const dayOfWeek = getDay(date);
     return activities.filter(a => {
       if (a.child_id !== childId) return false;
+      if ((a.excluded_dates ?? []).includes(dateStr)) return false;
+      if (a.end_date && dateStr > a.end_date) return false;
       // Recurring: matches weekday
       if (a.weekdays.length > 0 && a.weekdays.includes(dayOfWeek)) return true;
       // One-off: matches specific date
@@ -647,6 +687,7 @@ export function useFamily() {
       return false;
     });
   };
+
 
   return {
     family,
