@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, BookOpen, Calendar, Brain, Heart, Sparkles, Users, Home, GraduationCap, Languages, Calculator, Smartphone, Zap, BookText, Award } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Calendar, Brain, Heart, Sparkles, Users, Home, GraduationCap, Languages, Calculator, Smartphone, Zap, BookText, Award, ClipboardList, Sunrise, Backpack } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 
@@ -17,6 +17,11 @@ const ARTICLES: Article[] = [
   // Planering & rutiner
   { path: '/tips/laxplanering', title: 'Läxplanering: 7 tips för en strukturerad vecka', description: 'Lär dig hur du planerar veckans läxor smart så att stressen minskar och inget glöms bort.', icon: Calendar, color: 'bg-primary/10 text-primary', category: 'Planering' },
   { path: '/tips/laxrutin', title: 'Skapa en läxrutin som håller hela terminen', description: 'Steg-för-steg-guide för att bygga en hållbar läxrutin som passar familjens vardag.', icon: BookOpen, color: 'bg-success/10 text-success', category: 'Rutiner' },
+
+  // Terminsstart
+  { path: '/tips/terminsstart-checklista', title: 'Terminsstart: checklista för föräldrar', description: 'Steg-för-steg inför skolstart — sovtider, material, scheman, läxrutin och en lugn första vecka.', icon: ClipboardList, color: 'bg-primary/10 text-primary', category: 'Terminsstart' },
+  { path: '/tips/skolstart-rutiner', title: 'Morgon- och sovrutiner efter lovet', description: 'Dag-för-dag-plan för att ställa om sovtiderna och bygga morgonrutiner som håller.', icon: Sunrise, color: 'bg-amber-500/10 text-amber-600', category: 'Terminsstart' },
+  { path: '/tips/skolmaterial-packlista', title: 'Skolmaterial & packlista inför terminsstarten', description: 'Vad barnet faktiskt behöver, vad skolan står för och så packar barnet själv.', icon: Backpack, color: 'bg-sky-500/10 text-sky-600', category: 'Terminsstart' },
 
   // Studieteknik
   { path: '/tips/studieteknik-barn', title: 'Studieteknik för barn – metoder som faktiskt fungerar', description: 'Beprövade studietekniker anpassade för barn i grundskolan, från lågstadiet till högstadiet.', icon: Brain, color: 'bg-accent/10 text-accent', category: 'Studieteknik' },
@@ -42,14 +47,14 @@ const ARTICLES: Article[] = [
   { path: '/tips/laxhjalp-hemma', title: 'Läxhjälp hemma – så blir du den bästa läxcoachen', description: 'Konkreta tips för hur du som förälder kan vägleda utan att ta över ansvaret.', icon: Home, color: 'bg-amber-500/10 text-amber-600', category: 'Föräldraroll' },
 ];
 
-const CATEGORIES = ['Planering', 'Rutiner', 'Studieteknik', 'Per ämne', 'Per åldersgrupp', 'Välmående', 'Motivation', 'Föräldraroll'];
+const CATEGORIES = ['Terminsstart', 'Planering', 'Rutiner', 'Studieteknik', 'Per ämne', 'Per åldersgrupp', 'Välmående', 'Motivation', 'Föräldraroll'];
 
 export default function TipsIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>Tips & guider om läxor och studieteknik | Läxhjälp</title>
-        <meta name="description" content="15 fördjupande guider om läxplanering, studieteknik, läsförståelse, mattehjälp, engelska glosor, ADHD-anpassningar och mer — skrivna för svenska föräldrar." />
+        <meta name="description" content="18 fördjupande guider om läxplanering, studieteknik, läsförståelse, mattehjälp, engelska glosor, ADHD-anpassningar och mer — skrivna för svenska föräldrar." />
         <link rel="canonical" href="https://laxhjalp.app/tips" />
         <meta property="og:title" content="Tips & guider om läxor och studieteknik" />
         <meta property="og:description" content="Praktiska, fördjupande guider om läxor, studieteknik och välmående — för svenska familjer." />
@@ -96,7 +101,7 @@ export default function TipsIndexPage() {
             Läxor, studieteknik & motivation
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            15 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
+            18 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
             högstadiets nationella prov.
           </p>
         </motion.div>

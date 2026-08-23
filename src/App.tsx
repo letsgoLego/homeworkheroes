@@ -43,6 +43,9 @@ import AdhdLaxorPage from "./pages/seo/AdhdLaxorPage";
 import LaxorArskurs1_3Page from "./pages/seo/LaxorArskurs1_3Page";
 import LaxorArskurs4_6Page from "./pages/seo/LaxorArskurs4_6Page";
 import HogstadietStudieteknikPage from "./pages/seo/HogstadietStudieteknikPage";
+import TerminsstartChecklistaPage from "./pages/seo/TerminsstartChecklistaPage";
+import SkolstartRutinerPage from "./pages/seo/SkolstartRutinerPage";
+import SkolmaterialPacklistaPage from "./pages/seo/SkolmaterialPacklistaPage";
 
 
 const queryClient = new QueryClient();
@@ -124,6 +127,9 @@ function AppRoutes() {
       <Route path="/tips/laxor-arskurs-1-3" element={<LaxorArskurs1_3Page />} />
       <Route path="/tips/laxor-arskurs-4-6" element={<LaxorArskurs4_6Page />} />
       <Route path="/tips/hogstadiet-studieteknik" element={<HogstadietStudieteknikPage />} />
+      <Route path="/tips/terminsstart-checklista" element={<TerminsstartChecklistaPage />} />
+      <Route path="/tips/skolstart-rutiner" element={<SkolstartRutinerPage />} />
+      <Route path="/tips/skolmaterial-packlista" element={<SkolmaterialPacklistaPage />} />
       <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
       <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
