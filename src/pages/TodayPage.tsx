@@ -706,6 +706,15 @@ export default function TodayPage() {
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
       <IntroTour />
+      <DeleteActivityDialog
+        open={!!deletingActivity}
+        onClose={() => setDeletingActivityId(null)}
+        activity={deletingActivity}
+        date={today}
+        onDeleteSeries={deleteActivity}
+        onSkipDate={skipActivityDate}
+      />
+
       {editingActivity && (
         <AddActivity
           open={true}
