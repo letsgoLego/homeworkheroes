@@ -156,7 +156,9 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
       specificDate: !isRecurring ? specificDate : undefined,
       startTime: startTime || undefined,
       endTime: endTime || undefined,
+      ...(isEdit ? { endDate: isRecurring ? endDate || null : null, excludedDates: skippedDates } : {}),
     };
+
 
     setLoading(true);
     const success = isEdit
