@@ -38,7 +38,9 @@ export default function AddPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const [deletingActivityId, setDeletingActivityId] = useState<string | null>(null);
   const { homework, inboxHomework, userRole, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, updateActivity, deleteActivity, addAdhocTask } = useFamily();
+
   
   const today = startOfDay(new Date());
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
