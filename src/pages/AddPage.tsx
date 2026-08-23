@@ -8,14 +8,16 @@ import { HomeworkInbox } from '@/components/HomeworkInbox';
 import { EditHomework } from '@/components/EditHomework';
 import { AddActivity } from '@/components/AddActivity';
 import { AddTodo } from '@/components/AddTodo';
-import { ActivityCard } from '@/components/ActivityCard';
+
 import { DeleteActivityDialog } from '@/components/DeleteActivityDialog';
 
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { useFamily } from '@/hooks/useFamily';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
-import { Plus, Calendar, Trash2, Pencil, Repeat, Flag, AlertTriangle, ListTodo, Send } from 'lucide-react';
+import { Plus, Calendar, Clock, Trash2, Pencil, Repeat, Flag, AlertTriangle, ListTodo, Send } from 'lucide-react';
+
+const ACTIVITY_DAY_LABELS = ['sön', 'mån', 'tis', 'ons', 'tor', 'fre', 'lör'];
 import { HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 import { Button } from '@/components/ui/button';
 import { format, isPast, parseISO, startOfDay } from 'date-fns';
@@ -134,23 +136,100 @@ export default function AddPage() {
           childNameById={Object.fromEntries(children.map(c => [c.id, c.name]))}
         />
 
-        {/* Activities */}
-        {childActivities.length > 0 && (
-          <section>
-            <h2 className="text-lg font-bold mb-3">Aktiviteter 🏃 ({childActivities.length})</h2>
-            <div className="space-y-2">
-              {childActivities.map((act) => (
-                <ActivityCard
-                  key={act.id}
-                  activity={act}
-                  showSchedule
-                  onEdit={setEditingActivityId}
-                  onDelete={setDeletingActivityId}
-                />
-              ))}
+        {/* Activities – presented like homework cards */}
+        <section>
+          <h2 className="text-lg font-bold mb-3">Aktiviteter 🏃 ({childActivities.length})</h2>
+
+          {childActivities.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-8 text-muted-foreground"
+            >
+              <p>Inga aktiviteter ännu – lägg till en serie 🏃</p>
+            </motion.div>
+          ) : (
+            <div className="space-y-3">
+              {childActivities.map((act) => {
+                const days = act.weekdays ?? [];
+                const isSeries = days.length > 0;
+                const scheduleStr = isSeries
+                  ? `Varje ${days.map((d) => ACTIVITY_DAY_LABELS[d]).join(', ')}`
+                  : act.specific_date
+                    ? format(new Date(act.specific_date), 'EEE d MMM', { locale: sv })
+                    : '';
+                const timeStr = [act.start_time?.slice(0, 5), act.end_time?.slice(0, 5)]
+                  .filter(Boolean)
+                  .join('–');
+                const skipped = act.excluded_dates?.length ?? 0;
+
+                return (
+                  <motion.div
+                    key={act.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 rounded-2xl bg-card shadow-card"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <span className="text-xs bg-accent/20 text-accent-foreground px-2 py-0.5 rounded-full flex items-center gap-1">
+                        {isSeries ? <Repeat className="w-3 h-3" /> : <Calendar className="w-3 h-3" />}
+                        {isSeries ? 'Serie' : 'Enstaka'}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => setEditingActivityId(act.id)}
+                          aria-label="Redigera serie"
+                          title="Redigera serie"
+                          className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeletingActivityId(act.id)}
+                          aria-label="Ta bort aktivitet"
+                          title="Ta bort aktivitet"
+                          className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <h3 className="font-bold text-lg mb-1 flex items-center gap-2 flex-wrap">
+                      <span>{act.emoji}</span>
+                      {act.title}
+                    </h3>
+
+                    <div className="flex items-center gap-3 flex-wrap text-sm text-muted-foreground">
+                      {scheduleStr && (
+                        <span className="flex items-center gap-1">
+                          <Repeat className="w-4 h-4" />
+                          {scheduleStr}
+                        </span>
+                      )}
+                      {timeStr && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {timeStr}
+                        </span>
+                      )}
+                    </div>
+
+                    {(act.end_date || skipped > 0) && (
+                      <div className="flex items-center gap-3 flex-wrap mt-2 text-xs text-muted-foreground">
+                        {act.end_date && (
+                          <span>Pågår t.o.m. {format(new Date(act.end_date), 'd MMM', { locale: sv })}</span>
+                        )}
+                        {skipped > 0 && <span>{skipped} hoppad{skipped === 1 ? ' dag' : 'a dagar'}</span>}
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
-          </section>
-        )}
+          )}
+        </section>
+
         
 
         
