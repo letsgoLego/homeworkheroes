@@ -23,6 +23,8 @@ import { AddAdhocTask } from '@/components/AddAdhocTask';
 import { AdhocTaskCard } from '@/components/AdhocTaskCard';
 import { ActivityCard } from '@/components/ActivityCard';
 import { AddActivity } from '@/components/AddActivity';
+import { DeleteActivityDialog } from '@/components/DeleteActivityDialog';
+
 import { IntroTour } from '@/components/IntroTour';
 import { NudgeButton } from '@/components/NudgeButton';
 import { useChildHeartbeat } from '@/hooks/useChildPresence';
