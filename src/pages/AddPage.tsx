@@ -364,6 +364,13 @@ export default function AddPage() {
       
       <Navigation />
       <SendHomeworkToChild open={showSendHomework} onClose={() => setShowSendHomework(false)} />
+      <DeleteActivityDialog
+        open={!!deletingActivity}
+        onClose={() => setDeletingActivityId(null)}
+        activity={deletingActivity}
+        onDeleteSeries={deleteActivity}
+      />
+
 
       <AddHomework open={showAddHomework} onClose={() => setShowAddHomework(false)} />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
