@@ -23,6 +23,8 @@ import { AddAdhocTask } from '@/components/AddAdhocTask';
 import { AdhocTaskCard } from '@/components/AdhocTaskCard';
 import { ActivityCard } from '@/components/ActivityCard';
 import { AddActivity } from '@/components/AddActivity';
+import { DeleteActivityDialog } from '@/components/DeleteActivityDialog';
+
 import { IntroTour } from '@/components/IntroTour';
 import { NudgeButton } from '@/components/NudgeButton';
 import { useChildHeartbeat } from '@/hooks/useChildPresence';
@@ -40,6 +42,8 @@ export default function TodayPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [refetchAttempted, setRefetchAttempted] = useState(false);
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const [deletingActivityId, setDeletingActivityId] = useState<string | null>(null);
+
   const {
     homework,
     inboxHomework,
@@ -67,6 +71,8 @@ export default function TodayPage() {
     activities,
     updateActivity,
     deleteActivity,
+    skipActivityDate,
+
     refetch,
   } = useFamily();
   
@@ -174,6 +180,8 @@ export default function TodayPage() {
   const hasItemsToBring = itemsToBringData.homeworkItems.length > 0 || itemsToBringData.recurringItems.length > 0;
   const todayActivities = activeChildId ? getActivitiesForDate(activeChildId, today) : [];
   const editingActivity = activities.find((a) => a.id === editingActivityId) || null;
+  const deletingActivity = activities.find((a) => a.id === deletingActivityId) || null;
+
   
   // Get homework due on pack date (today before 12, tomorrow after 12)
   const packDateHomework = homework.filter(hw => {
@@ -354,7 +362,7 @@ export default function TodayPage() {
                       key={act.id}
                       activity={act}
                       onEdit={userRole !== 'child' ? setEditingActivityId : undefined}
-                      onDelete={userRole !== 'child' ? deleteActivity : undefined}
+                      onDelete={userRole !== 'child' ? setDeletingActivityId : undefined}
                     />
                   ))}
                 </div>
@@ -700,6 +708,15 @@ export default function TodayPage() {
       <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
       <IntroTour />
+      <DeleteActivityDialog
+        open={!!deletingActivity}
+        onClose={() => setDeletingActivityId(null)}
+        activity={deletingActivity}
+        date={today}
+        onDeleteSeries={deleteActivity}
+        onSkipDate={skipActivityDate}
+      />
+
       {editingActivity && (
         <AddActivity
           open={true}

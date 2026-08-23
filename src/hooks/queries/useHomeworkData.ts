@@ -17,8 +17,11 @@ export interface Activity {
   specific_date: string | null;
   start_time: string | null;
   end_time: string | null;
+  excluded_dates: string[];
+  end_date: string | null;
   created_at: string;
 }
+
 
 export interface HomeworkPlanItem {
   id: string;

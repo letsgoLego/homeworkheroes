@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { format } from 'date-fns';
+import { sv } from 'date-fns/locale';
+import { X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { celebrateTask } from '@/lib/confetti';
 
+
 export interface ActivityFormData {
   title: string;
   emoji: string;
@@ -16,6 +20,8 @@ export interface ActivityFormData {
   specificDate?: string;
   startTime?: string;
   endTime?: string;
+  endDate?: string | null;
+  excludedDates?: string[];
 }
 
 interface EditableActivity {
@@ -26,7 +32,10 @@ interface EditableActivity {
   specific_date?: string | null;
   start_time?: string | null;
   end_time?: string | null;
+  end_date?: string | null;
+  excluded_dates?: string[] | null;
 }
+
 
 interface AddActivityProps {
   open: boolean;
@@ -74,6 +83,8 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
   const [specificDate, setSpecificDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [skippedDates, setSkippedDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
@@ -84,6 +95,8 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
     setSpecificDate('');
     setStartTime('');
     setEndTime('');
+    setEndDate('');
+    setSkippedDates([]);
   };
 
   // Prefill when opening in edit mode
@@ -97,11 +110,14 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
       setSpecificDate(activity.specific_date || '');
       setStartTime(activity.start_time?.slice(0, 5) || '');
       setEndTime(activity.end_time?.slice(0, 5) || '');
+      setEndDate(activity.end_date || '');
+      setSkippedDates(activity.excluded_dates || []);
     }
     if (open && !activity) {
       resetForm();
     }
   }, [open, activity]);
+
 
   const handleClose = () => {
     resetForm();
@@ -140,7 +156,9 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
       specificDate: !isRecurring ? specificDate : undefined,
       startTime: startTime || undefined,
       endTime: endTime || undefined,
+      ...(isEdit ? { endDate: isRecurring ? endDate || null : null, excludedDates: skippedDates } : {}),
     };
+
 
     setLoading(true);
     const success = isEdit
@@ -274,6 +292,57 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
               />
             </div>
           </div>
+
+          {/* Series controls (edit mode only) */}
+          {isEdit && (
+            <div className="space-y-3 p-3 rounded-xl bg-muted/50">
+              <p className="text-xs text-muted-foreground">
+                ℹ️ Ändringarna gäller <strong>hela serien</strong> – alla tillfällen uppdateras.
+              </p>
+
+              {isRecurring && (
+                <div>
+                  <Label htmlFor="activity-end-date" className="text-sm font-medium">
+                    Pågår t.o.m. (valfritt)
+                  </Label>
+                  <Input
+                    id="activity-end-date"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="mt-1.5"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Avsluta serien istället för att ta bort den.
+                  </p>
+                </div>
+              )}
+
+              {skippedDates.length > 0 && (
+                <div>
+                  <Label className="text-sm font-medium">Hoppade dagar</Label>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
+                    {skippedDates.map((d) => (
+                      <button
+                        key={d}
+                        onClick={() => setSkippedDates(prev => prev.filter(x => x !== d))}
+                        className="px-3 py-1.5 rounded-lg bg-background text-xs font-medium flex items-center gap-1 hover:bg-destructive/10"
+                        title="Ta tillbaka dagen"
+                      >
+                        {format(new Date(d), 'd MMM', { locale: sv })}
+                        <X className="w-3 h-3" />
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Klicka på ett datum för att ta tillbaka aktiviteten den dagen.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+
 
           <Button
             onClick={handleSubmit}

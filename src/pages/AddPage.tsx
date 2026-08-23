@@ -9,6 +9,8 @@ import { EditHomework } from '@/components/EditHomework';
 import { AddActivity } from '@/components/AddActivity';
 import { AddTodo } from '@/components/AddTodo';
 import { ActivityCard } from '@/components/ActivityCard';
+import { DeleteActivityDialog } from '@/components/DeleteActivityDialog';
+
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { useFamily } from '@/hooks/useFamily';
@@ -36,12 +38,16 @@ export default function AddPage() {
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const [deletingActivityId, setDeletingActivityId] = useState<string | null>(null);
   const { homework, inboxHomework, userRole, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, updateActivity, deleteActivity, addAdhocTask } = useFamily();
+
   
   const today = startOfDay(new Date());
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
   const childActivities = activities.filter((a) => a.child_id === activeChildId);
   const editingActivity = childActivities.find((a) => a.id === editingActivityId) || null;
+  const deletingActivity = childActivities.find((a) => a.id === deletingActivityId) || null;
+
 
   
   // Split into: overdue (past due, not completed), active (not past due, not completed), completed
@@ -139,7 +145,7 @@ export default function AddPage() {
                   activity={act}
                   showSchedule
                   onEdit={setEditingActivityId}
-                  onDelete={deleteActivity}
+                  onDelete={setDeletingActivityId}
                 />
               ))}
             </div>
@@ -358,6 +364,13 @@ export default function AddPage() {
       
       <Navigation />
       <SendHomeworkToChild open={showSendHomework} onClose={() => setShowSendHomework(false)} />
+      <DeleteActivityDialog
+        open={!!deletingActivity}
+        onClose={() => setDeletingActivityId(null)}
+        activity={deletingActivity}
+        onDeleteSeries={deleteActivity}
+      />
+
 
       <AddHomework open={showAddHomework} onClose={() => setShowAddHomework(false)} />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />

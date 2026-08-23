@@ -19,7 +19,9 @@ export type Database = {
           child_id: string
           created_at: string | null
           emoji: string | null
+          end_date: string | null
           end_time: string | null
+          excluded_dates: string[]
           id: string
           specific_date: string | null
           start_time: string | null
@@ -30,7 +32,9 @@ export type Database = {
           child_id: string
           created_at?: string | null
           emoji?: string | null
+          end_date?: string | null
           end_time?: string | null
+          excluded_dates?: string[]
           id?: string
           specific_date?: string | null
           start_time?: string | null
@@ -41,7 +45,9 @@ export type Database = {
           child_id?: string
           created_at?: string | null
           emoji?: string | null
+          end_date?: string | null
           end_time?: string | null
+          excluded_dates?: string[]
           id?: string
           specific_date?: string | null
           start_time?: string | null
