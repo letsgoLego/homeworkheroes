@@ -15,7 +15,9 @@ import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
 import { useFamily } from '@/hooks/useFamily';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
-import { Plus, Calendar, Trash2, Pencil, Repeat, Flag, AlertTriangle, ListTodo, Send } from 'lucide-react';
+import { Plus, Calendar, Clock, Trash2, Pencil, Repeat, Flag, AlertTriangle, ListTodo, Send } from 'lucide-react';
+
+const ACTIVITY_DAY_LABELS = ['sön', 'mån', 'tis', 'ons', 'tor', 'fre', 'lör'];
 import { HOMEWORK_TYPE_LABELS, HomeworkType } from '@/types/homework';
 import { Button } from '@/components/ui/button';
 import { format, isPast, parseISO, startOfDay } from 'date-fns';
