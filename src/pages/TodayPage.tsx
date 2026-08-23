@@ -360,7 +360,7 @@ export default function TodayPage() {
                       key={act.id}
                       activity={act}
                       onEdit={userRole !== 'child' ? setEditingActivityId : undefined}
-                      onDelete={userRole !== 'child' ? deleteActivity : undefined}
+                      onDelete={userRole !== 'child' ? setDeletingActivityId : undefined}
                     />
                   ))}
                 </div>
