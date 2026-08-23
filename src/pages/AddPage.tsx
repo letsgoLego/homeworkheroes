@@ -46,6 +46,8 @@ export default function AddPage() {
   const childHomework = homework.filter((hw) => hw.child_id === activeChildId);
   const childActivities = activities.filter((a) => a.child_id === activeChildId);
   const editingActivity = childActivities.find((a) => a.id === editingActivityId) || null;
+  const deletingActivity = childActivities.find((a) => a.id === deletingActivityId) || null;
+
 
   
   // Split into: overdue (past due, not completed), active (not past due, not completed), completed
