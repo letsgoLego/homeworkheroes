@@ -24,3 +24,6 @@ Läxhjälp hjälper familjer att planera läxor, dela upp arbete på lugna dagar
 - [Motivation för läxor](/tips/motivation-laxor): Så motiverar du ditt barn.
 - [Tonåringar och läxor](/tips/tonaringar-laxor): Guide för föräldrar till tonåringar.
 - [Läxhjälp hemma](/tips/laxhjalp-hemma): Så stöttar du utan att ta över.
+- [Terminsstart – checklista](/tips/terminsstart-checklista): Steg-för-steg inför skolstart.
+- [Skolstart – rutiner](/tips/skolstart-rutiner): Sovtider och morgonrutiner efter lovet.
+- [Skolmaterial & packlista](/tips/skolmaterial-packlista): Vad barnet behöver inför terminsstart.
