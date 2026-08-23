@@ -275,6 +275,57 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
             </div>
           </div>
 
+          {/* Series controls (edit mode only) */}
+          {isEdit && (
+            <div className="space-y-3 p-3 rounded-xl bg-muted/50">
+              <p className="text-xs text-muted-foreground">
+                ℹ️ Ändringarna gäller <strong>hela serien</strong> – alla tillfällen uppdateras.
+              </p>
+
+              {isRecurring && (
+                <div>
+                  <Label htmlFor="activity-end-date" className="text-sm font-medium">
+                    Pågår t.o.m. (valfritt)
+                  </Label>
+                  <Input
+                    id="activity-end-date"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="mt-1.5"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Avsluta serien istället för att ta bort den.
+                  </p>
+                </div>
+              )}
+
+              {skippedDates.length > 0 && (
+                <div>
+                  <Label className="text-sm font-medium">Hoppade dagar</Label>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
+                    {skippedDates.map((d) => (
+                      <button
+                        key={d}
+                        onClick={() => setSkippedDates(prev => prev.filter(x => x !== d))}
+                        className="px-3 py-1.5 rounded-lg bg-background text-xs font-medium flex items-center gap-1 hover:bg-destructive/10"
+                        title="Ta tillbaka dagen"
+                      >
+                        {format(new Date(d), 'd MMM', { locale: sv })}
+                        <X className="w-3 h-3" />
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Klicka på ett datum för att ta tillbaka aktiviteten den dagen.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+
+
           <Button
             onClick={handleSubmit}
             disabled={loading}
