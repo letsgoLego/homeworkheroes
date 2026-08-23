@@ -32,8 +32,9 @@ export function ActivityCard({ activity, onDelete, onEdit, compact, showSchedule
 
   const days = activity.weekdays ?? [];
   const scheduleStr = days.length > 0
-    ? days.map((d) => DAY_LABELS[d]).join(', ')
+    ? `Varje ${days.map((d) => DAY_LABELS[d]).join(', ')}`
     : activity.specific_date || null;
+
 
   if (compact) {
     return (
