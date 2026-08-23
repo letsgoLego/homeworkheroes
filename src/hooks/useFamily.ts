@@ -729,8 +729,9 @@ export function useFamily() {
     addActivity,
     updateActivity,
     deleteActivity,
+    skipActivityDate,
+    unskipActivityDate,
 
-    getActivitiesForDate,
     refetch,
   };
 }
