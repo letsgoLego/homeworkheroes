@@ -178,6 +178,8 @@ export default function TodayPage() {
   const hasItemsToBring = itemsToBringData.homeworkItems.length > 0 || itemsToBringData.recurringItems.length > 0;
   const todayActivities = activeChildId ? getActivitiesForDate(activeChildId, today) : [];
   const editingActivity = activities.find((a) => a.id === editingActivityId) || null;
+  const deletingActivity = activities.find((a) => a.id === deletingActivityId) || null;
+
   
   // Get homework due on pack date (today before 12, tomorrow after 12)
   const packDateHomework = homework.filter(hw => {
