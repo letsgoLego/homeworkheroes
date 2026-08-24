@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
@@ -49,13 +48,6 @@ const QUICK_TEMPLATES: QuickTemplate[] = [
   { label: 'Prov / Förhör', emoji: '✍️', type: 'forhor' },
   { label: 'Inlämning', emoji: '📄', type: 'inlamning' },
 ];
-
-function getLoadLabel(count: number): { text: string; emoji: string } {
-  if (count === 0) return { text: 'Lugnt', emoji: '😎' };
-  if (count === 1) return { text: 'Lite att göra', emoji: '📚' };
-  if (count === 2) return { text: 'En del', emoji: '📝' };
-  return { text: 'Fullt schema!', emoji: '🔥' };
-}
 
 function generateAutoTitle(homeworkType: HomeworkType, subject: Subject, title: string): string {
   const subjectLabel = SUBJECT_LABELS[subject];
@@ -111,7 +103,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [recurrenceWeeks, setRecurrenceWeeks] = useState(4);
   const [submissionDay, setSubmissionDay] = useState<number | null>(5);
   const [recurringBringDays, setRecurringBringDays] = useState<number[]>([]);
-  const [suggestedDayCount, setSuggestedDayCount] = useState(3);
   const [subjectAnimKey, setSubjectAnimKey] = useState(0);
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   
@@ -178,7 +169,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setSubmissionDay(5);
     setHomeworkType('inlamning');
     setRecurringBringDays([]);
-    setSuggestedDayCount(3);
     setActiveTemplate(null);
   };
   
