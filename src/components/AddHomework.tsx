@@ -153,6 +153,29 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setSelectedDays(suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count));
   };
 
+  const studyTechniqueSuggestions = useMemo(
+    () => getStudyTechniqueSuggestions(subject, homeworkType),
+    [subject, homeworkType]
+  );
+
+  const addStudyPart = (technique: StudyTechnique) => {
+    if (selectedDays.length === 0) return;
+    const nextDay = selectedDays.find(d => !studyParts.some(p => p.date === d)) || selectedDays[0];
+    setStudyParts(prev => [...prev, { title: technique.label, date: nextDay }]);
+  };
+
+  const removeStudyPart = (index: number) => {
+    setStudyParts(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateStudyPartTitle = (index: number, title: string) => {
+    setStudyParts(prev => prev.map((p, i) => (i === index ? { ...p, title } : p)));
+  };
+
+  const setStudyPartDate = (index: number, date: string) => {
+    setStudyParts(prev => prev.map((p, i) => (i === index ? { ...p, date } : p)));
+  };
+
 
   const resetForm = () => {
     setStep(1);
