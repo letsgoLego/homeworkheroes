@@ -25,7 +25,7 @@ interface PlanRow {
 }
 
 export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps) {
-  const { planHomework } = useFamily();
+  const { planHomework, homework: allHomework, getActivitiesForDate } = useFamily();
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [saving, setSaving] = useState(false);
@@ -39,6 +39,23 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     if (isBefore(due, today)) return [today];
     return eachDayOfInterval({ start: today, end: due });
   }, [homework]);
+
+  // Existing workload per day for this child
+  const taskCountsByDate = useMemo(() => {
+    const counts: Record<string, number> = {};
+    if (!homework) return counts;
+    allHomework
+      .filter(hw => hw.child_id === homework.child_id)
+      .forEach(hw => {
+        hw.tasks.forEach(task => {
+          if (!task.completed) {
+            counts[task.task_date] = (counts[task.task_date] || 0) + 1;
+          }
+        });
+      });
+    return counts;
+  }, [allHomework, homework]);
+
 
   // Initialise rows from parent's plan items
   if (homework && initialisedFor !== homework.id) {
