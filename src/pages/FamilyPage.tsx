@@ -9,6 +9,7 @@ import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
 import { Users, Download, Smartphone, LogOut, Copy, Check, Settings, UserPlus, ExternalLink, Crown, CreditCard, BarChart3, ChevronRight } from 'lucide-react';
 import { NotificationSettings } from '@/components/NotificationSettings';
+import { UpdateAppButton } from '@/components/UpdateAppButton';
 import { FamilyMembers } from '@/components/FamilyMembers';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
