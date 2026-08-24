@@ -56,6 +56,7 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
 
 - **Förälder skickar läxa** – titel, ämne, beskrivning och deadline fylls i av föräldern via "Skicka läxa".
 - **Föreslagna delmoment** – föräldern kan lägga till delmoment (t.ex. "läs kapitel 1") som sparas som `homework_plan_items`.
+- **Smart studieteknik i inkorgen** – vid förhör/prov föreslås ämnesanpassade delmoment även när barnet ska planera; barnet kan välja, lägga till egna och fördela på dagar.
 - **Barnets inkorg** – oplanerade läxor visas högst upp på Idag- och Läxor-sidan med notisbricka i navigeringen.
 - **Barnet planerar dagarna** – barnet fördelar delmomenten på dagar mellan idag och deadline; först då blir läxan synlig i Idag/Vecka.
 - **Påminnelse kl 16:00** – push/lokal notis om det finns oplanerade läxor kvar i inkorgen.
