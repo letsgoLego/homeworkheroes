@@ -41,6 +41,7 @@ Läxhjälpen är en svensk PWA (Progressive Web App) byggd för familjer med bar
 - **Två huvudtyper:**
   - **Inlämning** – uppgift som ska lämnas in.
   - **Förhör / prov** – markeras med diamantdeadline.
+- **Smart studieteknik för förhör/prov** – ämnesanpassade förslag på delmoment (t.ex. "Gör delförhör", "Räkna gamla uppgifter", "Repetera glosor") som föräldern och barnet kan välja, redigera och fördela på pluggdagar.
 - **Återkommande läxor** – t.ex. "läs 5 dagar/vecka" som genererar uppgifter på valda dagar.
 - **Extrauppgifter (⭐ Extra)** – ad-hoc-uppgifter med gyllene hover-effekt och stjärnregn-animation vid avklarning.
 - **Gamifierad skapelse** – auto-genererade namn och emoji-indikatorer för arbetsbörda.
