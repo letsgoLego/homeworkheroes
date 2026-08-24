@@ -163,6 +163,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setBringItems([]);
     setNewItem('');
     setSelectedDays([]);
+    setStudyParts([]);
     setSelectedChildId(null);
     setEnableReminder(true);
     setIsRecurring(false);
