@@ -59,7 +59,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
 
 
   const studyTechniqueSuggestions = useMemo(
-    () => (homework ? getStudyTechniqueSuggestions(homework.subject as Subject, homework.homework_type) : []),
+    () => (homework ? getStudyTechniqueSuggestions(homework.subject as Subject, homework.homework_type as any) : []),
     [homework]
   );
 
