@@ -12,6 +12,7 @@ import { useFamily } from '@/hooks/useFamily';
 import { celebrateAssignment } from '@/lib/confetti';
 import { track } from '@/lib/analytics';
 import { SUBJECT_LABELS, SUBJECT_ICONS, Subject } from '@/types/homework';
+import { getStudyTechniqueSuggestions, type StudyTechnique } from '@/lib/studyTechniques';
 import type { InboxHomework } from '@/hooks/queries/useHomeworkData';
 
 interface PlanHomeworkSheetProps {
