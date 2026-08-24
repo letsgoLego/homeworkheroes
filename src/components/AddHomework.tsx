@@ -97,6 +97,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [bringItems, setBringItems] = useState<string[]>([]);
   const [newItem, setNewItem] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [studyParts, setStudyParts] = useState<{ title: string; date: string | null }[]>([]);
   const [enableReminder, setEnableReminder] = useState(true);
   const [homeworkType, setHomeworkType] = useState<HomeworkType>('inlamning');
   const [isRecurring, setIsRecurring] = useState(false);
