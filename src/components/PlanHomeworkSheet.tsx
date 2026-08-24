@@ -106,6 +106,13 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     if (ok) {
       celebrateAssignment();
       track('homework_planned_by_child', { parts: rows.length });
+      if (homework.homework_type === 'forhor') {
+        track('study_techniques_used', {
+          count: rows.length,
+          subject: homework.subject,
+          flow: 'child',
+        });
+      }
       setInitialisedFor(null);
       onClose();
     }
