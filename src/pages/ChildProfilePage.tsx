@@ -119,6 +119,11 @@ export default function ChildProfilePage() {
             Installera app
           </Button>
         </motion.div>
+
+        {/* Update App */}
+        <UpdateAppButton />
+
+
         
         {/* Account info */}
         <motion.div
