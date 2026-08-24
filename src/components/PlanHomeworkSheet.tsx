@@ -58,11 +58,21 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
   }, [allHomework, homework]);
 
 
-  // Initialise rows from parent's plan items
+  const studyTechniqueSuggestions = useMemo(
+    () => (homework ? getStudyTechniqueSuggestions(homework.subject as Subject, homework.homework_type) : []),
+    [homework]
+  );
+
+  // Initialise rows from parent's plan items, or with study technique suggestions for exams
   if (homework && initialisedFor !== homework.id) {
-    const base = homework.planItems.length > 0
-      ? homework.planItems.map(item => ({ title: item.title, date: null }))
-      : [{ title: homework.title, date: null }];
+    let base: PlanRow[] = [];
+    if (homework.planItems.length > 0) {
+      base = homework.planItems.map(item => ({ title: item.title, date: null }));
+    } else if (homework.homework_type === 'forhor' && studyTechniqueSuggestions.length > 0) {
+      base = studyTechniqueSuggestions.slice(0, 5).map(t => ({ title: t.label, date: null }));
+    } else {
+      base = [{ title: homework.title, date: null }];
+    }
     setRows(base);
     setInitialisedFor(homework.id);
   }
