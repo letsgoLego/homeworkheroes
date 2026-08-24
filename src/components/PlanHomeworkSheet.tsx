@@ -187,6 +187,35 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
             </div>
           ))}
 
+          {studyTechniqueSuggestions.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Förslag på delar</Label>
+              <div className="flex flex-wrap gap-2">
+                {studyTechniqueSuggestions.map(t => {
+                  const added = rows.some(r => r.title === t.label);
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      disabled={added}
+                      onClick={() => setRows(prev => [...prev, { title: t.label, date: null }])}
+                      className={cn(
+                        'px-3 py-2 rounded-lg text-xs font-medium transition-all border',
+                        added
+                          ? 'bg-muted text-muted-foreground border-border opacity-60'
+                          : 'bg-background border-primary/30 hover:border-primary hover:bg-primary/5'
+                      )}
+                      title={t.description}
+                    >
+                      <span className="mr-1">{t.icon}</span>
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="plan-new">Lägg till egen del</Label>
             <div className="flex gap-2">
