@@ -324,9 +324,21 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     if (hw) {
       const taskDates = isRecurring ? generateRecurringTaskDates() : selectedDays.sort();
       const autoTitle = generateAutoTitle(homeworkType, subject, title);
-      
-      for (const dateStr of taskDates) {
-        await addTask(hw.id, autoTitle, dateStr);
+
+      if (homeworkType === 'forhor' && studyParts.length > 0) {
+        const fallbackDate = taskDates[0] || effectiveDueDate;
+        for (const part of studyParts) {
+          await addTask(hw.id, part.title, part.date || fallbackDate);
+        }
+        track('study_techniques_used', {
+          count: studyParts.length,
+          subject,
+          flow: 'parent',
+        });
+      } else {
+        for (const dateStr of taskDates) {
+          await addTask(hw.id, autoTitle, dateStr);
+        }
       }
 
       track('homework_created', {
