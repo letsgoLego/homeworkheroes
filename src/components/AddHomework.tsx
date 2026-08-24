@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
+import { getStudyTechniqueSuggestions, type StudyTechnique } from '@/lib/studyTechniques';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, addWeeks, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay, subDays, getDay } from 'date-fns';
@@ -96,6 +97,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [bringItems, setBringItems] = useState<string[]>([]);
   const [newItem, setNewItem] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [studyParts, setStudyParts] = useState<{ title: string; date: string | null }[]>([]);
   const [enableReminder, setEnableReminder] = useState(true);
   const [homeworkType, setHomeworkType] = useState<HomeworkType>('inlamning');
   const [isRecurring, setIsRecurring] = useState(false);
@@ -151,6 +153,29 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setSelectedDays(suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count));
   };
 
+  const studyTechniqueSuggestions = useMemo(
+    () => getStudyTechniqueSuggestions(subject, homeworkType),
+    [subject, homeworkType]
+  );
+
+  const addStudyPart = (technique: StudyTechnique) => {
+    if (selectedDays.length === 0) return;
+    const nextDay = selectedDays.find(d => !studyParts.some(p => p.date === d)) || selectedDays[0];
+    setStudyParts(prev => [...prev, { title: technique.label, date: nextDay }]);
+  };
+
+  const removeStudyPart = (index: number) => {
+    setStudyParts(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateStudyPartTitle = (index: number, title: string) => {
+    setStudyParts(prev => prev.map((p, i) => (i === index ? { ...p, title } : p)));
+  };
+
+  const setStudyPartDate = (index: number, date: string) => {
+    setStudyParts(prev => prev.map((p, i) => (i === index ? { ...p, date } : p)));
+  };
+
 
   const resetForm = () => {
     setStep(1);
@@ -161,6 +186,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setBringItems([]);
     setNewItem('');
     setSelectedDays([]);
+    setStudyParts([]);
     setSelectedChildId(null);
     setEnableReminder(true);
     setIsRecurring(false);
@@ -298,9 +324,21 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     if (hw) {
       const taskDates = isRecurring ? generateRecurringTaskDates() : selectedDays.sort();
       const autoTitle = generateAutoTitle(homeworkType, subject, title);
-      
-      for (const dateStr of taskDates) {
-        await addTask(hw.id, autoTitle, dateStr);
+
+      if (homeworkType === 'forhor' && studyParts.length > 0) {
+        const fallbackDate = taskDates[0] || effectiveDueDate;
+        for (const part of studyParts) {
+          await addTask(hw.id, part.title, part.date || fallbackDate);
+        }
+        track('study_techniques_used', {
+          count: studyParts.length,
+          subject,
+          flow: 'parent',
+        });
+      } else {
+        for (const dateStr of taskDates) {
+          await addTask(hw.id, autoTitle, dateStr);
+        }
       }
 
       track('homework_created', {
@@ -849,6 +887,87 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 <p className="text-xs text-muted-foreground text-center">
                   Grön = lugn dag · Gul = några läxor · Röd = full dag
                 </p>
+              )}
+
+              {homeworkType === 'forhor' && availableDays.length > 0 && (
+                <div className="space-y-3 p-3 rounded-xl bg-muted/50">
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      Dela upp förhöret i delar
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Välj tekniker som hjälper barnet lära sig bättre.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {studyTechniqueSuggestions.map(t => {
+                      const added = studyParts.some(p => p.title === t.label);
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          disabled={added}
+                          onClick={() => addStudyPart(t)}
+                          className={cn(
+                            'px-3 py-2 rounded-lg text-xs font-medium transition-all border',
+                            added
+                              ? 'bg-muted text-muted-foreground border-border opacity-60'
+                              : 'bg-background border-primary/30 hover:border-primary hover:bg-primary/5'
+                          )}
+                          title={t.description}
+                        >
+                          <span className="mr-1">{t.icon}</span>
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {studyParts.length > 0 && (
+                    <div className="space-y-3">
+                      {studyParts.map((part, i) => (
+                        <div key={`${part.title}-${i}`} className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={part.title}
+                              onChange={e => updateStudyPartTitle(i, e.target.value)}
+                              className="flex-1 h-9"
+                            />
+                            <button
+                              type="button"
+                              aria-label="Ta bort del"
+                              onClick={() => removeStudyPart(i)}
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {selectedDays.map(d => {
+                              const selected = part.date === d;
+                              return (
+                                <button
+                                  key={d}
+                                  type="button"
+                                  onClick={() => setStudyPartDate(i, d)}
+                                  className={cn(
+                                    'px-2 py-1 rounded-md text-[10px] font-medium border transition-all',
+                                    selected
+                                      ? 'bg-primary text-primary-foreground border-primary'
+                                      : 'bg-background border-border text-muted-foreground hover:bg-muted'
+                                  )}
+                                >
+                                  {format(parseISO(d), 'EEE d/M', { locale: sv })}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
 
               

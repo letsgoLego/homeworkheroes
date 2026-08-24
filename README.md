@@ -12,6 +12,7 @@ Kort sammanfattning:
 
 - Läxor med inlämningar, förhör, återkommande uppgifter och extrauppgifter
 - Läxinkorg: föräldern skickar läxan, barnet planerar dagarna själv
+- Smart studieteknik för förhör/prov med ämnesanpassade delmoment
 - Aktiviteter med krockdetektering – skapa, redigera och ta bort
 - Lov-läge med 1–3 egna mål, streaks, XP, heatmap och delbar veckosammanfattning
 - Barnvy med dashboard, packlista, väder och peppande animationer

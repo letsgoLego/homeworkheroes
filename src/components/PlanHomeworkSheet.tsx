@@ -11,7 +11,8 @@ import { toast } from 'sonner';
 import { useFamily } from '@/hooks/useFamily';
 import { celebrateAssignment } from '@/lib/confetti';
 import { track } from '@/lib/analytics';
-import { SUBJECT_LABELS, SUBJECT_ICONS, Subject } from '@/types/homework';
+import { SUBJECT_LABELS, SUBJECT_ICONS, Subject, HomeworkType } from '@/types/homework';
+import { getStudyTechniqueSuggestions, type StudyTechnique } from '@/lib/studyTechniques';
 import type { InboxHomework } from '@/hooks/queries/useHomeworkData';
 
 interface PlanHomeworkSheetProps {
@@ -57,11 +58,21 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
   }, [allHomework, homework]);
 
 
-  // Initialise rows from parent's plan items
+  const studyTechniqueSuggestions = useMemo(
+    () => (homework ? getStudyTechniqueSuggestions(homework.subject as Subject, homework.homework_type as HomeworkType) : []),
+    [homework]
+  );
+
+  // Initialise rows from parent's plan items, or with study technique suggestions for exams
   if (homework && initialisedFor !== homework.id) {
-    const base = homework.planItems.length > 0
-      ? homework.planItems.map(item => ({ title: item.title, date: null }))
-      : [{ title: homework.title, date: null }];
+    let base: PlanRow[] = [];
+    if (homework.planItems.length > 0) {
+      base = homework.planItems.map(item => ({ title: item.title, date: null }));
+    } else if (homework.homework_type === 'forhor' && studyTechniqueSuggestions.length > 0) {
+      base = studyTechniqueSuggestions.slice(0, 5).map(t => ({ title: t.label, date: null }));
+    } else {
+      base = [{ title: homework.title, date: null }];
+    }
     setRows(base);
     setInitialisedFor(homework.id);
   }
@@ -95,6 +106,13 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     if (ok) {
       celebrateAssignment();
       track('homework_planned_by_child', { parts: rows.length });
+      if (homework.homework_type === 'forhor') {
+        track('study_techniques_used', {
+          count: rows.length,
+          subject: homework.subject,
+          flow: 'child',
+        });
+      }
       setInitialisedFor(null);
       onClose();
     }
@@ -168,6 +186,35 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
               </div>
             </div>
           ))}
+
+          {studyTechniqueSuggestions.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Förslag på delar</Label>
+              <div className="flex flex-wrap gap-2">
+                {studyTechniqueSuggestions.map(t => {
+                  const added = rows.some(r => r.title === t.label);
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      disabled={added}
+                      onClick={() => setRows(prev => [...prev, { title: t.label, date: null }])}
+                      className={cn(
+                        'px-3 py-2 rounded-lg text-xs font-medium transition-all border',
+                        added
+                          ? 'bg-muted text-muted-foreground border-border opacity-60'
+                          : 'bg-background border-primary/30 hover:border-primary hover:bg-primary/5'
+                      )}
+                      title={t.description}
+                    >
+                      <span className="mr-1">{t.icon}</span>
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="plan-new">Lägg till egen del</Label>
