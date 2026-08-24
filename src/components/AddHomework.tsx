@@ -153,14 +153,13 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     return counts;
   }, [availableDays, targetChildId, getActivitiesForDate]);
 
-  // Auto-suggest days when available days or suggested count changes
-  useEffect(() => {
-    if (availableDays.length > 0 && step === 2 && selectedDays.length === 0) {
-      const count = Math.min(suggestedDayCount, availableDays.length);
-      const suggested = suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count);
-      setSelectedDays(suggested);
-    }
-  }, [step]); // Only run when entering step 2
+  // Manual day picking: no automatic pre-selection.
+  const applySuggestedDays = () => {
+    if (availableDays.length === 0) return;
+    const count = Math.min(3, availableDays.length);
+    setSelectedDays(suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count));
+  };
+
 
   const resetForm = () => {
     setStep(1);
