@@ -889,6 +889,87 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 </p>
               )}
 
+              {homeworkType === 'forhor' && availableDays.length > 0 && (
+                <div className="space-y-3 p-3 rounded-xl bg-muted/50">
+                  <div>
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      Dela upp förhöret i delar
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Välj tekniker som hjälper barnet lära sig bättre.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {studyTechniqueSuggestions.map(t => {
+                      const added = studyParts.some(p => p.title === t.label);
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          disabled={added}
+                          onClick={() => addStudyPart(t)}
+                          className={cn(
+                            'px-3 py-2 rounded-lg text-xs font-medium transition-all border',
+                            added
+                              ? 'bg-muted text-muted-foreground border-border opacity-60'
+                              : 'bg-background border-primary/30 hover:border-primary hover:bg-primary/5'
+                          )}
+                          title={t.description}
+                        >
+                          <span className="mr-1">{t.icon}</span>
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {studyParts.length > 0 && (
+                    <div className="space-y-3">
+                      {studyParts.map((part, i) => (
+                        <div key={`${part.title}-${i}`} className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={part.title}
+                              onChange={e => updateStudyPartTitle(i, e.target.value)}
+                              className="flex-1 h-9"
+                            />
+                            <button
+                              type="button"
+                              aria-label="Ta bort del"
+                              onClick={() => removeStudyPart(i)}
+                              className="text-muted-foreground hover:text-destructive"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {selectedDays.map(d => {
+                              const selected = part.date === d;
+                              return (
+                                <button
+                                  key={d}
+                                  type="button"
+                                  onClick={() => setStudyPartDate(i, d)}
+                                  className={cn(
+                                    'px-2 py-1 rounded-md text-[10px] font-medium border transition-all',
+                                    selected
+                                      ? 'bg-primary text-primary-foreground border-primary'
+                                      : 'bg-background border-border text-muted-foreground hover:bg-muted'
+                                  )}
+                                >
+                                  {format(parseISO(d), 'EEE d/M', { locale: sv })}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               
               <div className="text-center text-sm font-medium">
                 {selectedDays.length > 0 
