@@ -25,7 +25,7 @@ interface PlanRow {
 }
 
 export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps) {
-  const { planHomework } = useFamily();
+  const { planHomework, homework: allHomework, getActivitiesForDate } = useFamily();
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [saving, setSaving] = useState(false);
@@ -39,6 +39,23 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     if (isBefore(due, today)) return [today];
     return eachDayOfInterval({ start: today, end: due });
   }, [homework]);
+
+  // Existing workload per day for this child
+  const taskCountsByDate = useMemo(() => {
+    const counts: Record<string, number> = {};
+    if (!homework) return counts;
+    allHomework
+      .filter(hw => hw.child_id === homework.child_id)
+      .forEach(hw => {
+        hw.tasks.forEach(task => {
+          if (!task.completed) {
+            counts[task.task_date] = (counts[task.task_date] || 0) + 1;
+          }
+        });
+      });
+    return counts;
+  }, [allHomework, homework]);
+
 
   // Initialise rows from parent's plan items
   if (homework && initialisedFor !== homework.id) {
@@ -119,6 +136,10 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                 {days.map(day => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const selected = row.date === dateStr;
+                  const hwCount = taskCountsByDate[dateStr] || 0;
+                  const acts = getActivitiesForDate(homework.child_id, day);
+                  const busy = hwCount + acts.length;
+                  const dotClass = busy === 0 ? 'bg-success' : busy <= 2 ? 'bg-warning' : 'bg-destructive';
                   return (
                     <button
                       key={dateStr}
@@ -128,14 +149,22 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                         'shrink-0 px-3 py-2 rounded-xl border-2 text-xs font-medium transition-colors',
                         selected
                           ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-border text-muted-foreground'
+                          : busy >= 3
+                            ? 'border-destructive/40 text-muted-foreground'
+                            : 'border-border text-muted-foreground'
                       )}
                     >
                       <span className="block">{format(day, 'EEE', { locale: sv })}</span>
                       <span className="block text-sm font-bold">{format(day, 'd/M')}</span>
+                      <span className="flex items-center justify-center gap-1 mt-0.5 text-[10px]">
+                        <span className={cn('w-1.5 h-1.5 rounded-full', dotClass)} />
+                        {hwCount}
+                        {acts.length > 0 && <span>{acts.map(a => a.emoji || '📌').join('')}</span>}
+                      </span>
                     </button>
                   );
                 })}
+
               </div>
             </div>
           ))}

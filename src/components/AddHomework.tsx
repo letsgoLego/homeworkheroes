@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
@@ -49,13 +48,6 @@ const QUICK_TEMPLATES: QuickTemplate[] = [
   { label: 'Prov / Förhör', emoji: '✍️', type: 'forhor' },
   { label: 'Inlämning', emoji: '📄', type: 'inlamning' },
 ];
-
-function getLoadLabel(count: number): { text: string; emoji: string } {
-  if (count === 0) return { text: 'Lugnt', emoji: '😎' };
-  if (count === 1) return { text: 'Lite att göra', emoji: '📚' };
-  if (count === 2) return { text: 'En del', emoji: '📝' };
-  return { text: 'Fullt schema!', emoji: '🔥' };
-}
 
 function generateAutoTitle(homeworkType: HomeworkType, subject: Subject, title: string): string {
   const subjectLabel = SUBJECT_LABELS[subject];
@@ -111,7 +103,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [recurrenceWeeks, setRecurrenceWeeks] = useState(4);
   const [submissionDay, setSubmissionDay] = useState<number | null>(5);
   const [recurringBringDays, setRecurringBringDays] = useState<number[]>([]);
-  const [suggestedDayCount, setSuggestedDayCount] = useState(3);
   const [subjectAnimKey, setSubjectAnimKey] = useState(0);
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   
@@ -153,14 +144,13 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     return counts;
   }, [availableDays, targetChildId, getActivitiesForDate]);
 
-  // Auto-suggest days when available days or suggested count changes
-  useEffect(() => {
-    if (availableDays.length > 0 && step === 2 && selectedDays.length === 0) {
-      const count = Math.min(suggestedDayCount, availableDays.length);
-      const suggested = suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count);
-      setSelectedDays(suggested);
-    }
-  }, [step]); // Only run when entering step 2
+  // Manual day picking: no automatic pre-selection.
+  const applySuggestedDays = () => {
+    if (availableDays.length === 0) return;
+    const count = Math.min(3, availableDays.length);
+    setSelectedDays(suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count));
+  };
+
 
   const resetForm = () => {
     setStep(1);
@@ -179,7 +169,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setSubmissionDay(5);
     setHomeworkType('inlamning');
     setRecurringBringDays([]);
-    setSuggestedDayCount(3);
     setActiveTemplate(null);
   };
   
@@ -754,12 +743,11 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               exit={{ opacity: 0, x: 20 }}
               className="space-y-4"
             >
-              {/* Smart suggestion header */}
+              {/* Header */}
               <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
-                <p className="text-sm font-medium flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
+                <p className="text-sm font-medium">
                   {availableDays.length > 0 ? (
-                    <>Du har {availableDays.length} dagar på dig. Vi föreslår {Math.min(suggestedDayCount, availableDays.length)} pluggdagar!</>
+                    <>Du har {availableDays.length} dagar på dig – välj själv vilka dagar du pluggar.</>
                   ) : (
                     <>Inga dagar före deadline</>
                   )}
@@ -769,91 +757,82 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 </p>
               </div>
 
-              {/* Day count slider */}
               {availableDays.length > 1 && (
-                <div>
-                  <Label className="text-sm font-medium">
-                    Antal pluggdagar: <span className="text-primary font-bold">{Math.min(suggestedDayCount, availableDays.length)}</span>
-                  </Label>
-                  <Slider
-                    value={[suggestedDayCount]}
-                    onValueChange={(val) => {
-                      const count = val[0];
-                      setSuggestedDayCount(count);
-                      const suggested = suggestStudyDays(availableDays, taskCountsByDate, activityCountsByDate, count);
-                      setSelectedDays(suggested);
-                    }}
-                    min={1}
-                    max={availableDays.length}
-                    step={1}
-                    className="mt-2"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>1 dag</span>
-                    <span>{availableDays.length} dagar</span>
-                  </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-muted-foreground">Vill du ha hjälp?</span>
+                  <Button type="button" variant="outline" size="sm" onClick={applySuggestedDays}>
+                    <Sparkles className="w-4 h-4 mr-1.5" />
+                    Föreslå dagar
+                  </Button>
                 </div>
               )}
-              
-              {/* Day picker with workload */}
-              <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
+
+              {/* Day list with workload in plain text */}
+              <div className="space-y-2 max-h-72 overflow-y-auto p-1">
                 {availableDays.map((day) => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isSelected = selectedDays.includes(dateStr);
                   const isToday = isSameDay(day, today);
-                   const isWeekendDay = isWeekend(day);
-                   const existingTaskCount = taskCountsByDate[dateStr] || 0;
-                   const load = getLoadLabel(existingTaskCount);
-                   const dayActivities = targetChildId ? getActivitiesForDate(targetChildId, day) : [];
-                   
-                   return (
+                  const isWeekendDay = isWeekend(day);
+                  const existingTaskCount = taskCountsByDate[dateStr] || 0;
+                  const dayActivities = targetChildId ? getActivitiesForDate(targetChildId, day) : [];
+                  const busy = existingTaskCount + dayActivities.length;
+                  const dotClass = busy === 0
+                    ? 'bg-success'
+                    : busy <= 2
+                      ? 'bg-warning'
+                      : 'bg-destructive';
+                  const homeworkText = existingTaskCount === 0
+                    ? 'Inga läxor'
+                    : `${existingTaskCount} läx${existingTaskCount === 1 ? 'a' : 'or'}`;
+
+                  return (
                     <motion.button
                       key={dateStr}
-                      whileTap={{ scale: 0.95 }}
+                      type="button"
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => toggleDay(dateStr)}
                       className={cn(
-                        'relative p-3 rounded-xl text-center transition-all',
-                        isSelected 
-                          ? 'bg-primary text-primary-foreground shadow-glow-primary' 
-                          : isWeekendDay
-                            ? 'bg-accent/50 hover:bg-accent/70'
-                            : 'bg-muted hover:bg-muted/80',
-                        isToday && !isSelected && 'ring-2 ring-primary/50'
+                        'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all border-2',
+                        isSelected
+                          ? 'border-primary bg-primary/10'
+                          : busy >= 3
+                            ? 'border-destructive/40 bg-destructive/5 hover:bg-destructive/10'
+                            : 'border-border bg-muted/50 hover:bg-muted'
                       )}
                     >
-                      <div className={cn(
-                        "text-xs font-medium capitalize",
-                        isWeekendDay && !isSelected && "text-accent-foreground/80"
-                      )}>
-                        {format(day, 'EEE', { locale: sv })}
-                      </div>
-                      <div className="text-lg font-bold">
-                        {format(day, 'd')}
-                      </div>
-                      <div className="text-xs opacity-70">
-                        {format(day, 'MMM', { locale: sv })}
-                      </div>
-                      {/* Activities indicator */}
-                      {dayActivities.length > 0 && !isSelected && (
-                        <div className="text-[10px] mt-0.5 truncate opacity-80">
-                          {dayActivities.map(a => a.emoji).join('')} {dayActivities[0]?.start_time?.slice(0, 5) || ''}
+                      <div className="w-12 shrink-0 text-center">
+                        <div className={cn('text-xs font-medium capitalize', isWeekendDay && 'text-accent-foreground/80')}>
+                          {format(day, 'EEE', { locale: sv })}
                         </div>
-                      )}
-                      {/* Workload label */}
-                      {existingTaskCount > 0 && !isSelected && dayActivities.length === 0 && (
-                        <div className="text-[10px] mt-0.5 opacity-70">
-                          {load.emoji}
+                        <div className="text-lg font-bold leading-none">{format(day, 'd')}</div>
+                        <div className="text-[10px] text-muted-foreground">{format(day, 'MMM', { locale: sv })}</div>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <span className={cn('w-2 h-2 rounded-full shrink-0', dotClass)} />
+                          <span>{homeworkText}</span>
+                          {isToday && <span className="text-xs text-primary font-semibold">idag</span>}
+                          {isWeekendDay && <span className="text-xs text-muted-foreground">helg</span>}
                         </div>
-                      )}
-                      {isSelected && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="absolute top-1 right-1 w-4 h-4 bg-primary-foreground/20 rounded-full flex items-center justify-center"
-                        >
-                          <Check className="w-3 h-3" />
-                        </motion.div>
-                      )}
+                        {dayActivities.length > 0 && (
+                          <div className="text-xs text-muted-foreground mt-1 truncate">
+                            {dayActivities
+                              .map(a => `${a.emoji || '📌'} ${a.title}${a.start_time ? ` ${a.start_time.slice(0, 5)}` : ''}`)
+                              .join(' · ')}
+                          </div>
+                        )}
+                      </div>
+
+                      <div
+                        className={cn(
+                          'w-6 h-6 rounded-full shrink-0 flex items-center justify-center border-2',
+                          isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-border'
+                        )}
+                      >
+                        {isSelected && <Check className="w-3.5 h-3.5" />}
+                      </div>
                     </motion.button>
                   );
                 })}
@@ -867,12 +846,11 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               
               {/* Legend */}
               {availableDays.length > 0 && (
-                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground justify-center">
-                  <span>😎 Lugnt</span>
-                  <span>📚 Lite</span>
-                  <span>🔥 Fullt</span>
-                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Grön = lugn dag · Gul = några läxor · Röd = full dag
+                </p>
               )}
+
               
               <div className="text-center text-sm font-medium">
                 {selectedDays.length > 0 
