@@ -198,6 +198,11 @@ export default function FamilyPage() {
             Installera app
           </Button>
         </motion.div>
+
+        {/* Update App */}
+        <UpdateAppButton />
+
+
         
         {/* Children list */}
         <section>
