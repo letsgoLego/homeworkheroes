@@ -120,8 +120,12 @@ export default function ChildProfilePage() {
           </Button>
         </motion.div>
 
+        {/* Share app */}
+        <ShareAppButton />
+
         {/* Update App */}
         <UpdateAppButton />
+
 
 
         
