@@ -202,8 +202,12 @@ export default function FamilyPage() {
           </Button>
         </motion.div>
 
+        {/* Share app */}
+        <ShareAppButton />
+
         {/* Update App */}
         <UpdateAppButton />
+
 
 
         
