@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { StreakStats } from '@/components/StreakStats';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { UpdateAppButton } from '@/components/UpdateAppButton';
+import { ShareAppButton } from '@/components/ShareAppButton';
+
 import { HolidayToggle } from '@/components/HolidayToggle';
 import { toast } from 'sonner';
 import { useState } from 'react';
