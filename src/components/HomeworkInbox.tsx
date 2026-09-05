@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { differenceInCalendarDays, format, parseISO, startOfDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Inbox, ArrowRight, Clock } from 'lucide-react';
+import { Inbox, ArrowRight, Clock, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { SUBJECT_ICONS, SUBJECT_LABELS, Subject } from '@/types/homework';
@@ -14,9 +14,11 @@ interface HomeworkInboxProps {
   /** Parents only see the status, children plan the homework */
   readOnly?: boolean;
   childNameById?: Record<string, string>;
+  /** Parents can delete homework they sent before the child has planned it */
+  onDelete?: (id: string) => Promise<boolean> | void;
 }
 
-export function HomeworkInbox({ items, readOnly, childNameById }: HomeworkInboxProps) {
+export function HomeworkInbox({ items, readOnly, childNameById, onDelete }: HomeworkInboxProps) {
   const [planning, setPlanning] = useState<InboxHomework | null>(null);
 
   if (items.length === 0) return null;
@@ -70,7 +72,20 @@ export function HomeworkInbox({ items, readOnly, childNameById }: HomeworkInboxP
                 </div>
 
                 {readOnly ? (
-                  <p className="mt-2 text-xs font-medium text-warning">Väntar på planering</p>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <p className="text-xs font-medium text-warning">Väntar på planering</p>
+                    {onDelete && (
+                      <button
+                        onClick={() => onDelete(hw.id)}
+                        aria-label={`Ta bort ${hw.title}`}
+                        title="Ta bort läxan"
+                        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Ta bort
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <Button size="sm" className="mt-3 w-full" onClick={() => setPlanning(hw)}>
                     Planera dagar
