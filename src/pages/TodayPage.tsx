@@ -72,6 +72,7 @@ export default function TodayPage() {
     updateActivity,
     deleteActivity,
     skipActivityDate,
+    deleteHomework,
 
     refetch,
   } = useFamily();
@@ -305,6 +306,7 @@ export default function TodayPage() {
               items={inboxForChild}
               readOnly={userRole !== 'child'}
               childNameById={Object.fromEntries(children.map(c => [c.id, c.name]))}
+              onDelete={userRole !== 'child' ? deleteHomework : undefined}
             />
 
             {/* Child weekly dashboard - peppar barnet att komma i mål */}

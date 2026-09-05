@@ -134,6 +134,7 @@ export default function AddPage() {
           items={inboxHomework.filter(hw => hw.child_id === activeChildId)}
           readOnly={userRole !== 'child'}
           childNameById={Object.fromEntries(children.map(c => [c.id, c.name]))}
+          onDelete={userRole !== 'child' ? deleteHomework : undefined}
         />
 
         {/* Activities – presented like homework cards */}
