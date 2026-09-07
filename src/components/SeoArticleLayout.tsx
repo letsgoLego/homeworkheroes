@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef } from 'react';
 import { useAdSense } from '@/hooks/useAdSense';
+import { TIPS_ARTICLES } from '@/lib/tipsArticles';
 
 export interface FaqItem {
   question: string;
@@ -276,7 +277,26 @@ export default function SeoArticleLayout({
             </div>
           </div>
         )}
+
+        {/* All guides — full cross-linking between articles */}
+        <div className="mt-10">
+          <h3 className="text-lg font-bold text-foreground mb-1">Alla guider</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Utforska hela biblioteket i <Link to="/tips" className="text-primary font-medium">Tips &amp; guider</Link>.
+          </p>
+          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 list-none p-0 m-0">
+            {TIPS_ARTICLES.filter((a) => a.slug !== slug).map((a) => (
+              <li key={a.path} className="text-sm">
+                <Link to={a.path} className="text-muted-foreground hover:text-primary transition-colors">
+                  <span className="text-xs uppercase tracking-wide text-primary/70 mr-2">{a.category}</span>
+                  {a.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </main>
+
 
       <footer className="border-t border-border py-8 mt-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
