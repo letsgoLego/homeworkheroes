@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { format, parseISO, startOfDay, eachDayOfInterval, isBefore } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, CalendarCheck } from 'lucide-react';
+import { Plus, X, CalendarCheck, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useFamily } from '@/hooks/useFamily';
 import { celebrateAssignment } from '@/lib/confetti';
@@ -21,8 +21,9 @@ interface PlanHomeworkSheetProps {
 }
 
 interface PlanRow {
+  id: string;
   title: string;
-  date: string | null;
+  dates: string[];
 }
 
 export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps) {
@@ -67,11 +68,11 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
   if (homework && initialisedFor !== homework.id) {
     let base: PlanRow[] = [];
     if (homework.planItems.length > 0) {
-      base = homework.planItems.map(item => ({ title: item.title, date: null }));
+      base = homework.planItems.map(item => ({ id: crypto.randomUUID(), title: item.title, dates: [] }));
     } else if (homework.homework_type === 'forhor' && studyTechniqueSuggestions.length > 0) {
-      base = studyTechniqueSuggestions.slice(0, 5).map(t => ({ title: t.label, date: null }));
+      base = studyTechniqueSuggestions.slice(0, 5).map(t => ({ id: crypto.randomUUID(), title: t.label, dates: [] }));
     } else {
-      base = [{ title: homework.title, date: null }];
+      base = [{ id: crypto.randomUUID(), title: homework.title, dates: [] }];
     }
     setRows(base);
     setInitialisedFor(homework.id);
@@ -79,36 +80,54 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
 
   if (!homework) return null;
 
-  const setRowDate = (index: number, date: string) => {
-    setRows(prev => prev.map((r, i) => (i === index ? { ...r, date: r.date === date ? null : date } : r)));
+  const toggleRowDate = (index: number, date: string) => {
+    setRows(prev =>
+      prev.map((r, i) =>
+        i === index
+          ? { ...r, dates: r.dates.includes(date) ? r.dates.filter(d => d !== date) : [...r.dates, date].sort() }
+          : r
+      )
+    );
+  };
+
+  const moveRow = (index: number, dir: -1 | 1) => {
+    setRows(prev => {
+      const next = [...prev];
+      const target = index + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
   };
 
   const addRow = () => {
     const value = newTitle.trim();
     if (!value) return;
-    setRows(prev => [...prev, { title: value, date: null }]);
+    setRows(prev => [...prev, { id: crypto.randomUUID(), title: value, dates: [] }]);
     setNewTitle('');
   };
 
-  const allPlanned = rows.length > 0 && rows.every(r => r.date);
+  const allPlanned = rows.length > 0 && rows.every(r => r.dates.length > 0);
+  const sessionCount = rows.reduce((sum, r) => sum + r.dates.length, 0);
 
   const handleSave = async () => {
     if (!allPlanned) {
-      toast.error('Välj en dag för varje del');
+      toast.error('Välj minst en dag för varje del');
       return;
     }
     setSaving(true);
     const ok = await planHomework(
       homework.id,
-      rows.map(r => ({ title: r.title, date: r.date as string }))
+      rows.flatMap(r => r.dates.map(date => ({ title: `${homework.title} – ${r.title}`, date })))
     );
     setSaving(false);
     if (ok) {
       celebrateAssignment();
-      track('homework_planned_by_child', { parts: rows.length });
+      track('homework_planned_by_child', { parts: rows.length, sessions: sessionCount });
       if (homework.homework_type === 'forhor') {
         track('study_techniques_used', {
           count: rows.length,
+          sessions: sessionCount,
           subject: homework.subject,
           flow: 'child',
         });
@@ -135,16 +154,43 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
         )}
 
         <div className="space-y-5 pt-2">
+          <p className="text-xs font-medium text-primary">
+            {rows.length} moment · {sessionCount} pluggtillfälle{sessionCount === 1 ? '' : 'n'}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Tips: repetera samma moment på två dagar – det ger bäst effekt.
+          </p>
           {rows.map((row, i) => (
-            <div key={`${row.title}-${i}`} className="space-y-2">
+            <div key={row.id} className="space-y-2 rounded-xl border border-border p-2">
               <div className="flex items-center gap-2">
+                <span className="w-6 h-6 shrink-0 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
+                  {i + 1}
+                </span>
                 <Label className="flex-1">{row.title}</Label>
+                <button
+                  type="button"
+                  aria-label="Flytta upp"
+                  disabled={i === 0}
+                  onClick={() => moveRow(i, -1)}
+                  className="text-muted-foreground hover:text-primary disabled:opacity-30"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Flytta ner"
+                  disabled={i === rows.length - 1}
+                  onClick={() => moveRow(i, 1)}
+                  className="text-muted-foreground hover:text-primary disabled:opacity-30"
+                >
+                  <ArrowDown className="w-4 h-4" />
+                </button>
                 {rows.length > 1 && (
                   <button
                     type="button"
                     aria-label="Ta bort del"
                     onClick={() => setRows(prev => prev.filter((_, idx) => idx !== i))}
-                    className="text-muted-foreground"
+                    className="text-muted-foreground hover:text-destructive"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -153,7 +199,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {days.map(day => {
                   const dateStr = format(day, 'yyyy-MM-dd');
-                  const selected = row.date === dateStr;
+                  const selected = row.dates.includes(dateStr);
                   const hwCount = taskCountsByDate[dateStr] || 0;
                   const acts = getActivitiesForDate(homework.child_id, day);
                   const busy = hwCount + acts.length;
@@ -162,7 +208,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                     <button
                       key={dateStr}
                       type="button"
-                      onClick={() => setRowDate(i, dateStr)}
+                      onClick={() => toggleRowDate(i, dateStr)}
                       className={cn(
                         'shrink-0 px-3 py-2 rounded-xl border-2 text-xs font-medium transition-colors',
                         selected
@@ -182,8 +228,12 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                     </button>
                   );
                 })}
-
               </div>
+              <p className={cn('text-[10px]', row.dates.length === 0 ? 'text-destructive' : 'text-muted-foreground')}>
+                {row.dates.length === 0
+                  ? 'Välj minst en dag'
+                  : `${row.dates.length} dag${row.dates.length === 1 ? '' : 'ar'} vald${row.dates.length === 1 ? '' : 'a'}`}
+              </p>
             </div>
           ))}
 
@@ -198,7 +248,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                       key={t.id}
                       type="button"
                       disabled={added}
-                      onClick={() => setRows(prev => [...prev, { title: t.label, date: null }])}
+                      onClick={() => setRows(prev => [...prev, { id: crypto.randomUUID(), title: t.label, dates: [] }])}
                       className={cn(
                         'px-3 py-2 rounded-lg text-xs font-medium transition-all border',
                         added
@@ -242,7 +292,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
             {saving ? 'Sparar…' : 'Klart – planera!'}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            {SUBJECT_LABELS[homework.subject as Subject]} · {rows.filter(r => r.date).length}/{rows.length} delar planerade
+            {SUBJECT_LABELS[homework.subject as Subject]} · {rows.filter(r => r.dates.length > 0).length}/{rows.length} delar planerade
           </p>
         </div>
       </DialogContent>
