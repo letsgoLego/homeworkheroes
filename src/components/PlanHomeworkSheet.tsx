@@ -248,7 +248,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                       key={t.id}
                       type="button"
                       disabled={added}
-                      onClick={() => setRows(prev => [...prev, { title: t.label, date: null }])}
+                      onClick={() => setRows(prev => [...prev, { id: crypto.randomUUID(), title: t.label, dates: [] }])}
                       className={cn(
                         'px-3 py-2 rounded-lg text-xs font-medium transition-all border',
                         added
