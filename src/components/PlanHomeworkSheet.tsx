@@ -427,12 +427,12 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
             </div>
           </div>
 
-          <Button onClick={handleSave} disabled={saving || !allPlanned} className="w-full" size="lg">
+          <Button onClick={handleSave} disabled={saving || !canSave} className="w-full" size="lg">
             <CalendarCheck className="w-4 h-4 mr-2" />
             {saving ? 'Sparar…' : 'Klart – planera!'}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            {SUBJECT_LABELS[homework.subject as Subject]} · {rows.filter(r => r.dates.length > 0).length}/{rows.length} delar planerade
+            {SUBJECT_LABELS[subject]} · {rows.filter(r => r.dates.length > 0).length}/{rows.length} delar planerade
           </p>
         </div>
       </DialogContent>
