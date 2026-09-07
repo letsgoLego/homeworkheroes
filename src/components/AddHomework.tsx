@@ -12,7 +12,7 @@ import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, addWeeks, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay, subDays, getDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag, Lock, Sparkles } from 'lucide-react';
+import { Plus, X, ArrowRight, ArrowUp, ArrowDown, Check, User, Bell, Repeat, Flag, Lock, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
