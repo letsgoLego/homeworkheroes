@@ -23,6 +23,8 @@ interface SeoArticleLayoutProps {
   /** Estimated reading time in minutes */
   readingTimeMin?: number;
   faqItems?: FaqItem[];
+  /** Paragraph tying the article's topic to what the Läxhjälp app can do. */
+  toolParagraph?: string;
 }
 
 export default function SeoArticleLayout({
@@ -36,6 +38,7 @@ export default function SeoArticleLayout({
   dateModified = '2026-06-23',
   readingTimeMin,
   faqItems = [],
+  toolParagraph,
 }: SeoArticleLayoutProps) {
   useAdSense();
   const adPushed = useRef(false);
@@ -225,18 +228,21 @@ export default function SeoArticleLayout({
           </div>
         </article>
 
-        {/* CTA */}
-        <div className="mt-12 p-6 sm:p-8 rounded-2xl bg-primary/10 border border-primary/20 text-center">
-          <h2 className="text-xl font-bold text-foreground mb-2">Testa Läxhjälp gratis</h2>
-          <p className="text-muted-foreground mb-4">
-            Planera läxor, skapa packlistor och håll koll på aktiviteter — hela familjen tillsammans.
+        {/* Topic-specific tool paragraph + CTA */}
+        <section className="mt-12 p-6 sm:p-8 rounded-2xl bg-primary/10 border border-primary/20">
+          <h2 className="text-xl font-bold text-foreground mb-2">
+            Så hjälper Läxhjälp-appen dig med det här
+          </h2>
+          <p className="text-muted-foreground mb-4 leading-relaxed">
+            {toolParagraph ??
+              'I Läxhjälp lägger ni in läxor, prov och aktiviteter en gång — sedan visar appen veckans belastning per dag, delar upp stora uppgifter i mindre pluggpass, påminner innan deadline och låter barnet bocka av själv. Föräldrar får överblick utan att fråga, barnet får struktur och beröm när något blir klart.'}
           </p>
           <Link to="/auth">
             <Button size="lg" className="rounded-full gap-2">
-              Skapa konto gratis <ArrowRight className="w-4 h-4" />
+              Kom igång gratis <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
-        </div>
+        </section>
 
         {/* AdSense ad */}
         <div className="mt-8 flex justify-center">
