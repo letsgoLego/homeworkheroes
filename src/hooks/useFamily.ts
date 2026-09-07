@@ -199,6 +199,7 @@ export function useFamily() {
     childId: string;
     homeworkType?: 'inlamning' | 'forhor';
     items?: string[];
+    dueDateConfirmed?: boolean;
   }) => {
     const { data, error } = await supabase
       .from('homework')
@@ -211,6 +212,7 @@ export function useFamily() {
         homework_type: input.homeworkType || 'inlamning',
         planning_status: 'pending',
         created_by: user?.id ?? null,
+        due_date_confirmed: input.dueDateConfirmed !== false,
       })
       .select()
       .single();
@@ -274,6 +276,7 @@ export function useFamily() {
     recurrenceEndDate?: string;
     submissionDay?: number | null;
     homeworkType?: string;
+    dueDateConfirmed?: boolean;
   }) => {
     const updateData: Record<string, unknown> = {};
     if (updates.title !== undefined) updateData.title = updates.title;
