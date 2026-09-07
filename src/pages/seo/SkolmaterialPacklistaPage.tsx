@@ -40,6 +40,7 @@ export default function SkolmaterialPacklistaPage() {
       dateModified="2026-08-23"
       readingTimeMin={7}
       relatedArticles={related}
+      toolParagraph="I Läxhjälp bygger ni en digital packlista per veckodag — gympakläder på tisdag, mattebok på onsdag — som återställs varje dag. Barnet packar själv kvällen innan och bockar av, så morgonen blir lugn."
       faqItems={faqItems}
     >
       <p>

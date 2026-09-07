@@ -40,6 +40,7 @@ export default function TerminsstartChecklistaPage() {
       dateModified="2026-08-23"
       readingTimeMin={8}
       relatedArticles={related}
+      toolParagraph="Läxhjälp gör terminsstarten enklare: lägg in schema och aktiviteter en gång, bygg packlistan per veckodag och sätt läxtiden — sedan påminner appen automatiskt. Hela familjen ser samma bild från första skolveckan."
       faqItems={faqItems}
     >
       <p>

@@ -42,6 +42,7 @@ export default function EngelskaGlosorPage() {
       slug="engelska-glosor"
       metaDescription="Vetenskapligt baserade tekniker för att lära in engelska glosor långsiktigt. Spaced repetition, appar, exempel per årskurs och vanliga föräldrafällor."
       relatedArticles={related}
+      toolParagraph="Läxhjälp planerar glosorna med upprepning över flera dagar istället för ett långt pass kvällen innan förhöret, och föreslår pluggsteg som “repetera glosor” och “förhör varandra”. Påminnelserna kommer automatiskt de dagar ni valt."
       datePublished="2026-02-22"
       dateModified="2026-06-23"
       readingTimeMin={12}

@@ -14,6 +14,7 @@ export default function StudieteknikBarnPage() {
       slug="studieteknik-barn"
       metaDescription="Hjälp ditt barn att plugga smartare med dessa 8 beprövade studietekniker anpassade för barn i alla åldrar."
       relatedArticles={related}
+      toolParagraph="Läxhjälp bygger in teknikerna i planeringen: när du väljer förhör eller prov föreslår appen namngivna pluggpass som “läsa på”, “delförhör” och “förklara för någon”, och fördelar dem över flera dagar istället för allt kvällen innan."
     >
       <p>
         Barn lär sig olika, och det finns ingen universallösning. Men forskning visar att vissa

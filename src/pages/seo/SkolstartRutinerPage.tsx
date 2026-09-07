@@ -40,6 +40,7 @@ export default function SkolstartRutinerPage() {
       dateModified="2026-08-23"
       readingTimeMin={7}
       relatedArticles={related}
+      toolParagraph="Läxhjälp håller de nya rutinerna på plats med påminnelser på eftermiddagen och kvällen, dagens uppgifter samlade i en lista och streaks som gör rutinen rolig att hålla de första veckorna efter lovet."
       faqItems={faqItems}
     >
       <p>

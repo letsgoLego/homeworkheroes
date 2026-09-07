@@ -42,6 +42,7 @@ export default function MatematikHjalpBarnPage() {
       slug="matematik-hjalp-barn"
       metaDescription="Praktisk guide för dig som vill hjälpa ditt barn med matteläxor. Strategier per årskurs, vanliga föräldrafällor och konkreta verktyg som faktiskt fungerar."
       relatedArticles={related}
+      toolParagraph="Läxhjälp delar upp matteläxan i hanterbara pass och föreslår tekniker som “räkna gamla uppgifter” och “gör delförhör” inför provet. Veckovyn visar vilka dagar som är lugna nog för matte, som ofta kräver mer energi än andra ämnen."
       datePublished="2026-02-18"
       dateModified="2026-06-23"
       readingTimeMin={15}

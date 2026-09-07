@@ -42,6 +42,7 @@ export default function LaxplaneringTipsPage() {
       slug="laxplanering"
       metaDescription="Lär dig planera läxor effektivt med 7 beprövade tips. Strukturera veckan, dela upp stora uppgifter och låt barnet bygga eget ansvar."
       relatedArticles={related}
+      toolParagraph="I Läxhjälp gör du hela veckoplaneringen på några minuter: lägg in läxor, prov och aktiviteter, välj pluggdagar i en vy som visar hur mycket varje dag redan innehåller, och dela stora uppgifter i mindre steg. Appen påminner innan deadline, håller packlistan per veckodag och firar avklarade läxor med streaks och XP."
       datePublished="2025-09-12"
       dateModified="2026-06-23"
       readingTimeMin={11}

@@ -42,6 +42,7 @@ export default function LasforstaelseBarnPage() {
       slug="lasforstaelse-barn"
       metaDescription="Konkret guide för att träna läsförståelse hemma. Övningar, böcker, lästekniker och tips för barn i åk 1–6. Skrivet av Läxhjälp-redaktionen."
       relatedArticles={related}
+      toolParagraph="I Läxhjälp lägger du in läsläxan som återkommande uppgift — till exempel 15 minuter läsning fyra dagar i veckan — med påminnelse på eftermiddagen och avbockning som ger streak. Läsningen blir en vana istället för något ni kommer på i sista stund."
       datePublished="2026-02-10"
       dateModified="2026-06-23"
       readingTimeMin={14}

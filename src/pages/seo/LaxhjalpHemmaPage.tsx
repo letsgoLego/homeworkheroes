@@ -14,6 +14,7 @@ export default function LaxhjalpHemmaPage() {
       slug="laxhjalp-hemma"
       metaDescription="Allt du behöver veta om att hjälpa ditt barn med läxor hemma. Från rätt miljö till effektiva strategier för alla åldrar."
       relatedArticles={related}
+      toolParagraph="Läxhjälp gör det enklare att vara coach istället för kontrollant: barnet lägger in och planerar sina läxor, du ser veckans överblick, och appen sköter påminnelser och packlistor. Frågan “har du läxor idag?” försvinner från middagsbordet."
     >
       <p>
         Att hjälpa sitt barn med läxor är en av de vanligaste och ibland mest frustrerande

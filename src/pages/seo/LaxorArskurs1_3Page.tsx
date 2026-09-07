@@ -42,6 +42,7 @@ export default function LaxorArskurs1_3Page() {
       slug="laxor-arskurs-1-3"
       metaDescription="Allt om läxor i lågstadiet: mängd, rutiner, läsning, matte, engelska och hur du stöttar utan att ta över. Praktisk guide för svenska föräldrar."
       relatedArticles={related}
+      toolParagraph="I Läxhjälp kan du som förälder skicka läsläxan eller mattetabellerna till barnets inkorg, och barnet får välja vilka dagar de ska göras med hjälp av tydliga färger. Packlistan per veckodag gör att gympapåsen och boken följer med utan morgonstress."
       datePublished="2026-03-05"
       dateModified="2026-06-23"
       readingTimeMin={13}
