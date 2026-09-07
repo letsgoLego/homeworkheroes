@@ -69,22 +69,33 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
   }, [allHomework, homework]);
 
 
+  // Suggestions follow the child's own choice of subject/type
   const studyTechniqueSuggestions = useMemo(
-    () => (homework ? getStudyTechniqueSuggestions(homework.subject as Subject, homework.homework_type as HomeworkType) : []),
-    [homework]
+    () => getStudyTechniqueSuggestions(subject, homeworkType),
+    [subject, homeworkType]
   );
 
   // Initialise rows from parent's plan items, or with study technique suggestions for exams
   if (homework && initialisedFor !== homework.id) {
+    const hwSubject = homework.subject as Subject;
+    const hwType = (homework.homework_type as HomeworkType) || 'inlamning';
+    const suggestions = getStudyTechniqueSuggestions(hwSubject, hwType);
     let base: PlanRow[] = [];
     if (homework.planItems.length > 0) {
       base = homework.planItems.map(item => ({ id: crypto.randomUUID(), title: item.title, dates: [] }));
-    } else if (homework.homework_type === 'forhor' && studyTechniqueSuggestions.length > 0) {
-      base = studyTechniqueSuggestions.slice(0, 5).map(t => ({ id: crypto.randomUUID(), title: t.label, dates: [] }));
+    } else if (hwType === 'forhor' && suggestions.length > 0) {
+      base = suggestions.slice(0, 5).map(t => ({ id: crypto.randomUUID(), title: t.label, dates: [] }));
     } else {
       base = [{ id: crypto.randomUUID(), title: homework.title, dates: [] }];
     }
     setRows(base);
+    setTitle(homework.title);
+    setSubject(hwSubject);
+    setHomeworkType(hwType);
+    const confirmed = (homework as { due_date_confirmed?: boolean }).due_date_confirmed !== false;
+    setDueDateKnown(confirmed);
+    setDueDate(confirmed ? homework.due_date : '');
+    setNote('');
     setInitialisedFor(homework.id);
   }
 
