@@ -153,25 +153,41 @@ export function SendHomeworkToChild({ open, onClose }: SendHomeworkToChildProps)
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="send-title">Vad är läxan?</Label>
+            <Label htmlFor="send-title">Vad är läxan? (valfritt)</Label>
             <Input
               id="send-title"
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder={`t.ex. ${SUBJECT_LABELS[subject]} kap 4`}
             />
+            <p className="text-xs text-muted-foreground">
+              Barnet kan ändra titel, ämne, typ och deadline när hen planerar.
+            </p>
           </div>
 
           {/* Due date */}
           <div className="space-y-2">
-            <Label htmlFor="send-due">Deadline</Label>
+            <Label htmlFor="send-due">Deadline (valfritt)</Label>
             <Input
               id="send-due"
               type="date"
               value={dueDate}
               min={format(new Date(), 'yyyy-MM-dd')}
+              disabled={dueDateUnknown}
               onChange={e => setDueDate(e.target.value)}
             />
+            <button
+              type="button"
+              onClick={() => setDueDateUnknown(v => !v)}
+              className={cn(
+                'w-full py-2 rounded-xl border-2 text-sm font-medium transition-colors',
+                dueDateUnknown
+                  ? 'border-warning bg-warning/10 text-warning'
+                  : 'border-border text-muted-foreground'
+              )}
+            >
+              Vet inte – barnet fyller i
+            </button>
           </div>
 
           {/* Description */}
