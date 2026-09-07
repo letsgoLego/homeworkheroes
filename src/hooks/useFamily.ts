@@ -199,6 +199,7 @@ export function useFamily() {
     childId: string;
     homeworkType?: 'inlamning' | 'forhor';
     items?: string[];
+    dueDateConfirmed?: boolean;
   }) => {
     const { data, error } = await supabase
       .from('homework')
@@ -211,6 +212,7 @@ export function useFamily() {
         homework_type: input.homeworkType || 'inlamning',
         planning_status: 'pending',
         created_by: user?.id ?? null,
+        due_date_confirmed: input.dueDateConfirmed !== false,
       })
       .select()
       .single();
@@ -274,7 +276,8 @@ export function useFamily() {
     recurrenceEndDate?: string;
     submissionDay?: number | null;
     homeworkType?: string;
-  }) => {
+    dueDateConfirmed?: boolean;
+  }, options?: { silent?: boolean }) => {
     const updateData: Record<string, unknown> = {};
     if (updates.title !== undefined) updateData.title = updates.title;
     if (updates.subject !== undefined) updateData.subject = updates.subject;
@@ -287,6 +290,7 @@ export function useFamily() {
     if (updates.recurrenceEndDate !== undefined) updateData.recurrence_end_date = updates.recurrenceEndDate;
     if (updates.submissionDay !== undefined) updateData.submission_day = updates.submissionDay;
     if (updates.homeworkType !== undefined) updateData.homework_type = updates.homeworkType;
+    if (updates.dueDateConfirmed !== undefined) updateData.due_date_confirmed = updates.dueDateConfirmed;
 
     const { error } = await supabase
       .from('homework')
@@ -296,7 +300,7 @@ export function useFamily() {
       toast.error('Kunde inte uppdatera läxa');
       return false;
     }
-    toast.success('Läxa uppdaterad! ✓');
+    if (!options?.silent) toast.success('Läxa uppdaterad! ✓');
     invalidateHomework();
     return true;
   };

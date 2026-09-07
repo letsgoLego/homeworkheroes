@@ -27,6 +27,7 @@ export function SendHomeworkToChild({ open, onClose }: SendHomeworkToChildProps)
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState(format(addDays(new Date(), 5), 'yyyy-MM-dd'));
+  const [dueDateUnknown, setDueDateUnknown] = useState(false);
   const [items, setItems] = useState<string[]>([]);
   const [newItem, setNewItem] = useState('');
   const [saving, setSaving] = useState(false);
@@ -38,6 +39,7 @@ export function SendHomeworkToChild({ open, onClose }: SendHomeworkToChildProps)
     setDescription('');
     setItems([]);
     setNewItem('');
+    setDueDateUnknown(false);
     setDueDate(format(addDays(new Date(), 5), 'yyyy-MM-dd'));
   };
 
@@ -59,14 +61,15 @@ export function SendHomeworkToChild({ open, onClose }: SendHomeworkToChildProps)
       title: finalTitle,
       subject,
       description: description.trim() || undefined,
-      dueDate,
+      dueDate: dueDateUnknown ? format(addDays(new Date(), 7), 'yyyy-MM-dd') : dueDate,
+      dueDateConfirmed: !dueDateUnknown,
       childId: targetChildId,
       homeworkType,
       items,
     });
     setSaving(false);
     if (result) {
-      track('homework_sent_to_child', { subject, items: items.length });
+      track('homework_sent_to_child', { subject, items: items.length, due_unknown: dueDateUnknown });
       reset();
       onClose();
     }
@@ -150,25 +153,41 @@ export function SendHomeworkToChild({ open, onClose }: SendHomeworkToChildProps)
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="send-title">Vad är läxan?</Label>
+            <Label htmlFor="send-title">Vad är läxan? (valfritt)</Label>
             <Input
               id="send-title"
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder={`t.ex. ${SUBJECT_LABELS[subject]} kap 4`}
             />
+            <p className="text-xs text-muted-foreground">
+              Barnet kan ändra titel, ämne, typ och deadline när hen planerar.
+            </p>
           </div>
 
           {/* Due date */}
           <div className="space-y-2">
-            <Label htmlFor="send-due">Deadline</Label>
+            <Label htmlFor="send-due">Deadline (valfritt)</Label>
             <Input
               id="send-due"
               type="date"
               value={dueDate}
               min={format(new Date(), 'yyyy-MM-dd')}
+              disabled={dueDateUnknown}
               onChange={e => setDueDate(e.target.value)}
             />
+            <button
+              type="button"
+              onClick={() => setDueDateUnknown(v => !v)}
+              className={cn(
+                'w-full py-2 rounded-xl border-2 text-sm font-medium transition-colors',
+                dueDateUnknown
+                  ? 'border-warning bg-warning/10 text-warning'
+                  : 'border-border text-muted-foreground'
+              )}
+            >
+              Vet inte – barnet fyller i
+            </button>
           </div>
 
           {/* Description */}

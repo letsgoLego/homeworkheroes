@@ -38,12 +38,13 @@ export function HomeworkInbox({ items, readOnly, childNameById, onDelete }: Home
         </div>
         <p className="text-xs text-muted-foreground mb-3">
           {readOnly
-            ? 'Väntar på att barnet planerar dagarna.'
-            : 'Nya läxor från din förälder – välj vilka dagar du gör dem.'}
+            ? 'Väntar på att barnet planerar dagarna och fyller i detaljerna.'
+            : 'Nya läxor från din förälder – fyll i detaljerna och välj vilka dagar du gör dem.'}
         </p>
 
         <div className="space-y-2">
           {items.map(hw => {
+            const dueConfirmed = (hw as { due_date_confirmed?: boolean }).due_date_confirmed !== false;
             const daysLeft = differenceInCalendarDays(startOfDay(parseISO(hw.due_date)), startOfDay(new Date()));
             return (
               <div key={hw.id} className="p-3 rounded-xl bg-card border border-border">
@@ -56,24 +57,30 @@ export function HomeworkInbox({ items, readOnly, childNameById, onDelete }: Home
                       {SUBJECT_LABELS[hw.subject as Subject]}
                       {childNameById?.[hw.child_id] ? ` · ${childNameById[hw.child_id]}` : ''}
                       {' · '}
-                      {format(parseISO(hw.due_date), 'd MMM', { locale: sv })}
+                      {dueConfirmed
+                        ? format(parseISO(hw.due_date), 'd MMM', { locale: sv })
+                        : 'deadline ej bekräftad'}
                       {hw.planItems.length > 0 ? ` · ${hw.planItems.length} delar` : ''}
                     </p>
                   </div>
                   <span
                     className={cn(
                       'shrink-0 flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg',
-                      daysLeft <= 1 ? 'bg-destructive/15 text-destructive' : 'bg-warning/15 text-warning'
+                      dueConfirmed && daysLeft <= 1
+                        ? 'bg-destructive/15 text-destructive'
+                        : 'bg-warning/15 text-warning'
                     )}
                   >
                     <Clock className="w-3 h-3" />
-                    {daysLeft <= 0 ? 'Idag' : `${daysLeft} d`}
+                    {!dueConfirmed ? '?' : daysLeft <= 0 ? 'Idag' : `${daysLeft} d`}
                   </span>
                 </div>
 
                 {readOnly ? (
                   <div className="mt-2 flex items-center justify-between gap-2">
-                    <p className="text-xs font-medium text-warning">Väntar på planering</p>
+                    <p className="text-xs font-medium text-warning">
+                      Väntar på planering – barnet fyller i detaljerna
+                    </p>
                     {onDelete && (
                       <button
                         onClick={() => onDelete(hw.id)}

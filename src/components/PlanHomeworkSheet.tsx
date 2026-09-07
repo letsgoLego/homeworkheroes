@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { useFamily } from '@/hooks/useFamily';
 import { celebrateAssignment } from '@/lib/confetti';
 import { track } from '@/lib/analytics';
-import { SUBJECT_LABELS, SUBJECT_ICONS, Subject, HomeworkType } from '@/types/homework';
+import { SUBJECT_LABELS, SUBJECT_ICONS, HOMEWORK_TYPE_LABELS, Subject, HomeworkType } from '@/types/homework';
 import { getStudyTechniqueSuggestions, type StudyTechnique } from '@/lib/studyTechniques';
 import type { InboxHomework } from '@/hooks/queries/useHomeworkData';
 
@@ -26,21 +26,31 @@ interface PlanRow {
   dates: string[];
 }
 
+const subjects: Subject[] = ['math', 'science', 'language', 'history', 'art', 'music', 'english', 'other'];
+
 export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps) {
-  const { planHomework, homework: allHomework, getActivitiesForDate } = useFamily();
+  const { planHomework, updateHomework, homework: allHomework, getActivitiesForDate } = useFamily();
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [saving, setSaving] = useState(false);
   const [initialisedFor, setInitialisedFor] = useState<string | null>(null);
 
+  // Editable homework details (the child fills in what the parent didn't know)
+  const [title, setTitle] = useState('');
+  const [subject, setSubject] = useState<Subject>('other');
+  const [homeworkType, setHomeworkType] = useState<HomeworkType>('inlamning');
+  const [dueDate, setDueDate] = useState('');
+  const [dueDateKnown, setDueDateKnown] = useState(true);
+  const [note, setNote] = useState('');
+
   // Available days: today .. due date
   const days = useMemo(() => {
-    if (!homework) return [];
+    if (!homework || !dueDate) return [];
     const today = startOfDay(new Date());
-    const due = startOfDay(parseISO(homework.due_date));
+    const due = startOfDay(parseISO(dueDate));
     if (isBefore(due, today)) return [today];
     return eachDayOfInterval({ start: today, end: due });
-  }, [homework]);
+  }, [homework, dueDate]);
 
   // Existing workload per day for this child
   const taskCountsByDate = useMemo(() => {
@@ -59,22 +69,33 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
   }, [allHomework, homework]);
 
 
+  // Suggestions follow the child's own choice of subject/type
   const studyTechniqueSuggestions = useMemo(
-    () => (homework ? getStudyTechniqueSuggestions(homework.subject as Subject, homework.homework_type as HomeworkType) : []),
-    [homework]
+    () => getStudyTechniqueSuggestions(subject, homeworkType),
+    [subject, homeworkType]
   );
 
   // Initialise rows from parent's plan items, or with study technique suggestions for exams
   if (homework && initialisedFor !== homework.id) {
+    const hwSubject = homework.subject as Subject;
+    const hwType = (homework.homework_type as HomeworkType) || 'inlamning';
+    const suggestions = getStudyTechniqueSuggestions(hwSubject, hwType);
     let base: PlanRow[] = [];
     if (homework.planItems.length > 0) {
       base = homework.planItems.map(item => ({ id: crypto.randomUUID(), title: item.title, dates: [] }));
-    } else if (homework.homework_type === 'forhor' && studyTechniqueSuggestions.length > 0) {
-      base = studyTechniqueSuggestions.slice(0, 5).map(t => ({ id: crypto.randomUUID(), title: t.label, dates: [] }));
+    } else if (hwType === 'forhor' && suggestions.length > 0) {
+      base = suggestions.slice(0, 5).map(t => ({ id: crypto.randomUUID(), title: t.label, dates: [] }));
     } else {
       base = [{ id: crypto.randomUUID(), title: homework.title, dates: [] }];
     }
     setRows(base);
+    setTitle(homework.title);
+    setSubject(hwSubject);
+    setHomeworkType(hwType);
+    const confirmed = (homework as { due_date_confirmed?: boolean }).due_date_confirmed !== false;
+    setDueDateKnown(confirmed);
+    setDueDate(confirmed ? homework.due_date : '');
+    setNote('');
     setInitialisedFor(homework.id);
   }
 
@@ -107,28 +128,61 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     setNewTitle('');
   };
 
+  const renameRow = (index: number, value: string) => {
+    setRows(prev => prev.map((r, i) => (i === index ? { ...r, title: value } : r)));
+  };
+
+  const finalTitle = title.trim() || SUBJECT_LABELS[subject];
   const allPlanned = rows.length > 0 && rows.every(r => r.dates.length > 0);
   const sessionCount = rows.reduce((sum, r) => sum + r.dates.length, 0);
+  const canSave = allPlanned && !!dueDate;
+  const edited =
+    finalTitle !== homework.title ||
+    subject !== homework.subject ||
+    homeworkType !== homework.homework_type ||
+    dueDate !== homework.due_date ||
+    note.trim().length > 0;
 
   const handleSave = async () => {
+    if (!dueDate) {
+      toast.error('Välj när läxan ska vara klar');
+      return;
+    }
     if (!allPlanned) {
       toast.error('Välj minst en dag för varje del');
       return;
     }
     setSaving(true);
+    const description = [homework.description?.trim(), note.trim()].filter(Boolean).join('\n');
+    const updated = await updateHomework(
+      homework.id,
+      {
+        title: finalTitle,
+        subject,
+        homeworkType,
+        dueDate,
+        dueDateConfirmed: true,
+        description: description || undefined,
+      },
+      { silent: true }
+    );
+    if (!updated) {
+      setSaving(false);
+      return;
+    }
     const ok = await planHomework(
       homework.id,
-      rows.flatMap(r => r.dates.map(date => ({ title: `${homework.title} – ${r.title}`, date })))
+      rows.flatMap(r => r.dates.map(date => ({ title: `${finalTitle} – ${r.title.trim() || finalTitle}`, date })))
     );
     setSaving(false);
     if (ok) {
       celebrateAssignment();
-      track('homework_planned_by_child', { parts: rows.length, sessions: sessionCount });
-      if (homework.homework_type === 'forhor') {
+      track('homework_planned_by_child', { parts: rows.length, sessions: sessionCount, edited });
+      if (homeworkType === 'forhor') {
         track('study_techniques_used', {
           count: rows.length,
           sessions: sessionCount,
-          subject: homework.subject,
+          subject,
           flow: 'child',
         });
       }
@@ -142,10 +196,10 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {SUBJECT_ICONS[homework.subject as Subject]} {homework.title}
+            {SUBJECT_ICONS[subject]} {finalTitle}
           </DialogTitle>
           <DialogDescription>
-            Deadline {format(parseISO(homework.due_date), 'EEEE d MMMM', { locale: sv })} – välj vilka dagar du gör vad.
+            Fyll i det som saknas och välj vilka dagar du gör vad.
           </DialogDescription>
         </DialogHeader>
 
@@ -154,6 +208,84 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
         )}
 
         <div className="space-y-5 pt-2">
+          {/* Editable details */}
+          <div className="space-y-4 rounded-2xl border border-border p-3">
+            <div className="space-y-2">
+              <Label htmlFor="plan-title">Vad är läxan?</Label>
+              <Input
+                id="plan-title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder={`t.ex. ${SUBJECT_LABELS[subject]} kap 4`}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Ämne</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {subjects.map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSubject(s)}
+                    className={cn(
+                      'py-2 rounded-xl border-2 text-xs font-medium transition-colors',
+                      subject === s ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                    )}
+                  >
+                    <span className="block text-base">{SUBJECT_ICONS[s]}</span>
+                    {SUBJECT_LABELS[s]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Typ</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {(['inlamning', 'forhor'] as HomeworkType[]).map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setHomeworkType(t)}
+                    className={cn(
+                      'py-2 rounded-xl border-2 text-sm font-medium transition-colors',
+                      homeworkType === t ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                    )}
+                  >
+                    {HOMEWORK_TYPE_LABELS[t]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {!dueDateKnown && (
+                <p className="text-xs font-medium text-warning bg-warning/10 rounded-xl p-2">
+                  När ska den vara klar? Välj ett datum för att kunna planera.
+                </p>
+              )}
+              <Label htmlFor="plan-due">Deadline</Label>
+              <Input
+                id="plan-due"
+                type="date"
+                value={dueDate}
+                min={format(new Date(), 'yyyy-MM-dd')}
+                onChange={e => setDueDate(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="plan-note">Egen anteckning (valfritt)</Label>
+              <Input
+                id="plan-note"
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                placeholder="t.ex. sidor 12–18"
+              />
+            </div>
+          </div>
+
           <p className="text-xs font-medium text-primary">
             {rows.length} moment · {sessionCount} pluggtillfälle{sessionCount === 1 ? '' : 'n'}
           </p>
@@ -166,7 +298,12 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                 <span className="w-6 h-6 shrink-0 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
                   {i + 1}
                 </span>
-                <Label className="flex-1">{row.title}</Label>
+                <Input
+                  value={row.title}
+                  onChange={e => renameRow(i, e.target.value)}
+                  aria-label={`Namn på moment ${i + 1}`}
+                  className="flex-1 h-9"
+                />
                 <button
                   type="button"
                   aria-label="Flytta upp"
@@ -196,6 +333,9 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                   </button>
                 )}
               </div>
+              {days.length === 0 && (
+                <p className="text-xs text-warning">Välj deadline ovan för att se dagarna.</p>
+              )}
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {days.map(day => {
                   const dateStr = format(day, 'yyyy-MM-dd');
@@ -287,12 +427,12 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
             </div>
           </div>
 
-          <Button onClick={handleSave} disabled={saving || !allPlanned} className="w-full" size="lg">
+          <Button onClick={handleSave} disabled={saving || !canSave} className="w-full" size="lg">
             <CalendarCheck className="w-4 h-4 mr-2" />
             {saving ? 'Sparar…' : 'Klart – planera!'}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            {SUBJECT_LABELS[homework.subject as Subject]} · {rows.filter(r => r.dates.length > 0).length}/{rows.length} delar planerade
+            {SUBJECT_LABELS[subject]} · {rows.filter(r => r.dates.length > 0).length}/{rows.length} delar planerade
           </p>
         </div>
       </DialogContent>
