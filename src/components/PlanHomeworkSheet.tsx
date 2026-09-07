@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { format, parseISO, startOfDay, eachDayOfInterval, isBefore } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, CalendarCheck } from 'lucide-react';
+import { Plus, X, CalendarCheck, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useFamily } from '@/hooks/useFamily';
 import { celebrateAssignment } from '@/lib/confetti';
