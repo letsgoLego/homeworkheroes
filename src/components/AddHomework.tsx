@@ -928,7 +928,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       Dela upp förhöret i delar
                     </Label>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Välj tekniker som hjälper barnet lära sig bättre.
+                      Välj tekniker som hjälper barnet lära sig bättre. Repetera samma moment på två dagar – det ger bäst effekt.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -957,14 +957,38 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
 
                   {studyParts.length > 0 && (
                     <div className="space-y-3">
+                      <p className="text-xs font-medium text-primary">
+                        {studyParts.length} moment · {studySessionCount} pluggtillfälle{studySessionCount === 1 ? '' : 'n'}
+                      </p>
                       {studyParts.map((part, i) => (
-                        <div key={`${part.title}-${i}`} className="space-y-2">
+                        <div key={part.id} className="space-y-2 rounded-xl bg-background/70 p-2 border border-border">
                           <div className="flex items-center gap-2">
+                            <span className="w-6 h-6 shrink-0 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
+                              {i + 1}
+                            </span>
                             <Input
                               value={part.title}
                               onChange={e => updateStudyPartTitle(i, e.target.value)}
                               className="flex-1 h-9"
                             />
+                            <button
+                              type="button"
+                              aria-label="Flytta upp"
+                              disabled={i === 0}
+                              onClick={() => moveStudyPart(i, -1)}
+                              className="text-muted-foreground hover:text-primary disabled:opacity-30"
+                            >
+                              <ArrowUp className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="Flytta ner"
+                              disabled={i === studyParts.length - 1}
+                              onClick={() => moveStudyPart(i, 1)}
+                              className="text-muted-foreground hover:text-primary disabled:opacity-30"
+                            >
+                              <ArrowDown className="w-4 h-4" />
+                            </button>
                             <button
                               type="button"
                               aria-label="Ta bort del"
@@ -975,13 +999,14 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                             </button>
                           </div>
                           <div className="flex flex-wrap gap-1">
-                            {selectedDays.map(d => {
-                              const selected = part.date === d;
+                            {availableDays.map(day => {
+                              const d = format(day, 'yyyy-MM-dd');
+                              const selected = part.dates.includes(d);
                               return (
                                 <button
                                   key={d}
                                   type="button"
-                                  onClick={() => setStudyPartDate(i, d)}
+                                  onClick={() => toggleStudyPartDate(i, d)}
                                   className={cn(
                                     'px-2 py-1 rounded-md text-[10px] font-medium border transition-all',
                                     selected
@@ -989,11 +1014,16 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                                       : 'bg-background border-border text-muted-foreground hover:bg-muted'
                                   )}
                                 >
-                                  {format(parseISO(d), 'EEE d/M', { locale: sv })}
+                                  {format(day, 'EEE d/M', { locale: sv })}
                                 </button>
                               );
                             })}
                           </div>
+                          <p className={cn('text-[10px]', part.dates.length === 0 ? 'text-destructive' : 'text-muted-foreground')}>
+                            {part.dates.length === 0
+                              ? 'Välj minst en dag'
+                              : `${part.dates.length} dag${part.dates.length === 1 ? '' : 'ar'} vald${part.dates.length === 1 ? '' : 'a'}`}
+                          </p>
                         </div>
                       ))}
                     </div>
