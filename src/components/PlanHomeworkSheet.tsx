@@ -298,7 +298,12 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                 <span className="w-6 h-6 shrink-0 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
                   {i + 1}
                 </span>
-                <Label className="flex-1">{row.title}</Label>
+                <Input
+                  value={row.title}
+                  onChange={e => renameRow(i, e.target.value)}
+                  aria-label={`Namn på moment ${i + 1}`}
+                  className="flex-1 h-9"
+                />
                 <button
                   type="button"
                   aria-label="Flytta upp"
