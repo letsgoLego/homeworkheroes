@@ -27,6 +27,7 @@ export function SendHomeworkToChild({ open, onClose }: SendHomeworkToChildProps)
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState(format(addDays(new Date(), 5), 'yyyy-MM-dd'));
+  const [dueDateUnknown, setDueDateUnknown] = useState(false);
   const [items, setItems] = useState<string[]>([]);
   const [newItem, setNewItem] = useState('');
   const [saving, setSaving] = useState(false);
@@ -38,6 +39,7 @@ export function SendHomeworkToChild({ open, onClose }: SendHomeworkToChildProps)
     setDescription('');
     setItems([]);
     setNewItem('');
+    setDueDateUnknown(false);
     setDueDate(format(addDays(new Date(), 5), 'yyyy-MM-dd'));
   };
 
@@ -59,14 +61,15 @@ export function SendHomeworkToChild({ open, onClose }: SendHomeworkToChildProps)
       title: finalTitle,
       subject,
       description: description.trim() || undefined,
-      dueDate,
+      dueDate: dueDateUnknown ? format(addDays(new Date(), 7), 'yyyy-MM-dd') : dueDate,
+      dueDateConfirmed: !dueDateUnknown,
       childId: targetChildId,
       homeworkType,
       items,
     });
     setSaving(false);
     if (result) {
-      track('homework_sent_to_child', { subject, items: items.length });
+      track('homework_sent_to_child', { subject, items: items.length, due_unknown: dueDateUnknown });
       reset();
       onClose();
     }
