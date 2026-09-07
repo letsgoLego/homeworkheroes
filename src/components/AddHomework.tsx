@@ -353,11 +353,16 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
 
       if (homeworkType === 'forhor' && studyParts.length > 0) {
         const fallbackDate = taskDates[0] || effectiveDueDate;
+        const hwName = title.trim();
         for (const part of studyParts) {
-          await addTask(hw.id, part.title, part.date || fallbackDate);
+          const dates = part.dates.length > 0 ? [...part.dates].sort() : [fallbackDate];
+          for (const date of dates) {
+            await addTask(hw.id, `${hwName} – ${part.title}`, date);
+          }
         }
         track('study_techniques_used', {
           count: studyParts.length,
+          sessions: studySessionCount,
           subject,
           flow: 'parent',
         });
