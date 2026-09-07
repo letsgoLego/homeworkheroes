@@ -21,8 +21,9 @@ interface PlanHomeworkSheetProps {
 }
 
 interface PlanRow {
+  id: string;
   title: string;
-  date: string | null;
+  dates: string[];
 }
 
 export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps) {
