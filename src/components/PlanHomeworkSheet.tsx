@@ -292,7 +292,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
             {saving ? 'Sparar…' : 'Klart – planera!'}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            {SUBJECT_LABELS[homework.subject as Subject]} · {rows.filter(r => r.date).length}/{rows.length} delar planerade
+            {SUBJECT_LABELS[homework.subject as Subject]} · {rows.filter(r => r.dates.length > 0).length}/{rows.length} delar planerade
           </p>
         </div>
       </DialogContent>
