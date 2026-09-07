@@ -1,0 +1,1 @@
+ALTER TABLE public.homework ADD COLUMN IF NOT EXISTS due_date_confirmed boolean NOT NULL DEFAULT true;

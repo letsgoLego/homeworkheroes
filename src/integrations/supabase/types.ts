@@ -426,6 +426,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           due_date: string
+          due_date_confirmed: boolean
           homework_type: string
           id: string
           is_recurring: boolean
@@ -450,6 +451,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           due_date: string
+          due_date_confirmed?: boolean
           homework_type?: string
           id?: string
           is_recurring?: boolean
@@ -474,6 +476,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           due_date?: string
+          due_date_confirmed?: boolean
           homework_type?: string
           id?: string
           is_recurring?: boolean
