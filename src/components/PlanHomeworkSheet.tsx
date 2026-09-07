@@ -154,16 +154,43 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
         )}
 
         <div className="space-y-5 pt-2">
+          <p className="text-xs font-medium text-primary">
+            {rows.length} moment · {sessionCount} pluggtillfälle{sessionCount === 1 ? '' : 'n'}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Tips: repetera samma moment på två dagar – det ger bäst effekt.
+          </p>
           {rows.map((row, i) => (
-            <div key={`${row.title}-${i}`} className="space-y-2">
+            <div key={row.id} className="space-y-2 rounded-xl border border-border p-2">
               <div className="flex items-center gap-2">
+                <span className="w-6 h-6 shrink-0 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
+                  {i + 1}
+                </span>
                 <Label className="flex-1">{row.title}</Label>
+                <button
+                  type="button"
+                  aria-label="Flytta upp"
+                  disabled={i === 0}
+                  onClick={() => moveRow(i, -1)}
+                  className="text-muted-foreground hover:text-primary disabled:opacity-30"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Flytta ner"
+                  disabled={i === rows.length - 1}
+                  onClick={() => moveRow(i, 1)}
+                  className="text-muted-foreground hover:text-primary disabled:opacity-30"
+                >
+                  <ArrowDown className="w-4 h-4" />
+                </button>
                 {rows.length > 1 && (
                   <button
                     type="button"
                     aria-label="Ta bort del"
                     onClick={() => setRows(prev => prev.filter((_, idx) => idx !== i))}
-                    className="text-muted-foreground"
+                    className="text-muted-foreground hover:text-destructive"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -172,7 +199,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {days.map(day => {
                   const dateStr = format(day, 'yyyy-MM-dd');
-                  const selected = row.date === dateStr;
+                  const selected = row.dates.includes(dateStr);
                   const hwCount = taskCountsByDate[dateStr] || 0;
                   const acts = getActivitiesForDate(homework.child_id, day);
                   const busy = hwCount + acts.length;
@@ -181,7 +208,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                     <button
                       key={dateStr}
                       type="button"
-                      onClick={() => setRowDate(i, dateStr)}
+                      onClick={() => toggleRowDate(i, dateStr)}
                       className={cn(
                         'shrink-0 px-3 py-2 rounded-xl border-2 text-xs font-medium transition-colors',
                         selected
@@ -201,8 +228,12 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                     </button>
                   );
                 })}
-
               </div>
+              <p className={cn('text-[10px]', row.dates.length === 0 ? 'text-destructive' : 'text-muted-foreground')}>
+                {row.dates.length === 0
+                  ? 'Välj minst en dag'
+                  : `${row.dates.length} dag${row.dates.length === 1 ? '' : 'ar'} vald${row.dates.length === 1 ? '' : 'a'}`}
+              </p>
             </div>
           ))}
 
