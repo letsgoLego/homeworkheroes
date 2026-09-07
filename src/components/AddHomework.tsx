@@ -159,9 +159,13 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   );
 
   const addStudyPart = (technique: StudyTechnique) => {
-    if (selectedDays.length === 0) return;
-    const nextDay = selectedDays.find(d => !studyParts.some(p => p.date === d)) || selectedDays[0];
-    setStudyParts(prev => [...prev, { title: technique.label, date: nextDay }]);
+    const usedDays = new Set(studyParts.flatMap(p => p.dates));
+    const pool = selectedDays.length > 0 ? selectedDays : [];
+    const nextDay = pool.find(d => !usedDays.has(d)) || pool[0];
+    setStudyParts(prev => [
+      ...prev,
+      { id: crypto.randomUUID(), title: technique.label, dates: nextDay ? [nextDay] : [] },
+    ]);
   };
 
   const removeStudyPart = (index: number) => {
@@ -172,9 +176,31 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setStudyParts(prev => prev.map((p, i) => (i === index ? { ...p, title } : p)));
   };
 
-  const setStudyPartDate = (index: number, date: string) => {
-    setStudyParts(prev => prev.map((p, i) => (i === index ? { ...p, date } : p)));
+  const toggleStudyPartDate = (index: number, date: string) => {
+    setStudyParts(prev =>
+      prev.map((p, i) =>
+        i === index
+          ? { ...p, dates: p.dates.includes(date) ? p.dates.filter(d => d !== date) : [...p.dates, date].sort() }
+          : p
+      )
+    );
+    setSelectedDays(prev => (prev.includes(date) ? prev : [...prev, date].sort()));
   };
+
+  const moveStudyPart = (index: number, dir: -1 | 1) => {
+    setStudyParts(prev => {
+      const next = [...prev];
+      const target = index + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const studySessionCount = useMemo(
+    () => studyParts.reduce((sum, p) => sum + p.dates.length, 0),
+    [studyParts]
+  );
 
 
   const resetForm = () => {
