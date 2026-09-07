@@ -26,21 +26,31 @@ interface PlanRow {
   dates: string[];
 }
 
+const subjects: Subject[] = ['math', 'science', 'language', 'history', 'art', 'music', 'english', 'other'];
+
 export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps) {
-  const { planHomework, homework: allHomework, getActivitiesForDate } = useFamily();
+  const { planHomework, updateHomework, homework: allHomework, getActivitiesForDate } = useFamily();
   const [rows, setRows] = useState<PlanRow[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [saving, setSaving] = useState(false);
   const [initialisedFor, setInitialisedFor] = useState<string | null>(null);
 
+  // Editable homework details (the child fills in what the parent didn't know)
+  const [title, setTitle] = useState('');
+  const [subject, setSubject] = useState<Subject>('other');
+  const [homeworkType, setHomeworkType] = useState<HomeworkType>('inlamning');
+  const [dueDate, setDueDate] = useState('');
+  const [dueDateKnown, setDueDateKnown] = useState(true);
+  const [note, setNote] = useState('');
+
   // Available days: today .. due date
   const days = useMemo(() => {
-    if (!homework) return [];
+    if (!homework || !dueDate) return [];
     const today = startOfDay(new Date());
-    const due = startOfDay(parseISO(homework.due_date));
+    const due = startOfDay(parseISO(dueDate));
     if (isBefore(due, today)) return [today];
     return eachDayOfInterval({ start: today, end: due });
-  }, [homework]);
+  }, [homework, dueDate]);
 
   // Existing workload per day for this child
   const taskCountsByDate = useMemo(() => {
