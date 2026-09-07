@@ -333,6 +333,9 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                   </button>
                 )}
               </div>
+              {days.length === 0 && (
+                <p className="text-xs text-warning">Välj deadline ovan för att se dagarna.</p>
+              )}
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {days.map(day => {
                   const dateStr = format(day, 'yyyy-MM-dd');
