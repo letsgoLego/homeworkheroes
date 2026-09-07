@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef } from 'react';
 import { useAdSense } from '@/hooks/useAdSense';
+import { TIPS_ARTICLES } from '@/lib/tipsArticles';
 
 export interface FaqItem {
   question: string;
@@ -23,6 +24,8 @@ interface SeoArticleLayoutProps {
   /** Estimated reading time in minutes */
   readingTimeMin?: number;
   faqItems?: FaqItem[];
+  /** Paragraph tying the article's topic to what the Läxhjälp app can do. */
+  toolParagraph?: string;
 }
 
 export default function SeoArticleLayout({
@@ -36,6 +39,7 @@ export default function SeoArticleLayout({
   dateModified = '2026-06-23',
   readingTimeMin,
   faqItems = [],
+  toolParagraph,
 }: SeoArticleLayoutProps) {
   useAdSense();
   const adPushed = useRef(false);
@@ -225,18 +229,21 @@ export default function SeoArticleLayout({
           </div>
         </article>
 
-        {/* CTA */}
-        <div className="mt-12 p-6 sm:p-8 rounded-2xl bg-primary/10 border border-primary/20 text-center">
-          <h2 className="text-xl font-bold text-foreground mb-2">Testa Läxhjälp gratis</h2>
-          <p className="text-muted-foreground mb-4">
-            Planera läxor, skapa packlistor och håll koll på aktiviteter — hela familjen tillsammans.
+        {/* Topic-specific tool paragraph + CTA */}
+        <section className="mt-12 p-6 sm:p-8 rounded-2xl bg-primary/10 border border-primary/20">
+          <h2 className="text-xl font-bold text-foreground mb-2">
+            Så hjälper Läxhjälp-appen dig med det här
+          </h2>
+          <p className="text-muted-foreground mb-4 leading-relaxed">
+            {toolParagraph ??
+              'I Läxhjälp lägger ni in läxor, prov och aktiviteter en gång — sedan visar appen veckans belastning per dag, delar upp stora uppgifter i mindre pluggpass, påminner innan deadline och låter barnet bocka av själv. Föräldrar får överblick utan att fråga, barnet får struktur och beröm när något blir klart.'}
           </p>
           <Link to="/auth">
             <Button size="lg" className="rounded-full gap-2">
-              Skapa konto gratis <ArrowRight className="w-4 h-4" />
+              Kom igång gratis <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
-        </div>
+        </section>
 
         {/* AdSense ad */}
         <div className="mt-8 flex justify-center">
@@ -270,7 +277,26 @@ export default function SeoArticleLayout({
             </div>
           </div>
         )}
+
+        {/* All guides — full cross-linking between articles */}
+        <div className="mt-10">
+          <h3 className="text-lg font-bold text-foreground mb-1">Alla guider</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Utforska hela biblioteket i <Link to="/tips" className="text-primary font-medium">Tips &amp; guider</Link>.
+          </p>
+          <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 list-none p-0 m-0">
+            {TIPS_ARTICLES.filter((a) => a.slug !== slug).map((a) => (
+              <li key={a.path} className="text-sm">
+                <Link to={a.path} className="text-muted-foreground hover:text-primary transition-colors">
+                  <span className="text-xs uppercase tracking-wide text-primary/70 mr-2">{a.category}</span>
+                  {a.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </main>
+
 
       <footer className="border-t border-border py-8 mt-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">

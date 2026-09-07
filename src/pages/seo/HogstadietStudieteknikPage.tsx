@@ -42,6 +42,7 @@ export default function HogstadietStudieteknikPage() {
       slug="hogstadiet-studieteknik"
       metaDescription="Bevisade studietekniker för högstadiet: aktivt lärande, spaced repetition, planering inför prov och hur du undviker cramming. Skrivet för elever och föräldrar."
       relatedArticles={related}
+      toolParagraph="Läxhjälp stöttar högstadiets provplugg: prov och inlämningar får egna deadlines, pluggpassen fördelas över flera dagar med föreslagna tekniker (läsa på, delförhör, gamla prov) och veckovyn visar var det finns tid mellan träningar och andra ämnen."
       datePublished="2026-03-12"
       dateModified="2026-06-23"
       readingTimeMin={15}

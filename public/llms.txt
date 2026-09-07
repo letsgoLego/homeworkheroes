@@ -17,6 +17,7 @@ Läxhjälp hjälper familjer att planera läxor, dela upp arbete på lugna dagar
 
 ## Tips-artiklar
 
+- [Vikten av att planera läxor](/tips/planera-laxor-foraldrar): Varför läxplanering fungerar och hur föräldrar hjälper, per ålder.
 - [Läxplanering – 7 smarta tips](/tips/laxplanering): Praktiska tips för veckoplanering av läxor.
 - [Studieteknik för barn](/tips/studieteknik-barn): 8 metoder som faktiskt fungerar.
 - [Läxstress hos barn](/tips/laxstress): Strategier för att minska läxångest.

@@ -15,6 +15,7 @@ interface Article {
 
 const ARTICLES: Article[] = [
   // Planering & rutiner
+  { path: '/tips/planera-laxor-foraldrar', title: 'Vikten av att planera läxor — och hur du som förälder hjälper', description: 'Varför planering minskar läxstress, vad forskningen säger och fem konkreta steg per ålder.', icon: Calendar, color: 'bg-primary/10 text-primary', category: 'Planering' },
   { path: '/tips/laxplanering', title: 'Läxplanering: 7 tips för en strukturerad vecka', description: 'Lär dig hur du planerar veckans läxor smart så att stressen minskar och inget glöms bort.', icon: Calendar, color: 'bg-primary/10 text-primary', category: 'Planering' },
   { path: '/tips/laxrutin', title: 'Skapa en läxrutin som håller hela terminen', description: 'Steg-för-steg-guide för att bygga en hållbar läxrutin som passar familjens vardag.', icon: BookOpen, color: 'bg-success/10 text-success', category: 'Rutiner' },
 
@@ -54,7 +55,7 @@ export default function TipsIndexPage() {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>Tips & guider om läxor och studieteknik | Läxhjälp</title>
-        <meta name="description" content="18 fördjupande guider om läxplanering, studieteknik, läsförståelse, mattehjälp, engelska glosor, ADHD-anpassningar och mer — skrivna för svenska föräldrar." />
+        <meta name="description" content="19 fördjupande guider om läxplanering, studieteknik, läsförståelse, mattehjälp, engelska glosor, ADHD-anpassningar och mer — skrivna för svenska föräldrar." />
         <link rel="canonical" href="https://laxhjalp.app/tips" />
         <meta property="og:title" content="Tips & guider om läxor och studieteknik" />
         <meta property="og:description" content="Praktiska, fördjupande guider om läxor, studieteknik och välmående — för svenska familjer." />
@@ -101,7 +102,7 @@ export default function TipsIndexPage() {
             Läxor, studieteknik & motivation
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            18 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
+            19 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
             högstadiets nationella prov.
           </p>
         </motion.div>

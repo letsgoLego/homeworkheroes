@@ -14,6 +14,7 @@ export default function MotivationLaxorPage() {
       slug="motivation-laxor"
       metaDescription="Trött på att tjata om läxor? Här är forskningsbaserade strategier för att öka ditt barns motivation och skapa en positiv inställning till läxor."
       relatedArticles={related}
+      toolParagraph="Läxhjälp gör motivationen synlig: konfetti när en uppgift bockas av, XP och nivåer, streaks för dagar i rad och en “perfekt dag”-fest när allt är klart. Belöningen kommer direkt i appen istället för som beröm i efterhand."
     >
       <p>
         "Har du gjort läxan?" — en fråga som många föräldrar ställer varje dag, ofta med samma

@@ -42,6 +42,7 @@ export default function SkarmtidLaxorPage() {
       slug="skarmtid-och-laxor"
       metaDescription="Konkret guide om skärmtid, koncentration och läxor. Forskningsläget, riktlinjer per ålder, praktiska överenskommelser och appar som hjälper."
       relatedArticles={related}
+      toolParagraph="Läxhjälp gör överenskommelsen tydlig: dagens läxor syns i en lista som barnet bockar av själv, så ni kan enas om “skärm efter avbockat” utan diskussion. Påminnelser kommer på bestämda tider istället för mitt i spelet."
       datePublished="2026-02-26"
       dateModified="2026-06-23"
       readingTimeMin={13}

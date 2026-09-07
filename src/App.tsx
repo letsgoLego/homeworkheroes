@@ -46,6 +46,7 @@ import HogstadietStudieteknikPage from "./pages/seo/HogstadietStudieteknikPage";
 import TerminsstartChecklistaPage from "./pages/seo/TerminsstartChecklistaPage";
 import SkolstartRutinerPage from "./pages/seo/SkolstartRutinerPage";
 import SkolmaterialPacklistaPage from "./pages/seo/SkolmaterialPacklistaPage";
+import PlaneraLaxorForaldrarPage from "./pages/seo/PlaneraLaxorForaldrarPage";
 
 
 const queryClient = new QueryClient();
@@ -112,6 +113,7 @@ function AppRoutes() {
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/tips" element={<TipsIndexPage />} />
       <Route path="/om-oss" element={<AboutPage />} />
+      <Route path="/tips/planera-laxor-foraldrar" element={<PlaneraLaxorForaldrarPage />} />
       <Route path="/tips/laxplanering" element={<LaxplaneringTipsPage />} />
       <Route path="/tips/studieteknik-barn" element={<StudieteknikBarnPage />} />
       <Route path="/tips/laxstress" element={<LaxstressBarnPage />} />

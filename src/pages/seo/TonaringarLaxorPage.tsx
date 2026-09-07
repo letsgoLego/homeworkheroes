@@ -14,6 +14,7 @@ export default function TonaringarLaxorPage() {
       slug="tonaringar-laxor"
       metaDescription="Hur stöttar man en tonåring med läxor utan att det blir konflikt? Praktiska råd för föräldrar till 13-18-åringar."
       relatedArticles={related}
+      toolParagraph="Läxhjälp låter tonåringen äga sin planering: du kan skicka en läxa till barnets inkorg och barnet väljer själv vilka dagar den ska göras. Du ser överblicken och framstegen utan att behöva kontrollera eller fråga varje dag."
     >
       <p>
         Att hjälpa en tonåring med läxor kräver en helt annan approach än att hjälpa en

@@ -14,6 +14,7 @@ export default function LaxstressBarnPage() {
       slug="laxstress"
       metaDescription="Känner ditt barn stress över läxor? Här är konkreta strategier för att minska läxångesten och skapa en lugnare vardag."
       relatedArticles={related}
+      toolParagraph="Läxhjälp minskar stressen genom att göra det osynliga synligt: varje läxa delas upp i små, konkreta studieuppgifter, veckovyn visar vilka dagar som är tunga så ni kan flytta i tid, och barnet bockar av själv i en enkel vy utan röda varningar överallt."
     >
       <p>
         Allt fler barn upplever stress kopplad till skolan och läxor. Enligt en undersökning

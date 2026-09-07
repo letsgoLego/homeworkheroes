@@ -42,6 +42,7 @@ export default function AdhdLaxorPage() {
       slug="adhd-laxor"
       metaDescription="Konkret guide för att hjälpa barn med ADHD eller koncentrationssvårigheter med läxor. Anpassningar, rutiner, verktyg och samarbete med skolan."
       relatedArticles={related}
+      toolParagraph="Läxhjälp passar bra vid koncentrationssvårigheter: allt bryts ner i mycket små steg, bara dagens uppgifter visas, påminnelser kommer på fasta tider och varje avbockning ger direkt visuell belöning. Barnet slipper hålla planen i huvudet."
       datePublished="2026-03-02"
       dateModified="2026-06-23"
       readingTimeMin={14}

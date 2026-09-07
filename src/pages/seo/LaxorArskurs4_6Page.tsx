@@ -42,6 +42,7 @@ export default function LaxorArskurs4_6Page() {
       slug="laxor-arskurs-4-6"
       metaDescription="Allt om läxor i mellanstadiet: mängd, ämnen, självständighet, prov, prov, planering och hur du som förälder ändrar rollen från coach till stöttare."
       relatedArticles={related}
+      toolParagraph="Läxhjälp är särskilt gjort för mellanstadiets övergång till självständighet: barnet planerar själv i inkorgen, ser veckans belastning per dag och får påminnelser — medan du behåller överblicken och kan hjälpa till innan något krockar."
       datePublished="2026-03-08"
       dateModified="2026-06-23"
       readingTimeMin={14}

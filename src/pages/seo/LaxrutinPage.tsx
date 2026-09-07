@@ -14,6 +14,7 @@ export default function LaxrutinPage() {
       slug="laxrutin"
       metaDescription="Lär dig bygga en hållbar läxrutin för ditt barn. Steg-för-steg-guide med konkreta tips för varje ålder."
       relatedArticles={related}
+      toolParagraph="Läxhjälp håller rutinen vid liv när motivationen dippar: fasta påminnelser på eftermiddagen, dagens uppgifter samlade på ett ställe och streaks som visar hur många dagar i rad barnet hållit rutinen. Föräldrar ser direkt om dagens läxor är avklarade utan att behöva fråga."
     >
       <p>
         En bra rutin är grunden för stressfria läxor. Men hur skapar man en rutin som faktiskt
