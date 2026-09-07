@@ -68,11 +68,11 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
   if (homework && initialisedFor !== homework.id) {
     let base: PlanRow[] = [];
     if (homework.planItems.length > 0) {
-      base = homework.planItems.map(item => ({ title: item.title, date: null }));
+      base = homework.planItems.map(item => ({ id: crypto.randomUUID(), title: item.title, dates: [] }));
     } else if (homework.homework_type === 'forhor' && studyTechniqueSuggestions.length > 0) {
-      base = studyTechniqueSuggestions.slice(0, 5).map(t => ({ title: t.label, date: null }));
+      base = studyTechniqueSuggestions.slice(0, 5).map(t => ({ id: crypto.randomUUID(), title: t.label, dates: [] }));
     } else {
-      base = [{ title: homework.title, date: null }];
+      base = [{ id: crypto.randomUUID(), title: homework.title, dates: [] }];
     }
     setRows(base);
     setInitialisedFor(homework.id);
@@ -80,36 +80,54 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
 
   if (!homework) return null;
 
-  const setRowDate = (index: number, date: string) => {
-    setRows(prev => prev.map((r, i) => (i === index ? { ...r, date: r.date === date ? null : date } : r)));
+  const toggleRowDate = (index: number, date: string) => {
+    setRows(prev =>
+      prev.map((r, i) =>
+        i === index
+          ? { ...r, dates: r.dates.includes(date) ? r.dates.filter(d => d !== date) : [...r.dates, date].sort() }
+          : r
+      )
+    );
+  };
+
+  const moveRow = (index: number, dir: -1 | 1) => {
+    setRows(prev => {
+      const next = [...prev];
+      const target = index + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
   };
 
   const addRow = () => {
     const value = newTitle.trim();
     if (!value) return;
-    setRows(prev => [...prev, { title: value, date: null }]);
+    setRows(prev => [...prev, { id: crypto.randomUUID(), title: value, dates: [] }]);
     setNewTitle('');
   };
 
-  const allPlanned = rows.length > 0 && rows.every(r => r.date);
+  const allPlanned = rows.length > 0 && rows.every(r => r.dates.length > 0);
+  const sessionCount = rows.reduce((sum, r) => sum + r.dates.length, 0);
 
   const handleSave = async () => {
     if (!allPlanned) {
-      toast.error('Välj en dag för varje del');
+      toast.error('Välj minst en dag för varje del');
       return;
     }
     setSaving(true);
     const ok = await planHomework(
       homework.id,
-      rows.map(r => ({ title: r.title, date: r.date as string }))
+      rows.flatMap(r => r.dates.map(date => ({ title: `${homework.title} – ${r.title}`, date })))
     );
     setSaving(false);
     if (ok) {
       celebrateAssignment();
-      track('homework_planned_by_child', { parts: rows.length });
+      track('homework_planned_by_child', { parts: rows.length, sessions: sessionCount });
       if (homework.homework_type === 'forhor') {
         track('study_techniques_used', {
           count: rows.length,
+          sessions: sessionCount,
           subject: homework.subject,
           flow: 'child',
         });
