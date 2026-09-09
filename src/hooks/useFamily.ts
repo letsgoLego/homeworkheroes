@@ -696,6 +696,68 @@ export function useFamily() {
     });
   };
 
+  /**
+   * Allt som ska fixas/packas för ett visst datum:
+   * läxor som ska lämnas in, packlistesaker för veckodagen och
+   * saker som hör till dagens aktiviteter.
+   */
+  const getPrepItemsForDate = (childId: string, date: Date): PrepItem[] => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const dayOfWeek = getDay(date);
+    const items: PrepItem[] = [];
+
+    homework
+      .filter(hw => hw.child_id === childId && hw.due_date === dateStr)
+      .forEach(hw => {
+        const bring = hw.bring_to_school ?? [];
+        if (bring.length > 0) {
+          bring.forEach((item, index) => {
+            items.push({
+              id: `hw-${hw.id}-${index}`,
+              label: item,
+              context: hw.title,
+              source: 'homework',
+              emoji: '📚',
+            });
+          });
+        } else {
+          items.push({
+            id: `hwdue-${hw.id}`,
+            label: hw.title,
+            context: 'Ska lämnas in',
+            source: 'homework',
+            emoji: '📚',
+          });
+        }
+      });
+
+    recurringPackItems
+      .filter(item => item.child_id === childId && item.weekdays.includes(dayOfWeek))
+      .forEach(item => {
+        items.push({
+          id: `rec-${item.id}`,
+          label: item.item_name,
+          context: 'Packlista',
+          source: 'recurring',
+          emoji: '🎒',
+        });
+      });
+
+    getActivitiesForDate(childId, date).forEach(act => {
+      (act.pack_items ?? []).forEach((item, index) => {
+        items.push({
+          id: `act-${act.id}-${index}`,
+          label: item,
+          context: act.title,
+          source: 'activity',
+          emoji: act.emoji || '🏃',
+        });
+      });
+    });
+
+    return items;
+  };
+
 
   return {
     family,
@@ -740,6 +802,7 @@ export function useFamily() {
     skipActivityDate,
     unskipActivityDate,
     getActivitiesForDate,
+    getPrepItemsForDate,
 
 
     refetch,
