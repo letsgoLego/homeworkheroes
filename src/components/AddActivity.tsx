@@ -143,6 +143,13 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
     if (!title) setTitle(label);
   };
 
+  const addPackItem = () => {
+    const value = packInput.trim();
+    if (!value) return;
+    setPackItems(prev => (prev.includes(value) ? prev : [...prev, value]));
+    setPackInput('');
+  };
+
   const handleSubmit = async () => {
     if (!title.trim()) {
       toast.error('Ge aktiviteten ett namn');
@@ -164,6 +171,7 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
       specificDate: !isRecurring ? specificDate : undefined,
       startTime: startTime || undefined,
       endTime: endTime || undefined,
+      packItems: packItems,
       ...(isEdit ? { endDate: isRecurring ? endDate || null : null, excludedDates: skippedDates } : {}),
     };
 
