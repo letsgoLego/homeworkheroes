@@ -13,6 +13,14 @@ type Family = Tables<'families'>;
 type RecurringPackItem = Tables<'recurring_pack_items'>;
 type AdhocTask = Tables<'adhoc_tasks'>;
 
+export interface PrepItem {
+  id: string;
+  label: string;
+  context: string;
+  source: 'homework' | 'recurring' | 'activity';
+  emoji: string;
+}
+
 const ACTIVE_CHILD_KEY = 'laxhjalpen_active_child';
 const DEBOUNCE_MS = 1000;
 
