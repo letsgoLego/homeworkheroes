@@ -23,6 +23,7 @@ export type Database = {
           end_time: string | null
           excluded_dates: string[]
           id: string
+          pack_items: string[]
           specific_date: string | null
           start_time: string | null
           title: string
@@ -36,6 +37,7 @@ export type Database = {
           end_time?: string | null
           excluded_dates?: string[]
           id?: string
+          pack_items?: string[]
           specific_date?: string | null
           start_time?: string | null
           title: string
@@ -49,6 +51,7 @@ export type Database = {
           end_time?: string | null
           excluded_dates?: string[]
           id?: string
+          pack_items?: string[]
           specific_date?: string | null
           start_time?: string | null
           title?: string

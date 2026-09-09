@@ -1,0 +1,1 @@
+ALTER TABLE public.activities ADD COLUMN IF NOT EXISTS pack_items text[] NOT NULL DEFAULT '{}';
