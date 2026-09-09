@@ -22,6 +22,7 @@ export interface ActivityFormData {
   endTime?: string;
   endDate?: string | null;
   excludedDates?: string[];
+  packItems?: string[];
 }
 
 interface EditableActivity {
@@ -34,6 +35,7 @@ interface EditableActivity {
   end_time?: string | null;
   end_date?: string | null;
   excluded_dates?: string[] | null;
+  pack_items?: string[] | null;
 }
 
 
