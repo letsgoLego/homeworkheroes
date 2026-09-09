@@ -13,6 +13,14 @@ type Family = Tables<'families'>;
 type RecurringPackItem = Tables<'recurring_pack_items'>;
 type AdhocTask = Tables<'adhoc_tasks'>;
 
+export interface PrepItem {
+  id: string;
+  label: string;
+  context: string;
+  source: 'homework' | 'recurring' | 'activity';
+  emoji: string;
+}
+
 const ACTIVE_CHILD_KEY = 'laxhjalpen_active_child';
 const DEBOUNCE_MS = 1000;
 
@@ -578,6 +586,7 @@ export function useFamily() {
     specificDate?: string;
     startTime?: string;
     endTime?: string;
+    packItems?: string[];
   }) => {
     const { error } = await supabase
       .from('activities')
@@ -589,6 +598,7 @@ export function useFamily() {
         specific_date: activityData.specificDate || null,
         start_time: activityData.startTime || null,
         end_time: activityData.endTime || null,
+        pack_items: activityData.packItems ?? [],
       });
     if (error) {
       toast.error('Kunde inte lägga till aktivitet');
@@ -608,6 +618,7 @@ export function useFamily() {
     endTime?: string;
     endDate?: string | null;
     excludedDates?: string[];
+    packItems?: string[];
   }) => {
     const { error } = await supabase
       .from('activities')
@@ -619,6 +630,7 @@ export function useFamily() {
         start_time: activityData.startTime || null,
         end_time: activityData.endTime || null,
         end_date: activityData.endDate || null,
+        ...(activityData.packItems ? { pack_items: activityData.packItems } : {}),
         ...(activityData.excludedDates ? { excluded_dates: activityData.excludedDates } : {}),
       })
       .eq('id', id);
@@ -692,6 +704,68 @@ export function useFamily() {
     });
   };
 
+  /**
+   * Allt som ska fixas/packas för ett visst datum:
+   * läxor som ska lämnas in, packlistesaker för veckodagen och
+   * saker som hör till dagens aktiviteter.
+   */
+  const getPrepItemsForDate = (childId: string, date: Date): PrepItem[] => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const dayOfWeek = getDay(date);
+    const items: PrepItem[] = [];
+
+    homework
+      .filter(hw => hw.child_id === childId && hw.due_date === dateStr)
+      .forEach(hw => {
+        const bring = hw.bring_to_school ?? [];
+        if (bring.length > 0) {
+          bring.forEach((item, index) => {
+            items.push({
+              id: `hw-${hw.id}-${index}`,
+              label: item,
+              context: hw.title,
+              source: 'homework',
+              emoji: '📚',
+            });
+          });
+        } else {
+          items.push({
+            id: `hwdue-${hw.id}`,
+            label: hw.title,
+            context: 'Ska lämnas in',
+            source: 'homework',
+            emoji: '📚',
+          });
+        }
+      });
+
+    recurringPackItems
+      .filter(item => item.child_id === childId && item.weekdays.includes(dayOfWeek))
+      .forEach(item => {
+        items.push({
+          id: `rec-${item.id}`,
+          label: item.item_name,
+          context: 'Packlista',
+          source: 'recurring',
+          emoji: '🎒',
+        });
+      });
+
+    getActivitiesForDate(childId, date).forEach(act => {
+      (act.pack_items ?? []).forEach((item, index) => {
+        items.push({
+          id: `act-${act.id}-${index}`,
+          label: item,
+          context: act.title,
+          source: 'activity',
+          emoji: act.emoji || '🏃',
+        });
+      });
+    });
+
+    return items;
+  };
+
 
   return {
     family,
@@ -736,6 +810,7 @@ export function useFamily() {
     skipActivityDate,
     unskipActivityDate,
     getActivitiesForDate,
+    getPrepItemsForDate,
 
 
     refetch,

@@ -24,6 +24,7 @@ import { AdhocTaskCard } from '@/components/AdhocTaskCard';
 import { ActivityCard } from '@/components/ActivityCard';
 import { AddActivity } from '@/components/AddActivity';
 import { DeleteActivityDialog } from '@/components/DeleteActivityDialog';
+import { PrepChecklist } from '@/components/PrepChecklist';
 
 import { IntroTour } from '@/components/IntroTour';
 import { NudgeButton } from '@/components/NudgeButton';
@@ -54,6 +55,7 @@ export default function TodayPage() {
     userRole,
     getTasksForDate,
     getItemsToBringForDate,
+    getPrepItemsForDate,
     toggleTask,
     deleteTask,
     snoozeTask,
@@ -182,6 +184,12 @@ export default function TodayPage() {
   const todayActivities = activeChildId ? getActivitiesForDate(activeChildId, today) : [];
   const editingActivity = activities.find((a) => a.id === editingActivityId) || null;
   const deletingActivity = activities.find((a) => a.id === deletingActivityId) || null;
+
+  // Prep block: evening (from 12:00) prepares tomorrow, morning shows what to bring today
+  const prepDate = isAfternoon ? tomorrow : today;
+  const prepVariant: 'tomorrow' | 'today' = isAfternoon ? 'tomorrow' : 'today';
+  const prepItems = activeChildId ? getPrepItemsForDate(activeChildId, prepDate) : [];
+
 
   
   // Get homework due on pack date (today before 12, tomorrow after 12)
@@ -370,6 +378,11 @@ export default function TodayPage() {
                 </div>
               </section>
             )}
+
+            {/* Prep / bring checklist */}
+            <PrepChecklist date={prepDate} items={prepItems} variant={prepVariant} />
+
+
 
             {/* Today's tasks */}
             <section>
