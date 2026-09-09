@@ -309,6 +309,51 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
             </div>
           </div>
 
+          {/* Pack items for the activity */}
+          <div>
+            <Label htmlFor="activity-pack" className="text-sm font-medium">
+              Ta med till aktiviteten (valfritt)
+            </Label>
+            <div className="flex gap-2 mt-1.5">
+              <Input
+                id="activity-pack"
+                value={packInput}
+                onChange={(e) => setPackInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addPackItem();
+                  }
+                }}
+                placeholder="t.ex. Pingisväskan"
+                className="h-11 text-base"
+              />
+              <Button type="button" variant="secondary" onClick={addPackItem} className="h-11">
+                Lägg till
+              </Button>
+            </div>
+            {packItems.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {packItems.map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => setPackItems(prev => prev.filter(i => i !== item))}
+                    className="px-3 py-1.5 rounded-lg bg-muted text-xs font-medium flex items-center gap-1 hover:bg-destructive/10"
+                    title="Ta bort"
+                  >
+                    🎒 {item}
+                    <X className="w-3 h-3" />
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              Dyker upp som "Packa {packItems[0]?.toLowerCase() || 'pingisväskan'}" kvällen före.
+            </p>
+          </div>
+
+
+
           {/* Series controls (edit mode only) */}
           {isEdit && (
             <div className="space-y-3 p-3 rounded-xl bg-muted/50">
