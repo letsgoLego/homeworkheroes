@@ -10,6 +10,7 @@ interface ActivityCardProps {
     specific_date?: string | null;
     start_time?: string | null;
     end_time?: string | null;
+    pack_items?: string[] | null;
   };
   onDelete?: (id: string) => void;
   onEdit?: (id: string) => void;

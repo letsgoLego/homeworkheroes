@@ -24,6 +24,7 @@ import { AdhocTaskCard } from '@/components/AdhocTaskCard';
 import { ActivityCard } from '@/components/ActivityCard';
 import { AddActivity } from '@/components/AddActivity';
 import { DeleteActivityDialog } from '@/components/DeleteActivityDialog';
+import { PrepChecklist } from '@/components/PrepChecklist';
 
 import { IntroTour } from '@/components/IntroTour';
 import { NudgeButton } from '@/components/NudgeButton';
@@ -54,6 +55,7 @@ export default function TodayPage() {
     userRole,
     getTasksForDate,
     getItemsToBringForDate,
+    getPrepItemsForDate,
     toggleTask,
     deleteTask,
     snoozeTask,
