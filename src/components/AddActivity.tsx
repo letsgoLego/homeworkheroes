@@ -87,6 +87,8 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
   const [endTime, setEndTime] = useState('');
   const [endDate, setEndDate] = useState('');
   const [skippedDates, setSkippedDates] = useState<string[]>([]);
+  const [packItems, setPackItems] = useState<string[]>([]);
+  const [packInput, setPackInput] = useState('');
   const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
@@ -99,6 +101,8 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
     setEndTime('');
     setEndDate('');
     setSkippedDates([]);
+    setPackItems([]);
+    setPackInput('');
   };
 
   // Prefill when opening in edit mode
@@ -114,6 +118,8 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
       setEndTime(activity.end_time?.slice(0, 5) || '');
       setEndDate(activity.end_date || '');
       setSkippedDates(activity.excluded_dates || []);
+      setPackItems(activity.pack_items || []);
+      setPackInput('');
     }
     if (open && !activity) {
       resetForm();
