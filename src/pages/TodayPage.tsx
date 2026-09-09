@@ -379,6 +379,11 @@ export default function TodayPage() {
               </section>
             )}
 
+            {/* Prep / bring checklist */}
+            <PrepChecklist date={prepDate} items={prepItems} variant={prepVariant} />
+
+
+
             {/* Today's tasks */}
             <section>
               <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
