@@ -69,8 +69,14 @@ export function ActivityCard({ activity, onDelete, onEdit, compact, showSchedule
               {scheduleStr}
             </p>
           )}
+          {(activity.pack_items?.length ?? 0) > 0 && (
+            <p className="text-xs text-muted-foreground">
+              🎒 {activity.pack_items!.length} {activity.pack_items!.length === 1 ? 'sak' : 'saker'} att packa
+            </p>
+          )}
         </div>
       </div>
+
       {onEdit && (
         <button
           onClick={() => onEdit(activity.id)}
