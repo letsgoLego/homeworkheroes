@@ -578,6 +578,7 @@ export function useFamily() {
     specificDate?: string;
     startTime?: string;
     endTime?: string;
+    packItems?: string[];
   }) => {
     const { error } = await supabase
       .from('activities')
@@ -589,6 +590,7 @@ export function useFamily() {
         specific_date: activityData.specificDate || null,
         start_time: activityData.startTime || null,
         end_time: activityData.endTime || null,
+        pack_items: activityData.packItems ?? [],
       });
     if (error) {
       toast.error('Kunde inte lägga till aktivitet');
@@ -608,6 +610,7 @@ export function useFamily() {
     endTime?: string;
     endDate?: string | null;
     excludedDates?: string[];
+    packItems?: string[];
   }) => {
     const { error } = await supabase
       .from('activities')
@@ -619,6 +622,7 @@ export function useFamily() {
         start_time: activityData.startTime || null,
         end_time: activityData.endTime || null,
         end_date: activityData.endDate || null,
+        ...(activityData.packItems ? { pack_items: activityData.packItems } : {}),
         ...(activityData.excludedDates ? { excluded_dates: activityData.excludedDates } : {}),
       })
       .eq('id', id);

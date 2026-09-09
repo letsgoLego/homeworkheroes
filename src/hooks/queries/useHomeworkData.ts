@@ -18,6 +18,7 @@ export interface Activity {
   start_time: string | null;
   end_time: string | null;
   excluded_dates: string[];
+  pack_items: string[];
   end_date: string | null;
   created_at: string;
 }
