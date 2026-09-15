@@ -209,7 +209,7 @@ export function StudyPlanTemplate({
                   );
                 })}
               </div>
-              {days.length > 0 && <p className="text-center text-xs text-muted-foreground">Grön = lugn dag · Gul = några läxor · Röd = full dag</p>}
+              {days.length > 0 && <p className="text-center text-xs text-muted-foreground">Grön = lugn dag · Gul = några läxor · Röd = full dag · Siffrorna visar vilka moment dagen tillhör</p>}
               {days.length === 0 && <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Välj deadline för att se möjliga dagar.</p>}
             </>
           ) : (
