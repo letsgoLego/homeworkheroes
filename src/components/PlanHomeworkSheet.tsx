@@ -6,32 +6,29 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { format, parseISO, startOfDay, eachDayOfInterval, isBefore } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, CalendarCheck, ArrowUp, ArrowDown } from 'lucide-react';
+import { CalendarCheck, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useFamily } from '@/hooks/useFamily';
 import { celebrateAssignment } from '@/lib/confetti';
 import { track } from '@/lib/analytics';
 import { SUBJECT_LABELS, SUBJECT_ICONS, HOMEWORK_TYPE_LABELS, Subject, HomeworkType } from '@/types/homework';
-import { getStudyTechniqueSuggestions, type StudyTechnique } from '@/lib/studyTechniques';
+import { getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
 import type { InboxHomework } from '@/hooks/queries/useHomeworkData';
+import { StudyPlanningModeChoice, type StudyPlanningMode } from '@/components/StudyPlanningModeChoice';
+import { StudyPlanTemplate, type StudyPlanRow } from '@/components/StudyPlanTemplate';
 
 interface PlanHomeworkSheetProps {
   homework: InboxHomework | null;
   onClose: () => void;
 }
 
-interface PlanRow {
-  id: string;
-  title: string;
-  dates: string[];
-}
-
 const subjects: Subject[] = ['math', 'science', 'language', 'history', 'art', 'music', 'english', 'other'];
 
 export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps) {
   const { planHomework, updateHomework, homework: allHomework, getActivitiesForDate } = useFamily();
-  const [rows, setRows] = useState<PlanRow[]>([]);
-  const [newTitle, setNewTitle] = useState('');
+  const [rows, setRows] = useState<StudyPlanRow[]>([]);
+  const [planningMode, setPlanningMode] = useState<StudyPlanningMode | null>(null);
+  const [manualDays, setManualDays] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [initialisedFor, setInitialisedFor] = useState<string | null>(null);
 
@@ -80,11 +77,9 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     const hwSubject = homework.subject as Subject;
     const hwType = (homework.homework_type as HomeworkType) || 'inlamning';
     const suggestions = getStudyTechniqueSuggestions(hwSubject, hwType);
-    let base: PlanRow[] = [];
+    let base: StudyPlanRow[] = [];
     if (homework.planItems.length > 0) {
       base = homework.planItems.map(item => ({ id: crypto.randomUUID(), title: item.title, dates: [] }));
-    } else if (hwType === 'forhor' && suggestions.length > 0) {
-      base = suggestions.slice(0, 5).map(t => ({ id: crypto.randomUUID(), title: t.label, dates: [] }));
     } else {
       base = [{ id: crypto.randomUUID(), title: homework.title, dates: [] }];
     }
@@ -96,46 +91,21 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     setDueDateKnown(confirmed);
     setDueDate(confirmed ? homework.due_date : '');
     setNote('');
+    setPlanningMode(null);
+    setManualDays([]);
     setInitialisedFor(homework.id);
   }
 
   if (!homework) return null;
 
-  const toggleRowDate = (index: number, date: string) => {
-    setRows(prev =>
-      prev.map((r, i) =>
-        i === index
-          ? { ...r, dates: r.dates.includes(date) ? r.dates.filter(d => d !== date) : [...r.dates, date].sort() }
-          : r
-      )
-    );
-  };
-
-  const moveRow = (index: number, dir: -1 | 1) => {
-    setRows(prev => {
-      const next = [...prev];
-      const target = index + dir;
-      if (target < 0 || target >= next.length) return prev;
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
-  };
-
-  const addRow = () => {
-    const value = newTitle.trim();
-    if (!value) return;
-    setRows(prev => [...prev, { id: crypto.randomUUID(), title: value, dates: [] }]);
-    setNewTitle('');
-  };
-
-  const renameRow = (index: number, value: string) => {
-    setRows(prev => prev.map((r, i) => (i === index ? { ...r, title: value } : r)));
-  };
-
   const finalTitle = title.trim() || SUBJECT_LABELS[subject];
-  const allPlanned = rows.length > 0 && rows.every(r => r.dates.length > 0);
-  const sessionCount = rows.reduce((sum, r) => sum + r.dates.length, 0);
-  const canSave = allPlanned && !!dueDate;
+  const isTemplate = homeworkType === 'forhor' && planningMode === 'template';
+  const isManualExam = homeworkType === 'forhor' && planningMode === 'manual';
+  const allPlanned = isTemplate
+    ? rows.length > 0 && rows.every(row => row.dates.length > 0)
+    : manualDays.length > 0;
+  const sessionCount = isTemplate ? rows.reduce((sum, row) => sum + row.dates.length, 0) : manualDays.length;
+  const canSave = allPlanned && !!dueDate && (homeworkType !== 'forhor' || planningMode !== null);
   const edited =
     finalTitle !== homework.title ||
     subject !== homework.subject ||
@@ -172,7 +142,9 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     }
     const ok = await planHomework(
       homework.id,
-      rows.flatMap(r => r.dates.map(date => ({ title: `${finalTitle} – ${r.title.trim() || finalTitle}`, date })))
+      !isTemplate
+        ? manualDays.map(date => ({ title: finalTitle, date }))
+        : rows.flatMap(r => r.dates.map(date => ({ title: `${finalTitle} – ${r.title.trim() || finalTitle}`, date })))
     );
     setSaving(false);
     if (ok) {
@@ -193,7 +165,12 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
 
   return (
     <Dialog open={!!homework} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className={cn(
+        'max-h-[90vh] overflow-y-auto',
+        isTemplate
+          ? 'h-[100dvh] max-h-[100dvh] w-screen max-w-none rounded-none sm:h-[94vh] sm:max-h-[94vh] sm:w-[96vw] sm:max-w-6xl sm:rounded-lg'
+          : 'max-w-md md:max-w-2xl'
+      )}>
         <DialogHeader>
           <DialogTitle>
             {SUBJECT_ICONS[subject]} {finalTitle}
@@ -247,7 +224,11 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                   <button
                     key={t}
                     type="button"
-                    onClick={() => setHomeworkType(t)}
+                     onClick={() => {
+                       setHomeworkType(t);
+                       setPlanningMode(null);
+                       setManualDays([]);
+                     }}
                     className={cn(
                       'py-2 rounded-xl border-2 text-sm font-medium transition-colors',
                       homeworkType === t ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
@@ -286,146 +267,53 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
             </div>
           </div>
 
-          <p className="text-xs font-medium text-primary">
-            {rows.length} moment · {sessionCount} pluggtillfälle{sessionCount === 1 ? '' : 'n'}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Tips: repetera samma moment på två dagar – det ger bäst effekt.
-          </p>
-          {rows.map((row, i) => (
-            <div key={row.id} className="space-y-2 rounded-xl border border-border p-2">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 shrink-0 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
-                  {i + 1}
-                </span>
-                <Input
-                  value={row.title}
-                  onChange={e => renameRow(i, e.target.value)}
-                  aria-label={`Namn på moment ${i + 1}`}
-                  className="flex-1 h-9"
-                />
-                <button
-                  type="button"
-                  aria-label="Flytta upp"
-                  disabled={i === 0}
-                  onClick={() => moveRow(i, -1)}
-                  className="text-muted-foreground hover:text-primary disabled:opacity-30"
-                >
-                  <ArrowUp className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Flytta ner"
-                  disabled={i === rows.length - 1}
-                  onClick={() => moveRow(i, 1)}
-                  className="text-muted-foreground hover:text-primary disabled:opacity-30"
-                >
-                  <ArrowDown className="w-4 h-4" />
-                </button>
-                {rows.length > 1 && (
-                  <button
-                    type="button"
-                    aria-label="Ta bort del"
-                    onClick={() => setRows(prev => prev.filter((_, idx) => idx !== i))}
-                    className="text-muted-foreground hover:text-destructive"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              {days.length === 0 && (
-                <p className="text-xs text-warning">Välj deadline ovan för att se dagarna.</p>
-              )}
-              <div className="flex gap-2 overflow-x-auto pb-1">
+          {homeworkType === 'forhor' && (
+            <StudyPlanningModeChoice
+              value={planningMode}
+              onChange={mode => {
+                setPlanningMode(mode);
+                if (mode === 'template' && !rows.some(row => row.dates.length > 0)) {
+                  setRows(studyTechniqueSuggestions.slice(0, 5).map(item => ({ id: crypto.randomUUID(), title: item.label, dates: [] })));
+                }
+              }}
+            />
+          )}
+
+          {isTemplate && (
+            <StudyPlanTemplate
+              days={days}
+              rows={rows}
+              onRowsChange={setRows}
+              suggestions={studyTechniqueSuggestions}
+              taskCountsByDate={taskCountsByDate}
+              getActivitiesForDay={day => getActivitiesForDate(homework.child_id, day)}
+            />
+          )}
+
+          {!isTemplate && (homeworkType !== 'forhor' || isManualExam) && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><p className="font-medium">Välj pluggdagar</p></div>
+              <div className="grid gap-2 sm:grid-cols-2">
                 {days.map(day => {
-                  const dateStr = format(day, 'yyyy-MM-dd');
-                  const selected = row.dates.includes(dateStr);
-                  const hwCount = taskCountsByDate[dateStr] || 0;
-                  const acts = getActivitiesForDate(homework.child_id, day);
-                  const busy = hwCount + acts.length;
+                  const date = format(day, 'yyyy-MM-dd');
+                  const selected = manualDays.includes(date);
+                  const homeworkCount = taskCountsByDate[date] || 0;
+                  const activities = getActivitiesForDate(homework.child_id, day);
+                  const busy = homeworkCount + activities.length;
                   const dotClass = busy === 0 ? 'bg-success' : busy <= 2 ? 'bg-warning' : 'bg-destructive';
                   return (
-                    <button
-                      key={dateStr}
-                      type="button"
-                      onClick={() => toggleRowDate(i, dateStr)}
-                      className={cn(
-                        'shrink-0 px-3 py-2 rounded-xl border-2 text-xs font-medium transition-colors',
-                        selected
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : busy >= 3
-                            ? 'border-destructive/40 text-muted-foreground'
-                            : 'border-border text-muted-foreground'
-                      )}
-                    >
-                      <span className="block">{format(day, 'EEE', { locale: sv })}</span>
-                      <span className="block text-sm font-bold">{format(day, 'd/M')}</span>
-                      <span className="flex items-center justify-center gap-1 mt-0.5 text-[10px]">
-                        <span className={cn('w-1.5 h-1.5 rounded-full', dotClass)} />
-                        {hwCount}
-                        {acts.length > 0 && <span>{acts.map(a => a.emoji || '📌').join('')}</span>}
+                    <Button key={date} type="button" variant="outline" onClick={() => setManualDays(previous => previous.includes(date) ? previous.filter(item => item !== date) : [...previous, date].sort())} className={cn('h-auto min-h-20 justify-start p-3 text-left', selected && 'border-primary bg-primary/10 ring-1 ring-primary')}>
+                      <span className="flex w-full items-center gap-3">
+                        <span className="min-w-12"><span className="block text-xs capitalize text-muted-foreground">{format(day, 'EEE', { locale: sv })}</span><span className="font-bold">{format(day, 'd MMM', { locale: sv })}</span></span>
+                        <span className="min-w-0 flex-1"><span className="flex items-center gap-1.5 text-xs"><span className={cn('h-2 w-2 rounded-full', dotClass)} />{homeworkCount === 0 ? 'Inga läxor' : `${homeworkCount} läxor`}</span>{activities.length > 0 && <span className="block truncate text-xs font-normal text-muted-foreground">{activities.map(activity => `${activity.emoji || '📌'} ${activity.title}`).join(' · ')}</span>}</span>
+                        <span className={cn('flex h-6 w-6 items-center justify-center rounded-full border-2', selected && 'border-primary bg-primary text-primary-foreground')}>{selected && <Check className="h-3.5 w-3.5" />}</span>
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
-              <p className={cn('text-[10px]', row.dates.length === 0 ? 'text-destructive' : 'text-muted-foreground')}>
-                {row.dates.length === 0
-                  ? 'Välj minst en dag'
-                  : `${row.dates.length} dag${row.dates.length === 1 ? '' : 'ar'} vald${row.dates.length === 1 ? '' : 'a'}`}
-              </p>
-            </div>
-          ))}
-
-          {studyTechniqueSuggestions.length > 0 && (
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Förslag på delar</Label>
-              <div className="flex flex-wrap gap-2">
-                {studyTechniqueSuggestions.map(t => {
-                  const added = rows.some(r => r.title === t.label);
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      disabled={added}
-                      onClick={() => setRows(prev => [...prev, { id: crypto.randomUUID(), title: t.label, dates: [] }])}
-                      className={cn(
-                        'px-3 py-2 rounded-lg text-xs font-medium transition-all border',
-                        added
-                          ? 'bg-muted text-muted-foreground border-border opacity-60'
-                          : 'bg-background border-primary/30 hover:border-primary hover:bg-primary/5'
-                      )}
-                      title={t.description}
-                    >
-                      <span className="mr-1">{t.icon}</span>
-                      {t.label}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
             </div>
           )}
-
-          <div className="space-y-2">
-            <Label htmlFor="plan-new">Lägg till egen del</Label>
-            <div className="flex gap-2">
-              <Input
-                id="plan-new"
-                value={newTitle}
-                onChange={e => setNewTitle(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addRow();
-                  }
-                }}
-                placeholder="t.ex. Repetera glosor"
-              />
-              <Button type="button" variant="secondary" onClick={addRow} aria-label="Lägg till del">
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
 
           <Button onClick={handleSave} disabled={saving || !canSave} className="w-full" size="lg">
             <CalendarCheck className="w-4 h-4 mr-2" />

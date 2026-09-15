@@ -7,12 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
-import { getStudyTechniqueSuggestions, type StudyTechnique } from '@/lib/studyTechniques';
+import { getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
+import { StudyPlanningModeChoice, type StudyPlanningMode } from '@/components/StudyPlanningModeChoice';
+import { StudyPlanTemplate } from '@/components/StudyPlanTemplate';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, addWeeks, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay, subDays, getDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, ArrowRight, ArrowUp, ArrowDown, Check, User, Bell, Repeat, Flag, Lock, Sparkles } from 'lucide-react';
+import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag, Lock, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
@@ -98,6 +100,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   const [newItem, setNewItem] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [studyParts, setStudyParts] = useState<{ id: string; title: string; dates: string[] }[]>([]);
+  const [planningMode, setPlanningMode] = useState<StudyPlanningMode | null>(null);
   const [enableReminder, setEnableReminder] = useState(true);
   const [homeworkType, setHomeworkType] = useState<HomeworkType>('inlamning');
   const [isRecurring, setIsRecurring] = useState(false);
@@ -158,45 +161,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     [subject, homeworkType]
   );
 
-  const addStudyPart = (technique: StudyTechnique) => {
-    const usedDays = new Set(studyParts.flatMap(p => p.dates));
-    const pool = selectedDays.length > 0 ? selectedDays : [];
-    const nextDay = pool.find(d => !usedDays.has(d)) || pool[0];
-    setStudyParts(prev => [
-      ...prev,
-      { id: crypto.randomUUID(), title: technique.label, dates: nextDay ? [nextDay] : [] },
-    ]);
-  };
-
-  const removeStudyPart = (index: number) => {
-    setStudyParts(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const updateStudyPartTitle = (index: number, title: string) => {
-    setStudyParts(prev => prev.map((p, i) => (i === index ? { ...p, title } : p)));
-  };
-
-  const toggleStudyPartDate = (index: number, date: string) => {
-    setStudyParts(prev =>
-      prev.map((p, i) =>
-        i === index
-          ? { ...p, dates: p.dates.includes(date) ? p.dates.filter(d => d !== date) : [...p.dates, date].sort() }
-          : p
-      )
-    );
-    setSelectedDays(prev => (prev.includes(date) ? prev : [...prev, date].sort()));
-  };
-
-  const moveStudyPart = (index: number, dir: -1 | 1) => {
-    setStudyParts(prev => {
-      const next = [...prev];
-      const target = index + dir;
-      if (target < 0 || target >= next.length) return prev;
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
-  };
-
   const studySessionCount = useMemo(
     () => studyParts.reduce((sum, p) => sum + p.dates.length, 0),
     [studyParts]
@@ -213,6 +177,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setNewItem('');
     setSelectedDays([]);
     setStudyParts([]);
+    setPlanningMode(null);
     setSelectedChildId(null);
     setEnableReminder(true);
     setIsRecurring(false);
@@ -318,11 +283,25 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
       toast.error("Välj ett datum");
       return;
     }
+
+    if (!isRecurring && homeworkType === 'forhor' && !planningMode) {
+      toast.error('Välj hur du vill planera förhöret');
+      return;
+    }
+
+    if (homeworkType === 'forhor' && planningMode === 'template' && (studyParts.length === 0 || studyParts.some(part => part.dates.length === 0))) {
+      toast.error('Välj minst en dag för varje moment');
+      return;
+    }
     
     setLoading(true);
     
     const recurrenceEndDate = isRecurring ? format(addWeeks(today, recurrenceWeeks), 'yyyy-MM-dd') : undefined;
-    const effectiveDueDate = isRecurring ? recurrenceEndDate! : dueDate;
+    const effectiveDueDate = isRecurring ? recurrenceEndDate : dueDate;
+    if (!effectiveDueDate) {
+      setLoading(false);
+      return;
+    }
     const dueDateParsed = parseISO(effectiveDueDate);
     const reminderDate = enableReminder && !isRecurring ? format(subDays(dueDateParsed, 2), 'yyyy-MM-dd') : undefined;
     
@@ -348,10 +327,15 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     }
     
     if (hw) {
-      const taskDates = isRecurring ? generateRecurringTaskDates() : selectedDays.sort();
+      const templateDates = [...new Set(studyParts.flatMap(part => part.dates))].sort();
+      const taskDates = isRecurring
+        ? generateRecurringTaskDates()
+        : planningMode === 'template'
+          ? templateDates
+          : selectedDays.sort();
       const autoTitle = generateAutoTitle(homeworkType, subject, title);
 
-      if (homeworkType === 'forhor' && studyParts.length > 0) {
+      if (homeworkType === 'forhor' && planningMode === 'template' && studyParts.length > 0) {
         const fallbackDate = taskDates[0] || effectiveDueDate;
         const hwName = title.trim();
         for (const part of studyParts) {
@@ -406,7 +390,12 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
   return (
     <>
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
+      <DialogContent className={cn(
+        'max-h-[90vh] overflow-y-auto border-0 shadow-elevated',
+        step === 2 && planningMode === 'template'
+          ? 'h-[100dvh] max-h-[100dvh] w-screen max-w-none rounded-none sm:h-[94vh] sm:max-h-[94vh] sm:w-[96vw] sm:max-w-6xl sm:rounded-lg'
+          : 'sm:max-w-md md:max-w-2xl'
+      )}>
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
@@ -575,7 +564,11 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   {(['inlamning', 'forhor'] as HomeworkType[]).map((type) => (
                     <button
                       key={type}
-                      onClick={() => setHomeworkType(type)}
+                      onClick={() => {
+                        setHomeworkType(type);
+                        setPlanningMode(null);
+                        setStudyParts([]);
+                      }}
                       className={cn(
                         'flex items-center justify-center gap-2 p-3 rounded-xl transition-all',
                         homeworkType === type
@@ -826,7 +819,23 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 </p>
               </div>
 
-              {availableDays.length > 1 && (
+              {homeworkType === 'forhor' && (
+                <StudyPlanningModeChoice
+                  value={planningMode}
+                  onChange={mode => {
+                    setPlanningMode(mode);
+                    if (mode === 'template' && studyParts.length === 0) {
+                      setStudyParts(studyTechniqueSuggestions.slice(0, 5).map(item => ({
+                        id: crypto.randomUUID(),
+                        title: item.label,
+                        dates: [],
+                      })));
+                    }
+                  }}
+                />
+              )}
+
+              {(homeworkType !== 'forhor' || planningMode === 'manual') && availableDays.length > 1 && (
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-muted-foreground">Vill du ha hjälp?</span>
                   <Button type="button" variant="outline" size="sm" onClick={applySuggestedDays}>
@@ -837,7 +846,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               )}
 
               {/* Day list with workload in plain text */}
-              <div className="space-y-2 max-h-72 overflow-y-auto p-1">
+              {(homeworkType !== 'forhor' || planningMode === 'manual') && <div className="space-y-2 max-h-72 overflow-y-auto p-1">
                 {availableDays.map((day) => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isSelected = selectedDays.includes(dateStr);
@@ -905,137 +914,39 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                     </motion.button>
                   );
                 })}
-              </div>
+              </div>}
 
-              {availableDays.length === 0 && (
+              {(homeworkType !== 'forhor' || planningMode === 'manual') && availableDays.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   Inga dagar före inlämningsdagen
                 </p>
               )}
               
               {/* Legend */}
-              {availableDays.length > 0 && (
+              {(homeworkType !== 'forhor' || planningMode === 'manual') && availableDays.length > 0 && (
                 <p className="text-xs text-muted-foreground text-center">
                   Grön = lugn dag · Gul = några läxor · Röd = full dag
                 </p>
               )}
 
-              {homeworkType === 'forhor' && availableDays.length > 0 && (
-                <div className="space-y-3 p-3 rounded-xl bg-muted/50">
-                  <div>
-                    <Label className="text-sm font-medium flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      Dela upp förhöret i delar
-                    </Label>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Välj tekniker som hjälper barnet lära sig bättre. Repetera samma moment på två dagar – det ger bäst effekt.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {studyTechniqueSuggestions.map(t => {
-                      const added = studyParts.some(p => p.title === t.label);
-                      return (
-                        <button
-                          key={t.id}
-                          type="button"
-                          disabled={added}
-                          onClick={() => addStudyPart(t)}
-                          className={cn(
-                            'px-3 py-2 rounded-lg text-xs font-medium transition-all border',
-                            added
-                              ? 'bg-muted text-muted-foreground border-border opacity-60'
-                              : 'bg-background border-primary/30 hover:border-primary hover:bg-primary/5'
-                          )}
-                          title={t.description}
-                        >
-                          <span className="mr-1">{t.icon}</span>
-                          {t.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {studyParts.length > 0 && (
-                    <div className="space-y-3">
-                      <p className="text-xs font-medium text-primary">
-                        {studyParts.length} moment · {studySessionCount} pluggtillfälle{studySessionCount === 1 ? '' : 'n'}
-                      </p>
-                      {studyParts.map((part, i) => (
-                        <div key={part.id} className="space-y-2 rounded-xl bg-background/70 p-2 border border-border">
-                          <div className="flex items-center gap-2">
-                            <span className="w-6 h-6 shrink-0 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
-                              {i + 1}
-                            </span>
-                            <Input
-                              value={part.title}
-                              onChange={e => updateStudyPartTitle(i, e.target.value)}
-                              className="flex-1 h-9"
-                            />
-                            <button
-                              type="button"
-                              aria-label="Flytta upp"
-                              disabled={i === 0}
-                              onClick={() => moveStudyPart(i, -1)}
-                              className="text-muted-foreground hover:text-primary disabled:opacity-30"
-                            >
-                              <ArrowUp className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              aria-label="Flytta ner"
-                              disabled={i === studyParts.length - 1}
-                              onClick={() => moveStudyPart(i, 1)}
-                              className="text-muted-foreground hover:text-primary disabled:opacity-30"
-                            >
-                              <ArrowDown className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              aria-label="Ta bort del"
-                              onClick={() => removeStudyPart(i)}
-                              className="text-muted-foreground hover:text-destructive"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {availableDays.map(day => {
-                              const d = format(day, 'yyyy-MM-dd');
-                              const selected = part.dates.includes(d);
-                              return (
-                                <button
-                                  key={d}
-                                  type="button"
-                                  onClick={() => toggleStudyPartDate(i, d)}
-                                  className={cn(
-                                    'px-2 py-1 rounded-md text-[10px] font-medium border transition-all',
-                                    selected
-                                      ? 'bg-primary text-primary-foreground border-primary'
-                                      : 'bg-background border-border text-muted-foreground hover:bg-muted'
-                                  )}
-                                >
-                                  {format(day, 'EEE d/M', { locale: sv })}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          <p className={cn('text-[10px]', part.dates.length === 0 ? 'text-destructive' : 'text-muted-foreground')}>
-                            {part.dates.length === 0
-                              ? 'Välj minst en dag'
-                              : `${part.dates.length} dag${part.dates.length === 1 ? '' : 'ar'} vald${part.dates.length === 1 ? '' : 'a'}`}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+              {homeworkType === 'forhor' && planningMode === 'template' && (
+                <StudyPlanTemplate
+                  days={availableDays}
+                  rows={studyParts}
+                  onRowsChange={setStudyParts}
+                  suggestions={studyTechniqueSuggestions}
+                  taskCountsByDate={taskCountsByDate}
+                  getActivitiesForDay={day => targetChildId ? getActivitiesForDate(targetChildId, day) : []}
+                />
               )}
 
               
               <div className="text-center text-sm font-medium">
-                {selectedDays.length > 0 
-                  ? <span className="text-primary">{selectedDays.length} pluggdag{selectedDays.length > 1 ? 'ar' : ''} vald{selectedDays.length > 1 ? 'a' : ''} ✨</span>
-                  : <span className="text-muted-foreground">Inga dagar valda (valfritt)</span>}
+                {planningMode === 'template'
+                  ? <span className="text-primary">{studySessionCount} pluggtillfällen i mallen</span>
+                  : selectedDays.length > 0 
+                    ? <span className="text-primary">{selectedDays.length} pluggdag{selectedDays.length > 1 ? 'ar' : ''} vald{selectedDays.length > 1 ? 'a' : ''} ✨</span>
+                    : <span className="text-muted-foreground">Inga dagar valda (valfritt)</span>}
               </div>
               
               <div className="flex gap-2 pt-2">
