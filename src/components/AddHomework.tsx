@@ -297,7 +297,11 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setLoading(true);
     
     const recurrenceEndDate = isRecurring ? format(addWeeks(today, recurrenceWeeks), 'yyyy-MM-dd') : undefined;
-    const effectiveDueDate = isRecurring ? recurrenceEndDate! : dueDate;
+    const effectiveDueDate = isRecurring ? recurrenceEndDate : dueDate;
+    if (!effectiveDueDate) {
+      setLoading(false);
+      return;
+    }
     const dueDateParsed = parseISO(effectiveDueDate);
     const reminderDate = enableReminder && !isRecurring ? format(subDays(dueDateParsed, 2), 'yyyy-MM-dd') : undefined;
     
@@ -323,7 +327,12 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     }
     
     if (hw) {
-      const taskDates = isRecurring ? generateRecurringTaskDates() : selectedDays.sort();
+      const templateDates = [...new Set(studyParts.flatMap(part => part.dates))].sort();
+      const taskDates = isRecurring
+        ? generateRecurringTaskDates()
+        : planningMode === 'template'
+          ? templateDates
+          : selectedDays.sort();
       const autoTitle = generateAutoTitle(homeworkType, subject, title);
 
       if (homeworkType === 'forhor' && planningMode === 'template' && studyParts.length > 0) {
