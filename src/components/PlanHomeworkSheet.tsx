@@ -12,7 +12,7 @@ import { useFamily } from '@/hooks/useFamily';
 import { celebrateAssignment } from '@/lib/confetti';
 import { track } from '@/lib/analytics';
 import { SUBJECT_LABELS, SUBJECT_ICONS, HOMEWORK_TYPE_LABELS, Subject, HomeworkType } from '@/types/homework';
-import { getStudyTechniqueSuggestions, type StudyTechnique } from '@/lib/studyTechniques';
+import { getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
 import type { InboxHomework } from '@/hooks/queries/useHomeworkData';
 import { StudyPlanningModeChoice, type StudyPlanningMode } from '@/components/StudyPlanningModeChoice';
 import { StudyPlanTemplate, type StudyPlanRow } from '@/components/StudyPlanTemplate';

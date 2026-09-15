@@ -7,14 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
-import { getStudyTechniqueSuggestions, type StudyTechnique } from '@/lib/studyTechniques';
+import { getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
 import { StudyPlanningModeChoice, type StudyPlanningMode } from '@/components/StudyPlanningModeChoice';
 import { StudyPlanTemplate } from '@/components/StudyPlanTemplate';
 import { useFamily } from '@/hooks/useFamily';
 import { cn } from '@/lib/utils';
 import { format, addDays, addWeeks, parseISO, startOfDay, eachDayOfInterval, isWeekend, isSameDay, subDays, getDay } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { Plus, X, ArrowRight, ArrowUp, ArrowDown, Check, User, Bell, Repeat, Flag, Lock, Sparkles } from 'lucide-react';
+import { Plus, X, ArrowRight, Check, User, Bell, Repeat, Flag, Lock, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
@@ -160,45 +160,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     () => getStudyTechniqueSuggestions(subject, homeworkType),
     [subject, homeworkType]
   );
-
-  const addStudyPart = (technique: StudyTechnique) => {
-    const usedDays = new Set(studyParts.flatMap(p => p.dates));
-    const pool = selectedDays.length > 0 ? selectedDays : [];
-    const nextDay = pool.find(d => !usedDays.has(d)) || pool[0];
-    setStudyParts(prev => [
-      ...prev,
-      { id: crypto.randomUUID(), title: technique.label, dates: nextDay ? [nextDay] : [] },
-    ]);
-  };
-
-  const removeStudyPart = (index: number) => {
-    setStudyParts(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const updateStudyPartTitle = (index: number, title: string) => {
-    setStudyParts(prev => prev.map((p, i) => (i === index ? { ...p, title } : p)));
-  };
-
-  const toggleStudyPartDate = (index: number, date: string) => {
-    setStudyParts(prev =>
-      prev.map((p, i) =>
-        i === index
-          ? { ...p, dates: p.dates.includes(date) ? p.dates.filter(d => d !== date) : [...p.dates, date].sort() }
-          : p
-      )
-    );
-    setSelectedDays(prev => (prev.includes(date) ? prev : [...prev, date].sort()));
-  };
-
-  const moveStudyPart = (index: number, dir: -1 | 1) => {
-    setStudyParts(prev => {
-      const next = [...prev];
-      const target = index + dir;
-      if (target < 0 || target >= next.length) return prev;
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
-  };
 
   const studySessionCount = useMemo(
     () => studyParts.reduce((sum, p) => sum + p.dates.length, 0),
