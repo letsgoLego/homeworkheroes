@@ -190,7 +190,7 @@ export function AddActivity({ open, onClose, onAdd, activity, onUpdate }: AddAct
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
+      <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto border-0 shadow-elevated">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             {isEdit ? '✏️ Redigera aktivitet' : '🏃 Ny aktivitet'}

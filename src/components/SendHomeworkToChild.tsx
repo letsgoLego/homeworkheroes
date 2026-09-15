@@ -77,7 +77,7 @@ export function SendHomeworkToChild({ open, onClose }: SendHomeworkToChildProps)
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Skicka läxa till barnet 📥</DialogTitle>
           <DialogDescription>
