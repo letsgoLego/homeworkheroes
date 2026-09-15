@@ -882,19 +882,11 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <span className={cn('w-2 h-2 rounded-full shrink-0', dotClass)} />
-                          <span>{homeworkText}</span>
+                        <DayLoadIndicator homeworkCount={existingTaskCount} activities={dayActivities} />
+                        <div className="mt-1 flex items-center gap-2">
                           {isToday && <span className="text-xs text-primary font-semibold">idag</span>}
                           {isWeekendDay && <span className="text-xs text-muted-foreground">helg</span>}
                         </div>
-                        {dayActivities.length > 0 && (
-                          <div className="text-xs text-muted-foreground mt-1 truncate">
-                            {dayActivities
-                              .map(a => `${a.emoji || '📌'} ${a.title}${a.start_time ? ` ${a.start_time.slice(0, 5)}` : ''}`)
-                              .join(' · ')}
-                          </div>
-                        )}
                       </div>
 
                       <div
@@ -917,7 +909,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               )}
               
               {/* Legend */}
-              {(homeworkType !== 'forhor' || planningMode === 'manual') && availableDays.length > 0 && (
+              {availableDays.length > 0 && (
                 <p className="text-xs text-muted-foreground text-center">
                   Grön = lugn dag · Gul = några läxor · Röd = full dag
                 </p>
