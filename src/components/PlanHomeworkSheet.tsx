@@ -301,8 +301,6 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                   const selected = manualDays.includes(date);
                   const homeworkCount = taskCountsByDate[date] || 0;
                   const activities = getActivitiesForDate(homework.child_id, day);
-                  const busy = homeworkCount + activities.length;
-                  const dotClass = busy === 0 ? 'bg-success' : busy <= 2 ? 'bg-warning' : 'bg-destructive';
                   return (
                     <Button key={date} type="button" variant="outline" onClick={() => setManualDays(previous => previous.includes(date) ? previous.filter(item => item !== date) : [...previous, date].sort())} className={cn('h-auto min-h-20 justify-start p-3 text-left', selected && 'border-primary bg-primary/10 ring-1 ring-primary')}>
                       <span className="flex w-full items-center gap-3">
