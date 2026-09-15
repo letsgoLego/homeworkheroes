@@ -108,7 +108,7 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId, 
           <p className="text-sm">Njut av din lediga tid!</p>
         </motion.div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-4 md:space-y-0">
           {weekDays.map((day, dayIndex) => {
             const { deadlines, tasks, activities: dayActivities } = getItemsForDay(day);
             if (deadlines.length === 0 && tasks.length === 0 && dayActivities.length === 0) return null;
@@ -148,7 +148,7 @@ export function WeekView({ selectedDate, onSelectDate, homework, activeChildId, 
                 </div>
 
                 {/* Items for the day */}
-                <div className="space-y-2 ml-[3.25rem]">
+                <div className="space-y-2 ml-[3.25rem] md:ml-0">
                   {/* Deadlines */}
                   {deadlines.map((hw, index) => (
                     <motion.div

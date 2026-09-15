@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Navigation } from '@/components/Navigation';
+import { AppShell } from '@/components/AppShell';
 import { AddChild } from '@/components/AddChild';
 import { ManageChildAccount } from '@/components/ManageChildAccount';
 import { useFamily } from '@/hooks/useFamily';
@@ -78,10 +78,10 @@ export default function FamilyPage() {
   }
   
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <AppShell>
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
-        <div className="px-4 py-4 flex items-center justify-between">
+        <div className="px-4 py-4 flex items-center justify-between md:px-8">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Users className="w-6 h-6" />
             {family?.name || 'Familj'}
@@ -92,7 +92,7 @@ export default function FamilyPage() {
         </div>
       </header>
       
-      <main className="px-4 py-4 space-y-6">
+      <main className="px-4 py-4 space-y-6 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0 md:px-8 md:py-6">
         {/* Invite Code */}
         {family?.invite_code && (
           <motion.div
@@ -343,7 +343,6 @@ export default function FamilyPage() {
 
       
       
-      <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
       {(() => {
         const selectedChild = selectedChildId ? children.find(c => c.id === selectedChildId) || null : null;
@@ -357,6 +356,6 @@ export default function FamilyPage() {
         ) : null;
       })()}
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />
-    </div>
+    </AppShell>
   );
 }

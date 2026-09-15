@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { WeekView } from '@/components/WeekView';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
-import { Navigation } from '@/components/Navigation';
+import { AppShell } from '@/components/AppShell';
 import { Button } from '@/components/ui/button';
 import { useFamily } from '@/hooks/useFamily';
 import { useHolidayMode } from '@/hooks/useHolidayMode';
@@ -43,10 +43,10 @@ export default function WeekPage() {
   }
   
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <AppShell>
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 md:px-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">Veckoöversikt 📅</h1>
             <Button variant="outline" size="sm" onClick={handleToday}>
@@ -75,7 +75,7 @@ export default function WeekPage() {
         
         {/* Child switcher - only for parents */}
         {userRole !== 'child' && children.length > 0 && (
-          <div className="px-4 pb-3">
+          <div className="px-4 pb-3 md:px-8">
             <ChildSwitcher 
               children={children}
               activeChildId={activeChildId}
@@ -86,7 +86,7 @@ export default function WeekPage() {
         )}
       </header>
       
-      <main className="px-4 py-4 space-y-4">
+      <main className="px-4 py-4 space-y-4 md:px-8 md:py-6">
         <WeekView 
           selectedDate={selectedDate} 
           onSelectDate={setSelectedDate}
@@ -104,8 +104,7 @@ export default function WeekPage() {
 
       
       
-      <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
-    </div>
+    </AppShell>
   );
 }

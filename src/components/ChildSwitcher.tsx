@@ -16,7 +16,7 @@ interface ChildSwitcherProps {
 
 export function ChildSwitcher({ children, activeChildId, onSelectChild, onAddChild, showPresence = true }: ChildSwitcherProps) {
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+    <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
       {children.map((child) => (
         <motion.button
           key={child.id}

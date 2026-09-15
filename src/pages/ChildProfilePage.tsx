@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-import { Navigation } from '@/components/Navigation';
+import { AppShell } from '@/components/AppShell';
 import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Smartphone, Download, Flame } from 'lucide-react';
@@ -55,9 +55,9 @@ export default function ChildProfilePage() {
   }
   
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <AppShell>
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
-        <div className="px-4 py-4 flex items-center justify-between">
+        <div className="px-4 py-4 flex items-center justify-between md:px-8">
           <h1 className="text-2xl font-bold">Min profil</h1>
           <Button variant="ghost" size="icon" onClick={handleSignOut}>
             <LogOut className="w-5 h-5" />
@@ -65,7 +65,7 @@ export default function ChildProfilePage() {
         </div>
       </header>
       
-      <main className="px-4 py-4 space-y-6">
+      <main className="px-4 py-4 space-y-6 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0 md:px-8 md:py-6">
         {/* Profile card */}
         {activeChild && (
           <motion.div
@@ -145,7 +145,6 @@ export default function ChildProfilePage() {
 
       
       
-      <Navigation />
-    </div>
+    </AppShell>
   );
 }

@@ -10,6 +10,7 @@ import { format, subDays, parseISO, getDay, getHours, startOfWeek, endOfWeek, di
 import { sv } from 'date-fns/locale';
 import { SUBJECT_LABELS, SUBJECT_ICONS, type Subject } from '@/types/homework';
 import { cn } from '@/lib/utils';
+import { AppShell } from '@/components/AppShell';
 
 const WEEKDAYS = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör'];
 const WEEKDAYS_LONG = ['söndagar', 'måndagar', 'tisdagar', 'onsdagar', 'torsdagar', 'fredagar', 'lördagar'];
@@ -265,9 +266,9 @@ export default function InsightsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <AppShell>
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
-        <div className="px-4 py-4 flex items-center gap-3">
+        <div className="px-4 py-4 flex items-center gap-3 md:px-8">
           <Button variant="ghost" size="icon" onClick={() => navigate('/family')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -277,7 +278,7 @@ export default function InsightsPage() {
           </h1>
         </div>
         {children.length > 0 && (
-          <div className="px-4 pb-3">
+          <div className="px-4 pb-3 md:px-8">
             <ChildSwitcher
               children={children}
               activeChildId={activeChildId}
@@ -289,7 +290,7 @@ export default function InsightsPage() {
         )}
       </header>
 
-      <main className="px-4 py-4 space-y-5">
+      <main className="px-4 py-4 space-y-5 md:px-8 md:py-6">
         {/* Time range */}
         <div className="flex gap-2">
           {[30, 60, 90].map((d) => (
@@ -316,12 +317,12 @@ export default function InsightsPage() {
             </p>
           </div>
         ) : (
-          <>
+          <div className="space-y-5 md:grid md:grid-cols-2 md:items-start md:gap-5 md:space-y-0">
             {/* Headline */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-5 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 border border-primary/20"
+              className="p-5 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/15 border border-primary/20 md:col-span-2"
             >
               <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Senaste {days} dagarna</p>
               <div className="flex items-end gap-2">
@@ -337,7 +338,7 @@ export default function InsightsPage() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-2xl bg-card shadow-card space-y-3"
+              className="p-4 rounded-2xl bg-card shadow-card space-y-3 md:col-span-2"
             >
               <div className="flex items-center justify-between gap-2">
                 <h3 className="font-bold flex items-center gap-2">
@@ -472,7 +473,7 @@ export default function InsightsPage() {
             </motion.div>
 
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 md:col-span-2">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 rounded-2xl bg-card shadow-card">
                 <div className="flex items-center gap-2 text-celebration mb-1">
                   <TrendingUp className="w-4 h-4" />
@@ -630,12 +631,12 @@ export default function InsightsPage() {
               </motion.div>
             )}
 
-            <p className="text-[11px] text-muted-foreground text-center pt-2">
+            <p className="text-[11px] text-muted-foreground text-center pt-2 md:col-span-2">
               Insikter baseras på {format(subDays(new Date(), days), 'd MMM', { locale: sv })} – {format(new Date(), 'd MMM', { locale: sv })}.
             </p>
-          </>
+          </div>
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }

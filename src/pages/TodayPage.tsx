@@ -10,7 +10,7 @@ import { TaskCard } from '@/components/TaskCard';
 import { BringToSchool } from '@/components/BringToSchool';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { AddChild } from '@/components/AddChild';
-import { Navigation } from '@/components/Navigation';
+import { AppShell } from '@/components/AppShell';
 import { WeatherWidget } from '@/components/WeatherWidget';
 import { StreakStats } from '@/components/StreakStats';
 import { SubjectBadge } from '@/components/ui/SubjectBadge';
@@ -242,7 +242,7 @@ export default function TodayPage() {
   }
   
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <AppShell>
       <Helmet>
         <title>Idag – Läxhjälp</title>
         <meta name="description" content="Dagens läxor, prov och packlistor – samlat på ett ställe i Läxhjälp." />
@@ -252,7 +252,7 @@ export default function TodayPage() {
       </Helmet>
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 md:px-8">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <Sun className="w-5 h-5 text-celebration" />
@@ -277,7 +277,7 @@ export default function TodayPage() {
         
         {/* Child switcher - only for parents */}
         {userRole !== 'child' && (
-          <div className="px-4 pb-3">
+          <div className="px-4 pb-3 md:px-8">
             <ChildSwitcher 
               children={children}
               activeChildId={activeChildId}
@@ -288,7 +288,7 @@ export default function TodayPage() {
         )}
       </header>
       
-      <main className="px-4 py-4">
+      <main className="px-4 py-4 md:px-8 md:py-6">
         <Tabs defaultValue="today" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="today" className="flex items-center gap-2">
@@ -305,7 +305,7 @@ export default function TodayPage() {
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="today" className="space-y-6">
+          <TabsContent value="today" className="space-y-6 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0 [&>section]:min-w-0">
             {/* Holiday mode banner */}
             <HolidayBanner childId={activeChildId} />
 
@@ -720,7 +720,6 @@ export default function TodayPage() {
 
       
       
-      <Navigation />
       <AddChild open={showAddChild} onClose={() => setShowAddChild(false)} />
       <IntroTour />
       <DeleteActivityDialog
@@ -746,6 +745,6 @@ export default function TodayPage() {
         childName={activeChild?.name ?? ''}
         onClose={() => setSplashOpen(false)}
       />
-    </div>
+    </AppShell>
   );
 }

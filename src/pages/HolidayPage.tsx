@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { Palmtree } from 'lucide-react';
-import { Navigation } from '@/components/Navigation';
+import { AppShell } from '@/components/AppShell';
 import { ChildSwitcher } from '@/components/ChildSwitcher';
 import { useFamily } from '@/hooks/useFamily';
 import { useHolidayMode } from '@/hooks/useHolidayMode';
@@ -53,9 +53,9 @@ export default function HolidayPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-celebration/5 to-background pb-24">
+    <AppShell className="bg-gradient-to-b from-celebration/5 to-background">
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 md:px-8">
           <div className="flex items-center gap-2 mb-1">
             <Palmtree className="w-5 h-5 text-celebration" />
             <span className="text-sm text-muted-foreground font-medium">
@@ -73,7 +73,7 @@ export default function HolidayPage() {
         </div>
 
         {userRole !== 'child' && (
-          <div className="px-4 pb-3">
+          <div className="px-4 pb-3 md:px-8">
             <ChildSwitcher
               children={children}
               activeChildId={activeChildId}
@@ -84,7 +84,7 @@ export default function HolidayPage() {
         )}
       </header>
 
-      <main className="px-4 py-4 space-y-4">
+      <main className="px-4 py-4 space-y-4 md:px-8 md:py-6">
         {!activeChildId ? (
           <p className="text-center text-muted-foreground">Välj ett barn</p>
         ) : !isActive ? (
@@ -122,7 +122,7 @@ export default function HolidayPage() {
             ) : (
               <>
                 <HolidayProgressHeader childId={activeChildId} />
-                <div className="space-y-3">
+                <div className="space-y-3 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
                   {goals.map((g) => (
                     <HolidayGoalCard key={g.id} goal={g} childId={activeChildId} />
                   ))}
@@ -156,7 +156,6 @@ export default function HolidayPage() {
       />
 
 
-      <Navigation />
-    </div>
+    </AppShell>
   );
 }

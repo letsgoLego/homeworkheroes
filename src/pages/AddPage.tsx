@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { motion } from 'framer-motion';
-import { Navigation } from '@/components/Navigation';
+import { AppShell } from '@/components/AppShell';
 import { AddHomework } from '@/components/AddHomework';
 import { SendHomeworkToChild } from '@/components/SendHomeworkToChild';
 import { HomeworkInbox } from '@/components/HomeworkInbox';
@@ -66,15 +66,15 @@ export default function AddPage() {
   }
   
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <AppShell>
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-lg z-40 safe-area-top border-b border-border">
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 md:px-8">
           <h1 className="text-2xl font-bold mb-4">Läxor 📚</h1>
         </div>
         
         {/* Child switcher */}
-        <div className="px-4 pb-3">
+        <div className="px-4 pb-3 md:px-8">
           <ChildSwitcher 
             children={children}
             activeChildId={activeChildId}
@@ -84,7 +84,7 @@ export default function AddPage() {
         </div>
       </header>
       
-      <main className="px-4 py-4 space-y-6">
+      <main className="px-4 py-4 space-y-6 md:px-8 md:py-6">
         {/* Add buttons */}
         <div className="grid grid-cols-3 gap-2">
           <Button
@@ -137,8 +137,9 @@ export default function AddPage() {
           onDelete={userRole !== 'child' ? deleteHomework : undefined}
         />
 
+        <div className="md:grid md:grid-cols-2 md:items-start md:gap-6">
         {/* Activities – presented like homework cards */}
-        <section>
+        <section className="md:order-2">
           <h2 className="text-lg font-bold mb-3">Aktiviteter 🏃 ({childActivities.length})</h2>
 
           {childActivities.length === 0 ? (
@@ -234,6 +235,7 @@ export default function AddPage() {
         
 
         
+        <div className="space-y-6 md:order-1">
         {/* Overdue homework */}
         {overdueHomework.length > 0 && (
           <section>
@@ -438,11 +440,12 @@ export default function AddPage() {
             </div>
           </section>
         )}
+        </div>
+        </div>
       </main>
 
       
       
-      <Navigation />
       <SendHomeworkToChild open={showSendHomework} onClose={() => setShowSendHomework(false)} />
       <DeleteActivityDialog
         open={!!deletingActivity}
@@ -485,6 +488,6 @@ export default function AddPage() {
           homework={editingHomework}
         />
       )}
-    </div>
+    </AppShell>
   );
 }
