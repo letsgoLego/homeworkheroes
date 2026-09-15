@@ -848,7 +848,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               )}
 
               {/* Day list with workload in plain text */}
-              {(homeworkType !== 'forhor' || planningMode === 'manual') && <div className="space-y-2 max-h-72 overflow-y-auto p-1">
+              {(homeworkType !== 'forhor' || planningMode === 'manual') && <div className="space-y-2 p-1">
                 {availableDays.map((day) => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isSelected = selectedDays.includes(dateStr);
@@ -857,14 +857,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   const existingTaskCount = taskCountsByDate[dateStr] || 0;
                   const dayActivities = targetChildId ? getActivitiesForDate(targetChildId, day) : [];
                   const busy = existingTaskCount + dayActivities.length;
-                  const dotClass = busy === 0
-                    ? 'bg-success'
-                    : busy <= 2
-                      ? 'bg-warning'
-                      : 'bg-destructive';
-                  const homeworkText = existingTaskCount === 0
-                    ? 'Inga läxor'
-                    : `${existingTaskCount} läx${existingTaskCount === 1 ? 'a' : 'or'}`;
 
                   return (
                     <motion.button
