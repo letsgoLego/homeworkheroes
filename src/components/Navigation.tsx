@@ -32,18 +32,18 @@ export function Navigation() {
   const inboxCount = inboxHomework.filter(hw => !activeChildId || hw.child_id === activeChildId).length;
   
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border safe-area-bottom z-50">
-      <div className="flex items-center justify-around px-4 py-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-lg safe-area-bottom md:bottom-auto md:right-auto md:top-0 md:h-screen md:w-24 md:border-r md:border-t-0 md:safe-area-bottom">
+      <div className="flex items-center justify-around px-4 py-2 md:h-full md:flex-col md:justify-center md:gap-3 md:px-2 md:py-6">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
           
           if (item.isAction) {
             return (
-              <Link key={item.path} to={item.path}>
+              <Link key={item.path} to={item.path} className="md:w-full">
                 <motion.div
                   whileTap={{ scale: 0.9 }}
-                  className="relative -mt-6"
+                  className="relative -mt-6 md:mt-0 md:flex md:justify-center"
                 >
                   <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-glow-primary">
                     <Icon className="w-6 h-6 text-primary-foreground" />
@@ -54,11 +54,11 @@ export function Navigation() {
           }
           
           return (
-            <Link key={item.path} to={item.path}>
+              <Link key={item.path} to={item.path} className="md:w-full">
               <motion.div
                 whileTap={{ scale: 0.95 }}
                 className={cn(
-                  'flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors',
+                  'relative flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors md:w-full md:px-2 md:py-3',
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
