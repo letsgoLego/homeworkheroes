@@ -20,6 +20,7 @@ import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { celebrateTask } from '@/lib/confetti';
 import { track } from '@/lib/analytics';
+import { DayLoadIndicator } from '@/components/DayLoadIndicator';
 
 interface AddHomeworkProps {
   open: boolean;
@@ -822,6 +823,8 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               {homeworkType === 'forhor' && (
                 <StudyPlanningModeChoice
                   value={planningMode}
+                  collapsible
+                  onReset={() => setPlanningMode(null)}
                   onChange={mode => {
                     setPlanningMode(mode);
                     if (mode === 'template' && studyParts.length === 0) {
@@ -846,7 +849,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               )}
 
               {/* Day list with workload in plain text */}
-              {(homeworkType !== 'forhor' || planningMode === 'manual') && <div className="space-y-2 max-h-72 overflow-y-auto p-1">
+              {(homeworkType !== 'forhor' || planningMode === 'manual') && <div className="space-y-2 p-1">
                 {availableDays.map((day) => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isSelected = selectedDays.includes(dateStr);
@@ -855,14 +858,6 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   const existingTaskCount = taskCountsByDate[dateStr] || 0;
                   const dayActivities = targetChildId ? getActivitiesForDate(targetChildId, day) : [];
                   const busy = existingTaskCount + dayActivities.length;
-                  const dotClass = busy === 0
-                    ? 'bg-success'
-                    : busy <= 2
-                      ? 'bg-warning'
-                      : 'bg-destructive';
-                  const homeworkText = existingTaskCount === 0
-                    ? 'Inga läxor'
-                    : `${existingTaskCount} läx${existingTaskCount === 1 ? 'a' : 'or'}`;
 
                   return (
                     <motion.button
@@ -888,19 +883,11 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <span className={cn('w-2 h-2 rounded-full shrink-0', dotClass)} />
-                          <span>{homeworkText}</span>
+                        <DayLoadIndicator homeworkCount={existingTaskCount} activities={dayActivities} />
+                        <div className="mt-1 flex items-center gap-2">
                           {isToday && <span className="text-xs text-primary font-semibold">idag</span>}
                           {isWeekendDay && <span className="text-xs text-muted-foreground">helg</span>}
                         </div>
-                        {dayActivities.length > 0 && (
-                          <div className="text-xs text-muted-foreground mt-1 truncate">
-                            {dayActivities
-                              .map(a => `${a.emoji || '📌'} ${a.title}${a.start_time ? ` ${a.start_time.slice(0, 5)}` : ''}`)
-                              .join(' · ')}
-                          </div>
-                        )}
                       </div>
 
                       <div
@@ -923,7 +910,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               )}
               
               {/* Legend */}
-              {(homeworkType !== 'forhor' || planningMode === 'manual') && availableDays.length > 0 && (
+              {availableDays.length > 0 && (
                 <p className="text-xs text-muted-foreground text-center">
                   Grön = lugn dag · Gul = några läxor · Röd = full dag
                 </p>

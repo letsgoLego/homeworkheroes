@@ -15,6 +15,7 @@ import { SUBJECT_LABELS, SUBJECT_ICONS, HOMEWORK_TYPE_LABELS, Subject, HomeworkT
 import { getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
 import type { InboxHomework } from '@/hooks/queries/useHomeworkData';
 import { StudyPlanningModeChoice, type StudyPlanningMode } from '@/components/StudyPlanningModeChoice';
+import { DayLoadIndicator } from '@/components/DayLoadIndicator';
 import { StudyPlanTemplate, type StudyPlanRow } from '@/components/StudyPlanTemplate';
 
 interface PlanHomeworkSheetProps {
@@ -270,6 +271,8 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
           {homeworkType === 'forhor' && (
             <StudyPlanningModeChoice
               value={planningMode}
+              collapsible
+              onReset={() => setPlanningMode(null)}
               onChange={mode => {
                 setPlanningMode(mode);
                 if (mode === 'template' && !rows.some(row => row.dates.length > 0)) {
@@ -299,19 +302,18 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                   const selected = manualDays.includes(date);
                   const homeworkCount = taskCountsByDate[date] || 0;
                   const activities = getActivitiesForDate(homework.child_id, day);
-                  const busy = homeworkCount + activities.length;
-                  const dotClass = busy === 0 ? 'bg-success' : busy <= 2 ? 'bg-warning' : 'bg-destructive';
                   return (
                     <Button key={date} type="button" variant="outline" onClick={() => setManualDays(previous => previous.includes(date) ? previous.filter(item => item !== date) : [...previous, date].sort())} className={cn('h-auto min-h-20 justify-start p-3 text-left', selected && 'border-primary bg-primary/10 ring-1 ring-primary')}>
                       <span className="flex w-full items-center gap-3">
                         <span className="min-w-12"><span className="block text-xs capitalize text-muted-foreground">{format(day, 'EEE', { locale: sv })}</span><span className="font-bold">{format(day, 'd MMM', { locale: sv })}</span></span>
-                        <span className="min-w-0 flex-1"><span className="flex items-center gap-1.5 text-xs"><span className={cn('h-2 w-2 rounded-full', dotClass)} />{homeworkCount === 0 ? 'Inga läxor' : `${homeworkCount} läxor`}</span>{activities.length > 0 && <span className="block truncate text-xs font-normal text-muted-foreground">{activities.map(activity => `${activity.emoji || '📌'} ${activity.title}`).join(' · ')}</span>}</span>
+                        <span className="min-w-0 flex-1"><DayLoadIndicator homeworkCount={homeworkCount} activities={activities} /></span>
                         <span className={cn('flex h-6 w-6 items-center justify-center rounded-full border-2', selected && 'border-primary bg-primary text-primary-foreground')}>{selected && <Check className="h-3.5 w-3.5" />}</span>
                       </span>
                     </Button>
                   );
                 })}
               </div>
+              <p className="text-center text-xs text-muted-foreground">Grön = lugn dag · Gul = några läxor · Röd = full dag</p>
             </div>
           )}
 

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { DayLoadIndicator } from '@/components/DayLoadIndicator';
 import type { Activity } from '@/hooks/queries/useHomeworkData';
 import type { StudyTechnique } from '@/lib/studyTechniques';
 
@@ -151,15 +152,12 @@ export function StudyPlanTemplate({
                   const selected = activeRow.dates.includes(date);
                   const homeworkCount = taskCountsByDate[date] || 0;
                   const activities = getActivitiesForDay(day);
-                  const busy = homeworkCount + activities.length;
-                  const dotClass = busy === 0 ? 'bg-success' : busy <= 2 ? 'bg-warning' : 'bg-destructive';
                   return (
                     <Button key={date} type="button" variant="outline" onClick={() => toggleDate(date)} className={cn('h-auto min-h-24 justify-start whitespace-normal p-3 text-left', selected && 'border-primary bg-primary/10 ring-1 ring-primary')}>
                       <span className="flex w-full items-start gap-3">
                         <span className="min-w-10 text-center"><span className="block text-xs capitalize text-muted-foreground">{format(day, 'EEE', { locale: sv })}</span><span className="block text-lg font-bold">{format(day, 'd')}</span></span>
                         <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-1.5 text-xs"><span className={cn('h-2 w-2 rounded-full', dotClass)} />{homeworkCount === 0 ? 'Inga läxor' : `${homeworkCount} läxor`}</span>
-                          {activities.length > 0 && <span className="mt-1 block truncate text-xs font-normal text-muted-foreground">{activities.map(activity => `${activity.emoji || '📌'} ${activity.title}`).join(' · ')}</span>}
+                          <DayLoadIndicator homeworkCount={homeworkCount} activities={activities} />
                         </span>
                         <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2', selected && 'border-primary bg-primary text-primary-foreground')}>{selected && <Check className="h-3.5 w-3.5" />}</span>
                       </span>
@@ -167,6 +165,7 @@ export function StudyPlanTemplate({
                   );
                 })}
               </div>
+              {days.length > 0 && <p className="text-center text-xs text-muted-foreground">Grön = lugn dag · Gul = några läxor · Röd = full dag</p>}
               {days.length === 0 && <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Välj deadline för att se möjliga dagar.</p>}
             </>
           ) : (
