@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,19 @@ export interface StudyPlanRow {
   title: string;
   dates: string[];
 }
+
+// Fixed per-moment palette (index = moment position % palette length).
+// Full class strings so Tailwind picks them up.
+const MOMENT_COLORS = [
+  { dot: 'bg-teal-500', text: 'text-teal-600 dark:text-teal-400', ring: 'border-teal-500', softBg: 'bg-teal-500/10' },
+  { dot: 'bg-orange-500', text: 'text-orange-600 dark:text-orange-400', ring: 'border-orange-500', softBg: 'bg-orange-500/10' },
+  { dot: 'bg-violet-500', text: 'text-violet-600 dark:text-violet-400', ring: 'border-violet-500', softBg: 'bg-violet-500/10' },
+  { dot: 'bg-pink-500', text: 'text-pink-600 dark:text-pink-400', ring: 'border-pink-500', softBg: 'bg-pink-500/10' },
+  { dot: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400', ring: 'border-amber-500', softBg: 'bg-amber-500/10' },
+  { dot: 'bg-sky-500', text: 'text-sky-600 dark:text-sky-400', ring: 'border-sky-500', softBg: 'bg-sky-500/10' },
+] as const;
+
+const momentColor = (index: number) => MOMENT_COLORS[index % MOMENT_COLORS.length];
 
 interface StudyPlanTemplateProps {
   days: Date[];
@@ -94,22 +107,27 @@ export function StudyPlanTemplate({
             <p className="text-xs text-muted-foreground">Välj ett moment för att planera dess dagar.</p>
           </div>
           <div className="space-y-2">
-            {rows.map((row, index) => (
-              <div key={row.id} className={cn('rounded-lg border p-2', activeIndex === index && 'border-primary bg-primary/5')}>
-                <div className="flex items-center gap-2">
-                  <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start whitespace-normal px-2 text-left" onClick={() => setActiveIndex(index)}>
-                    <span className="mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{index + 1}</span>
-                    <span className="truncate">{row.title}</span>
-                  </Button>
-                  <Button type="button" size="icon" variant="ghost" className="h-8 w-8" disabled={index === 0} onClick={() => moveRow(index, -1)} aria-label="Flytta upp"><ArrowUp className="h-4 w-4" /></Button>
-                  <Button type="button" size="icon" variant="ghost" className="h-8 w-8" disabled={index === rows.length - 1} onClick={() => moveRow(index, 1)} aria-label="Flytta ner"><ArrowDown className="h-4 w-4" /></Button>
-                  <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => removeRow(index)} aria-label="Ta bort moment"><X className="h-4 w-4" /></Button>
+            {rows.map((row, index) => {
+              const color = momentColor(index);
+              return (
+                <div key={row.id} className={cn('rounded-lg border p-2', activeIndex === index && 'border-primary bg-primary/5')}>
+                  <div className="flex items-center gap-2">
+                    <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start whitespace-normal px-2 text-left" onClick={() => setActiveIndex(index)}>
+                      <span className={cn('mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white', color.dot)}>{index + 1}</span>
+                      <span className="truncate">{row.title}</span>
+                    </Button>
+                    <Button type="button" size="icon" variant="ghost" className="h-8 w-8" disabled={index === 0} onClick={() => moveRow(index, -1)} aria-label="Flytta upp"><ArrowUp className="h-4 w-4" /></Button>
+                    <Button type="button" size="icon" variant="ghost" className="h-8 w-8" disabled={index === rows.length - 1} onClick={() => moveRow(index, 1)} aria-label="Flytta ner"><ArrowDown className="h-4 w-4" /></Button>
+                    <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => removeRow(index)} aria-label="Ta bort moment"><X className="h-4 w-4" /></Button>
+                  </div>
+                  <p className={cn('pl-10 text-xs', row.dates.length ? color.text : 'text-destructive')}>
+                    {row.dates.length
+                      ? row.dates.map(d => format(parseISO(d), 'EEE d', { locale: sv })).join(', ')
+                      : 'Saknar dag'}
+                  </p>
                 </div>
-                <p className={cn('pl-10 text-xs', row.dates.length ? 'text-muted-foreground' : 'text-destructive')}>
-                  {row.dates.length ? `${row.dates.length} dagar valda` : 'Saknar dag'}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="space-y-2">
@@ -152,20 +170,46 @@ export function StudyPlanTemplate({
                   const selected = activeRow.dates.includes(date);
                   const homeworkCount = taskCountsByDate[date] || 0;
                   const activities = getActivitiesForDay(day);
+                  const momentsOnDate = rows
+                    .map((row, index) => ({ row, index }))
+                    .filter(({ row }) => row.dates.includes(date));
+                  const activeColor = momentColor(activeIndex);
                   return (
-                    <Button key={date} type="button" variant="outline" onClick={() => toggleDate(date)} className={cn('h-auto min-h-24 justify-start whitespace-normal p-3 text-left', selected && 'border-primary bg-primary/10 ring-1 ring-primary')}>
-                      <span className="flex w-full items-start gap-3">
-                        <span className="min-w-10 text-center"><span className="block text-xs capitalize text-muted-foreground">{format(day, 'EEE', { locale: sv })}</span><span className="block text-lg font-bold">{format(day, 'd')}</span></span>
-                        <span className="min-w-0 flex-1">
-                          <DayLoadIndicator homeworkCount={homeworkCount} activities={activities} />
+                    <Button key={date} type="button" variant="outline" onClick={() => toggleDate(date)} className={cn('h-auto min-h-24 justify-start whitespace-normal p-3 text-left', selected && cn(activeColor.ring, activeColor.softBg, 'ring-1', activeColor.ring.replace('border-', 'ring-')))}>
+                      <span className="flex w-full flex-col gap-2">
+                        <span className="flex w-full items-start gap-3">
+                          <span className="min-w-10 text-center"><span className="block text-xs capitalize text-muted-foreground">{format(day, 'EEE', { locale: sv })}</span><span className="block text-lg font-bold">{format(day, 'd')}</span></span>
+                          <span className="min-w-0 flex-1">
+                            <DayLoadIndicator homeworkCount={homeworkCount} activities={activities} />
+                          </span>
+                          <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2', selected && cn(activeColor.ring, activeColor.dot, 'text-white'))}>{selected && <Check className="h-3.5 w-3.5" />}</span>
                         </span>
-                        <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2', selected && 'border-primary bg-primary text-primary-foreground')}>{selected && <Check className="h-3.5 w-3.5" />}</span>
+                        {momentsOnDate.length > 0 && (
+                          <span className="flex flex-wrap items-center gap-1">
+                            {momentsOnDate.map(({ index }) => {
+                              const color = momentColor(index);
+                              const isActive = index === activeIndex;
+                              return (
+                                <span
+                                  key={rows[index].id}
+                                  title={rows[index].title}
+                                  className={cn(
+                                    'flex items-center justify-center rounded-full text-[10px] font-bold',
+                                    isActive ? cn('h-6 w-6 text-white ring-2 ring-offset-1', color.dot, color.ring.replace('border-', 'ring-')) : cn('h-5 w-5 border bg-background', color.ring, color.text),
+                                  )}
+                                >
+                                  {index + 1}
+                                </span>
+                              );
+                            })}
+                          </span>
+                        )}
                       </span>
                     </Button>
                   );
                 })}
               </div>
-              {days.length > 0 && <p className="text-center text-xs text-muted-foreground">Grön = lugn dag · Gul = några läxor · Röd = full dag</p>}
+              {days.length > 0 && <p className="text-center text-xs text-muted-foreground">Grön = lugn dag · Gul = några läxor · Röd = full dag · Siffrorna visar vilka moment dagen tillhör</p>}
               {days.length === 0 && <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Välj deadline för att se möjliga dagar.</p>}
             </>
           ) : (
