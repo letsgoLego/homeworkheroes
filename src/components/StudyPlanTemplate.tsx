@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,19 @@ export interface StudyPlanRow {
   title: string;
   dates: string[];
 }
+
+// Fixed per-moment palette (index = moment position % palette length).
+// Full class strings so Tailwind picks them up.
+const MOMENT_COLORS = [
+  { dot: 'bg-teal-500', text: 'text-teal-600 dark:text-teal-400', ring: 'border-teal-500', softBg: 'bg-teal-500/10' },
+  { dot: 'bg-orange-500', text: 'text-orange-600 dark:text-orange-400', ring: 'border-orange-500', softBg: 'bg-orange-500/10' },
+  { dot: 'bg-violet-500', text: 'text-violet-600 dark:text-violet-400', ring: 'border-violet-500', softBg: 'bg-violet-500/10' },
+  { dot: 'bg-pink-500', text: 'text-pink-600 dark:text-pink-400', ring: 'border-pink-500', softBg: 'bg-pink-500/10' },
+  { dot: 'bg-amber-500', text: 'text-amber-600 dark:text-amber-400', ring: 'border-amber-500', softBg: 'bg-amber-500/10' },
+  { dot: 'bg-sky-500', text: 'text-sky-600 dark:text-sky-400', ring: 'border-sky-500', softBg: 'bg-sky-500/10' },
+] as const;
+
+const momentColor = (index: number) => MOMENT_COLORS[index % MOMENT_COLORS.length];
 
 interface StudyPlanTemplateProps {
   days: Date[];
