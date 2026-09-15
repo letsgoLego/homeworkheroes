@@ -822,6 +822,8 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               {homeworkType === 'forhor' && (
                 <StudyPlanningModeChoice
                   value={planningMode}
+                  collapsible
+                  onReset={() => setPlanningMode(null)}
                   onChange={mode => {
                     setPlanningMode(mode);
                     if (mode === 'template' && studyParts.length === 0) {
