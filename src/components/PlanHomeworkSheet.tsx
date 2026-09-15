@@ -270,6 +270,8 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
           {homeworkType === 'forhor' && (
             <StudyPlanningModeChoice
               value={planningMode}
+              collapsible
+              onReset={() => setPlanningMode(null)}
               onChange={mode => {
                 setPlanningMode(mode);
                 if (mode === 'template' && !rows.some(row => row.dates.length > 0)) {

@@ -20,6 +20,7 @@ import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
 import { celebrateTask } from '@/lib/confetti';
 import { track } from '@/lib/analytics';
+import { DayLoadIndicator } from '@/components/DayLoadIndicator';
 
 interface AddHomeworkProps {
   open: boolean;
