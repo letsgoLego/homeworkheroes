@@ -170,14 +170,40 @@ export function StudyPlanTemplate({
                   const selected = activeRow.dates.includes(date);
                   const homeworkCount = taskCountsByDate[date] || 0;
                   const activities = getActivitiesForDay(day);
+                  const momentsOnDate = rows
+                    .map((row, index) => ({ row, index }))
+                    .filter(({ row }) => row.dates.includes(date));
+                  const activeColor = momentColor(activeIndex);
                   return (
-                    <Button key={date} type="button" variant="outline" onClick={() => toggleDate(date)} className={cn('h-auto min-h-24 justify-start whitespace-normal p-3 text-left', selected && 'border-primary bg-primary/10 ring-1 ring-primary')}>
-                      <span className="flex w-full items-start gap-3">
-                        <span className="min-w-10 text-center"><span className="block text-xs capitalize text-muted-foreground">{format(day, 'EEE', { locale: sv })}</span><span className="block text-lg font-bold">{format(day, 'd')}</span></span>
-                        <span className="min-w-0 flex-1">
-                          <DayLoadIndicator homeworkCount={homeworkCount} activities={activities} />
+                    <Button key={date} type="button" variant="outline" onClick={() => toggleDate(date)} className={cn('h-auto min-h-24 justify-start whitespace-normal p-3 text-left', selected && cn(activeColor.ring, activeColor.softBg, 'ring-1', activeColor.ring.replace('border-', 'ring-')))}>
+                      <span className="flex w-full flex-col gap-2">
+                        <span className="flex w-full items-start gap-3">
+                          <span className="min-w-10 text-center"><span className="block text-xs capitalize text-muted-foreground">{format(day, 'EEE', { locale: sv })}</span><span className="block text-lg font-bold">{format(day, 'd')}</span></span>
+                          <span className="min-w-0 flex-1">
+                            <DayLoadIndicator homeworkCount={homeworkCount} activities={activities} />
+                          </span>
+                          <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2', selected && cn(activeColor.ring, activeColor.dot, 'text-white'))}>{selected && <Check className="h-3.5 w-3.5" />}</span>
                         </span>
-                        <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2', selected && 'border-primary bg-primary text-primary-foreground')}>{selected && <Check className="h-3.5 w-3.5" />}</span>
+                        {momentsOnDate.length > 0 && (
+                          <span className="flex flex-wrap items-center gap-1">
+                            {momentsOnDate.map(({ index }) => {
+                              const color = momentColor(index);
+                              const isActive = index === activeIndex;
+                              return (
+                                <span
+                                  key={rows[index].id}
+                                  title={rows[index].title}
+                                  className={cn(
+                                    'flex items-center justify-center rounded-full text-[10px] font-bold',
+                                    isActive ? cn('h-6 w-6 text-white ring-2 ring-offset-1', color.dot, color.ring.replace('border-', 'ring-')) : cn('h-5 w-5 border bg-background', color.ring, color.text),
+                                  )}
+                                >
+                                  {index + 1}
+                                </span>
+                              );
+                            })}
+                          </span>
+                        )}
                       </span>
                     </Button>
                   );
