@@ -103,9 +103,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
   const isManualExam = homeworkType === 'forhor' && planningMode === 'manual';
   const allPlanned = isTemplate
     ? rows.length > 0 && rows.every(row => row.dates.length > 0)
-    : isManualExam
-      ? manualDays.length > 0
-      : rows.length > 0 && rows.every(row => row.dates.length > 0);
+    : manualDays.length > 0;
   const sessionCount = isTemplate ? rows.reduce((sum, row) => sum + row.dates.length, 0) : manualDays.length;
   const canSave = allPlanned && !!dueDate && (homeworkType !== 'forhor' || planningMode !== null);
   const edited =
@@ -144,7 +142,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     }
     const ok = await planHomework(
       homework.id,
-      isManualExam
+      !isTemplate
         ? manualDays.map(date => ({ title: finalTitle, date }))
         : rows.flatMap(r => r.dates.map(date => ({ title: `${finalTitle} – ${r.title.trim() || finalTitle}`, date })))
     );
@@ -292,7 +290,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
             />
           )}
 
-          {isManualExam && (
+          {!isTemplate && (homeworkType !== 'forhor' || isManualExam) && (
             <div className="space-y-3">
               <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><p className="font-medium">Välj pluggdagar</p></div>
               <div className="grid gap-2 sm:grid-cols-2">
