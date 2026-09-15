@@ -77,7 +77,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
     const hwSubject = homework.subject as Subject;
     const hwType = (homework.homework_type as HomeworkType) || 'inlamning';
     const suggestions = getStudyTechniqueSuggestions(hwSubject, hwType);
-    let base: PlanRow[] = [];
+    let base: StudyPlanRow[] = [];
     if (homework.planItems.length > 0) {
       base = homework.planItems.map(item => ({ id: crypto.randomUUID(), title: item.title, dates: [] }));
     } else {
