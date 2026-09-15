@@ -313,6 +313,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
                   );
                 })}
               </div>
+              <p className="text-center text-xs text-muted-foreground">Grön = lugn dag · Gul = några läxor · Röd = full dag</p>
             </div>
           )}
 
