@@ -28,11 +28,11 @@ export function StudyPlanningModeChoice({ value, onChange, collapsible, onReset 
             <ListChecks className="h-4 w-4 shrink-0 text-primary" />
           )}
           <span className="truncate">
-            <span className="text-muted-foreground">Planeringssätt: </span>
+            <span className="hidden text-muted-foreground sm:inline">Planeringssätt: </span>
             <span className="font-medium">{LABELS[value]}</span>
           </span>
         </span>
-        <Button type="button" variant="ghost" size="sm" className="shrink-0" onClick={onReset}>
+        <Button type="button" variant="ghost" size="sm" className="shrink-0 px-2" onClick={onReset}>
           Byt
         </Button>
       </div>
