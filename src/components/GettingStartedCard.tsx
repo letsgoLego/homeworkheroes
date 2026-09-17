@@ -74,6 +74,7 @@ export function GettingStartedCard({ children, homeworkCount, onAddChild }: Prop
   );
 
   const doneCount = steps.filter((s) => s.done).length;
+  if (notificationsLoading) return null;
   if (doneCount === steps.length) return null;
 
   const next = steps.find((s) => !s.done)!;
