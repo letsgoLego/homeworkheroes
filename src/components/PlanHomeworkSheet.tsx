@@ -278,8 +278,13 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
               onReset={() => setPlanningMode(null)}
               onChange={mode => {
                 setPlanningMode(mode);
-                if (mode === 'template' && !rows.some(row => row.dates.length > 0)) {
-                  setRows(buildSuggestedPlan(days, studyTechniqueSuggestions));
+                if (mode === 'template') {
+                  if (!rows.some(row => row.dates.length > 0)) {
+                    setRows(buildSuggestedPlan(days, studyTechniqueSuggestions));
+                  }
+                  toast.success('Vi har föreslagit ett upplägg', {
+                    description: 'Förstå först, träna två gånger och repetera nära förhöret.',
+                  });
                 }
               }}
             />

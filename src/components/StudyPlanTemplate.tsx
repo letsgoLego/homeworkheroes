@@ -37,6 +37,8 @@ const MOMENT_COLORS = [
 
 const momentColor = (index: number) => MOMENT_COLORS[index % MOMENT_COLORS.length];
 
+const STUDY_PHASES: StudyPhase[] = ['understand', 'practice', 'review'];
+
 interface StudyPlanTemplateProps {
   days: Date[];
   rows: StudyPlanRow[];
@@ -66,6 +68,7 @@ export function StudyPlanTemplate({
   const activeRow = rows[activeIndex];
   const sessions = useMemo(() => rows.reduce((sum, row) => sum + row.dates.length, 0), [rows]);
   const missing = rows.filter(row => row.dates.length === 0).length;
+  const completedRows = rows.length - missing;
 
   const phaseByLabel = useMemo(() => {
     const map = new Map<string, StudyPhase>();
@@ -81,8 +84,8 @@ export function StudyPlanTemplate({
     if (plan.length === 0) return;
     onRowsChange(plan);
     setActiveIndex(0);
-    toast.success(`Upplägg föreslaget – ${plan.length} moment tillagda`, {
-      description: 'Välj dagarna för varje moment nedan.',
+    toast.success('Vi har föreslagit ett upplägg', {
+      description: 'Förstå först, träna två gånger och repetera nära förhöret.',
     });
     setTimeout(() => {
       activeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -140,10 +143,51 @@ export function StudyPlanTemplate({
           </p>
           <Button type="button" size="sm" variant="secondary" onClick={applySuggestedPlan} disabled={suggestions.length === 0}>
             <Wand2 className="mr-1.5 h-4 w-4" />
-            Föreslå upplägg
+            {rows.length > 0 ? 'Gör om förslag' : 'Föreslå upplägg'}
           </Button>
         </div>
       </div>
+
+      {rows.length > 0 && (
+        <div className="space-y-3 md:hidden">
+          <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted/40 p-1 text-[11px] font-medium">
+            <span className="rounded-md bg-background px-2 py-1 text-center text-primary">1 Moment</span>
+            <span className="rounded-md bg-background px-2 py-1 text-center text-primary">2 Dagar</span>
+            <span className="rounded-md bg-background px-2 py-1 text-center text-muted-foreground">3 Klart</span>
+          </div>
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+            <p className="text-sm font-semibold text-primary">Förslag: förstå först, träna två gånger, repetera nära förhöret.</p>
+            <p className="mt-1 text-xs text-muted-foreground">{completedRows}/{rows.length} moment har valda dagar.</p>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {rows.map((row, index) => {
+              const color = momentColor(index);
+              const selected = activeIndex === index;
+              const phase = phaseByLabel.get(row.title);
+              return (
+                <Button
+                  key={row.id}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setActiveIndex(index);
+                    activeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className={cn(
+                    'h-auto min-w-24 flex-col items-center gap-1 whitespace-normal px-2 py-2 text-center',
+                    selected && 'border-primary bg-primary/10 ring-1 ring-primary'
+                  )}
+                >
+                  <span className={cn('flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold', selected ? cn(color.dot, 'text-primary-foreground') : cn('border bg-background', color.ring, color.text))}>{index + 1}</span>
+                  <span className="line-clamp-1 max-w-full text-[11px] font-semibold">{phase ? STUDY_PHASE_LABELS[phase] : 'Moment'}</span>
+                  <span className={cn('text-[10px] font-normal', row.dates.length ? 'text-primary' : 'text-muted-foreground')}>{row.dates.length ? 'Klar' : 'Välj dag'}</span>
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {rows.length > 0 && !hasPracticeRow && (
         <p className="flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs">
@@ -161,7 +205,7 @@ export function StudyPlanTemplate({
 
       <div className="grid gap-5 md:grid-cols-[minmax(240px,0.8fr)_minmax(0,1.6fr)]">
 
-        <section className="order-2 space-y-3 md:order-1">
+        <section className="hidden space-y-3 md:order-1 md:block">
           <div>
             <h3 className="font-semibold">Momentens ordning</h3>
             <p className="text-xs text-muted-foreground">Välj ett moment för att planera dess dagar.</p>
@@ -208,7 +252,7 @@ export function StudyPlanTemplate({
           </div>
 
           <div className="space-y-3">
-            {(['understand', 'practice', 'review'] as StudyPhase[]).map(phase => {
+            {STUDY_PHASES.map(phase => {
               const items = suggestions.filter(
                 item => item.phase === phase && !rows.some(row => row.title === item.label)
               );
@@ -246,9 +290,14 @@ export function StudyPlanTemplate({
         <section ref={activeSectionRef} className="order-1 scroll-mt-24 space-y-4 md:order-2">
           {activeRow ? (
             <>
-              <div className="space-y-2">
+              <div className="space-y-2 rounded-lg border bg-muted/30 p-3 md:border-0 md:bg-transparent md:p-0">
                 <div className="flex items-center justify-between gap-2">
-                  <Label htmlFor="active-study-part">Moment {activeIndex + 1}</Label>
+                  <div className="min-w-0">
+                    <Label htmlFor="active-study-part">Aktivt moment {activeIndex + 1}</Label>
+                    {phaseByLabel.get(activeRow.title) && (
+                      <p className="text-xs text-muted-foreground">{STUDY_PHASE_LABELS[phaseByLabel.get(activeRow.title) as StudyPhase]}</p>
+                    )}
+                  </div>
                   <div className="flex gap-1 md:hidden">
                     <Button type="button" size="icon" variant="outline" disabled={activeIndex === 0} onClick={() => setActiveIndex(value => value - 1)} aria-label="Föregående moment"><ArrowLeft className="h-4 w-4" /></Button>
                     <Button type="button" size="icon" variant="outline" disabled={activeIndex === rows.length - 1} onClick={() => setActiveIndex(value => value + 1)} aria-label="Nästa moment"><ArrowRight className="h-4 w-4" /></Button>
@@ -307,6 +356,76 @@ export function StudyPlanTemplate({
               </div>
               {days.length > 0 && <p className="text-center text-xs text-muted-foreground">Grön = lugn dag · Gul = några läxor · Röd = full dag · Siffrorna visar vilka moment dagen tillhör</p>}
               {days.length === 0 && <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">Välj deadline för att se möjliga dagar.</p>}
+              {rows.length > 1 && (
+                <div className="grid grid-cols-2 gap-2 md:hidden">
+                  <Button type="button" variant="outline" disabled={activeIndex === 0} onClick={() => setActiveIndex(value => Math.max(0, value - 1))}>
+                    <ArrowLeft className="mr-1.5 h-4 w-4" />
+                    Föregående
+                  </Button>
+                  <Button type="button" variant="secondary" disabled={activeIndex === rows.length - 1} onClick={() => setActiveIndex(value => Math.min(rows.length - 1, value + 1))}>
+                    Nästa moment
+                    <ArrowRight className="ml-1.5 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <details className="rounded-lg border bg-muted/30 p-3 md:hidden">
+                <summary className="text-sm font-semibold">Ändra eller lägg till moment</summary>
+                <div className="mt-3 space-y-3">
+                  <div className="space-y-2">
+                    {rows.map((row, index) => {
+                      const color = momentColor(index);
+                      return (
+                        <div key={row.id} className={cn('rounded-lg border bg-background p-2', activeIndex === index && 'border-primary bg-primary/5')}>
+                          <div className="flex items-center gap-2">
+                            <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start whitespace-normal px-2 text-left" onClick={() => setActiveIndex(index)}>
+                              <span className={cn('mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-primary-foreground', color.dot)}>{index + 1}</span>
+                              <span className="min-w-0 flex-1 truncate">{row.title}</span>
+                            </Button>
+                            <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => removeRow(index)} aria-label="Ta bort moment"><X className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-study-part-mobile">Lägg till eget moment</Label>
+                    <div className="flex gap-2">
+                      <Input id="new-study-part-mobile" value={newTitle} onChange={event => setNewTitle(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); addCustomRow(); } }} placeholder="t.ex. Träna svåra ord" />
+                      <Button type="button" size="icon" variant="secondary" onClick={addCustomRow} aria-label="Lägg till moment"><Plus className="h-4 w-4" /></Button>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {STUDY_PHASES.map(phase => {
+                      const items = suggestions.filter(
+                        item => item.phase === phase && !rows.some(row => row.title === item.label)
+                      );
+                      if (items.length === 0) return null;
+                      return (
+                        <div key={phase} className="space-y-1.5">
+                          <p className="text-xs font-semibold">{STUDY_PHASE_LABELS[phase]}</p>
+                          <div className="flex flex-wrap gap-2">
+                            {items.map(item => (
+                              <Button
+                                key={item.id}
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                title={item.why}
+                                onClick={() => {
+                                  onRowsChange([...rows, { id: crypto.randomUUID(), title: item.label, dates: [] }]);
+                                  setActiveIndex(rows.length);
+                                }}
+                              >
+                                {item.icon} {item.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </details>
             </>
           ) : (
             <div className="rounded-lg border border-dashed p-8 text-center">

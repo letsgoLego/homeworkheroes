@@ -813,7 +813,11 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               <div className="p-3 rounded-xl bg-primary/5 border border-primary/20">
                 <p className="text-sm font-medium">
                   {availableDays.length > 0 ? (
-                    <>Du har {availableDays.length} dagar på dig – välj själv vilka dagar du pluggar.</>
+                    homeworkType === 'forhor' ? (
+                      <>Du har {availableDays.length} dagar på dig – välj dagar själv eller få hjälp att planera.</>
+                    ) : (
+                      <>Du har {availableDays.length} dagar på dig – välj själv vilka dagar du pluggar.</>
+                    )
                   ) : (
                     <>Inga dagar före deadline</>
                   )}
@@ -830,8 +834,13 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   onReset={() => setPlanningMode(null)}
                   onChange={mode => {
                     setPlanningMode(mode);
-                    if (mode === 'template' && studyParts.length === 0) {
-                      setStudyParts(buildSuggestedPlan(availableDays, studyTechniqueSuggestions));
+                    if (mode === 'template') {
+                      if (studyParts.length === 0) {
+                        setStudyParts(buildSuggestedPlan(availableDays, studyTechniqueSuggestions));
+                      }
+                      toast.success('Vi har föreslagit ett upplägg', {
+                        description: 'Förstå först, träna två gånger och repetera nära förhöret.',
+                      });
                     }
 
                   }}
