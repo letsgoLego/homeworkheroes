@@ -33,7 +33,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
+
+        // Log actual sign-ins (SIGNED_IN = real login, not session restore)
+        if (event === 'SIGNED_IN' && session?.user) {
+          const s = session.user;
+          setTimeout(() => {
+            supabase.from('login_events').insert({
+              user_id: s.id,
+              email: s.email ?? null,
+            }).then(({ error }) => {
+              if (error) console.warn('[Auth] login_events insert failed:', error.message);
+            });
+          }, 0);
+        }
+
         // Only redirect on explicit sign out — ignore transient token refresh failures
         // so users aren't kicked out during temporary network issues.
         if (event === 'SIGNED_OUT') {
