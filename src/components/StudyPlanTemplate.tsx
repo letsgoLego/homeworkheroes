@@ -161,13 +161,22 @@ export function StudyPlanTemplate({
           <div className="space-y-2">
             {rows.map((row, index) => {
               const color = momentColor(index);
+              const phase = phaseByLabel.get(row.title);
               return (
                 <div key={row.id} className={cn('rounded-lg border p-2', activeIndex === index && 'border-primary bg-primary/5')}>
                   <div className="flex items-center gap-2">
                     <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start whitespace-normal px-2 text-left" onClick={() => setActiveIndex(index)}>
                       <span className={cn('mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white', color.dot)}>{index + 1}</span>
-                      <span className="truncate">{row.title}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate">{row.title}</span>
+                        {phase && (
+                          <span className="block text-[11px] font-normal text-muted-foreground">
+                            {STUDY_PHASE_LABELS[phase]}
+                          </span>
+                        )}
+                      </span>
                     </Button>
+
                     <Button type="button" size="icon" variant="ghost" className="h-8 w-8" disabled={index === 0} onClick={() => moveRow(index, -1)} aria-label="Flytta upp"><ArrowUp className="h-4 w-4" /></Button>
                     <Button type="button" size="icon" variant="ghost" className="h-8 w-8" disabled={index === rows.length - 1} onClick={() => moveRow(index, 1)} aria-label="Flytta ner"><ArrowDown className="h-4 w-4" /></Button>
                     <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => removeRow(index)} aria-label="Ta bort moment"><X className="h-4 w-4" /></Button>
