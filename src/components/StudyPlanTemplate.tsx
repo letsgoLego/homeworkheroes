@@ -65,6 +65,23 @@ export function StudyPlanTemplate({
   const sessions = useMemo(() => rows.reduce((sum, row) => sum + row.dates.length, 0), [rows]);
   const missing = rows.filter(row => row.dates.length === 0).length;
 
+  const phaseByLabel = useMemo(() => {
+    const map = new Map<string, StudyPhase>();
+    suggestions.forEach(item => map.set(item.label, item.phase));
+    return map;
+  }, [suggestions]);
+
+  const hasPracticeRow = rows.some(row => phaseByLabel.get(row.title) === 'practice');
+  const singleDayRows = rows.filter(row => row.dates.length === 1).length;
+
+  const applySuggestedPlan = () => {
+    const plan = buildSuggestedPlan(days, suggestions);
+    if (plan.length === 0) return;
+    onRowsChange(plan);
+    setActiveIndex(0);
+  };
+
+
   const updateRow = (index: number, patch: Partial<StudyPlanRow>) => {
     onRowsChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
   };
