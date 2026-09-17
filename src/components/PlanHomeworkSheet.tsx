@@ -157,6 +157,9 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
           sessions: sessionCount,
           subject,
           flow: 'child',
+          phases: [...new Set(rows
+            .map(row => studyTechniqueSuggestions.find(s => s.label === row.title)?.phase)
+            .filter(Boolean))].join(','),
         });
       }
       setInitialisedFor(null);
