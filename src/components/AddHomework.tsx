@@ -828,12 +828,9 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   onChange={mode => {
                     setPlanningMode(mode);
                     if (mode === 'template' && studyParts.length === 0) {
-                      setStudyParts(studyTechniqueSuggestions.slice(0, 5).map(item => ({
-                        id: crypto.randomUUID(),
-                        title: item.label,
-                        dates: [],
-                      })));
+                      setStudyParts(buildSuggestedPlan(availableDays, studyTechniqueSuggestions));
                     }
+
                   }}
                 />
               )}
