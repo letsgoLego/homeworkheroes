@@ -40,6 +40,10 @@ Sista momentet i föreslaget upplägg blir "Sista koll – vad är svårast?" s�
 - Kort rad i mallen: "Upplägget bygger på forskning om testbaserat lärande och spridd repetition."
 - Ny/uppdaterad SEO-text på `/tips/studieteknik-barn` med samma tre faser och länkar till källorna, samt en rad i `FEATURES.md`.
 
+### 6. Hemsidan berättar om den beprövade studietekniken
+På landningssidan (`LandingPage.tsx`) läggs ett eget avsnitt in: **"Beprövad studieteknik – samma forskning som skolan lutar sig mot"**, med de tre faserna Förstå / Träna / Repetera, en kort mening om testbaserat lärande och spridd repetition, källhänvisning till forskningssammanställningar spridda av Skolverket och en länk vidare till studieteknik-guiden. Samma budskap kortas ner till en mening i hero-texten och i sidans metabeskrivning så det syns i sökresultat.
+
+
 ## Teknisk sammanfattning
 
 - `src/lib/studyTechniques.ts`: lägg till `phase: 'understand' | 'practice' | 'review'` och `why`-text på `StudyTechnique`; behåll `getStudyTechniqueSuggestions` men sortera per fas; ny hjälpfunktion `buildSuggestedPlan(days, suggestions)` som returnerar `StudyPlanRow[]` med spridda datum.
