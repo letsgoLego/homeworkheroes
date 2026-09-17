@@ -47,6 +47,7 @@ import TerminsstartChecklistaPage from "./pages/seo/TerminsstartChecklistaPage";
 import SkolstartRutinerPage from "./pages/seo/SkolstartRutinerPage";
 import SkolmaterialPacklistaPage from "./pages/seo/SkolmaterialPacklistaPage";
 import PlaneraLaxorForaldrarPage from "./pages/seo/PlaneraLaxorForaldrarPage";
+import UnsubscribePage from "./pages/UnsubscribePage";
 
 
 const queryClient = new QueryClient();
@@ -132,6 +133,7 @@ function AppRoutes() {
       <Route path="/tips/terminsstart-checklista" element={<TerminsstartChecklistaPage />} />
       <Route path="/tips/skolstart-rutiner" element={<SkolstartRutinerPage />} />
       <Route path="/tips/skolmaterial-packlista" element={<SkolmaterialPacklistaPage />} />
+      <Route path="/unsubscribe" element={<UnsubscribePage />} />
       <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
       <Route path="/join-family" element={<ProtectedRoute><JoinFamilyPage /></ProtectedRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
