@@ -1,14 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Plus, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Info, Lightbulb, Plus, Wand2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { DayLoadIndicator } from '@/components/DayLoadIndicator';
 import type { Activity } from '@/hooks/queries/useHomeworkData';
-import type { StudyTechnique } from '@/lib/studyTechniques';
+import {
+  buildSuggestedPlan,
+  STUDY_PHASE_HINTS,
+  STUDY_PHASE_LABELS,
+  type StudyPhase,
+  type StudyTechnique,
+} from '@/lib/studyTechniques';
+
 
 export interface StudyPlanRow {
   id: string;
