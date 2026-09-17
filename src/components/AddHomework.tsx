@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
-import { getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
+import { buildSuggestedPlan, getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
 import { StudyPlanningModeChoice, type StudyPlanningMode } from '@/components/StudyPlanningModeChoice';
 import { StudyPlanTemplate } from '@/components/StudyPlanTemplate';
 import { useFamily } from '@/hooks/useFamily';
