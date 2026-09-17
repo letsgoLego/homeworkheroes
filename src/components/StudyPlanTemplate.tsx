@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Info, Lightbulb, Plus, Wand2, X } from 'lucide-react';
@@ -55,6 +56,7 @@ export function StudyPlanTemplate({
 }: StudyPlanTemplateProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [newTitle, setNewTitle] = useState('');
+  const activeSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (rows.length === 0) setActiveIndex(0);
@@ -79,6 +81,12 @@ export function StudyPlanTemplate({
     if (plan.length === 0) return;
     onRowsChange(plan);
     setActiveIndex(0);
+    toast.success(`Upplägg föreslaget – ${plan.length} moment tillagda`, {
+      description: 'Välj dagarna för varje moment nedan.',
+    });
+    setTimeout(() => {
+      activeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
 
@@ -125,7 +133,7 @@ export function StudyPlanTemplate({
           <div><p className="text-xs text-muted-foreground">Saknar dag</p><p className={cn('font-bold', missing > 0 && 'text-destructive')}>{missing}</p></div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+          <p className="hidden items-start gap-1.5 text-xs text-muted-foreground md:flex">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             Upplägget bygger på forskning om testbaserat lärande och spridd repetition – samma
             studieteknik som skolan lutar sig mot.
@@ -153,7 +161,7 @@ export function StudyPlanTemplate({
 
       <div className="grid gap-5 md:grid-cols-[minmax(240px,0.8fr)_minmax(0,1.6fr)]">
 
-        <section className="space-y-3">
+        <section className="order-2 space-y-3 md:order-1">
           <div>
             <h3 className="font-semibold">Momentens ordning</h3>
             <p className="text-xs text-muted-foreground">Välj ett moment för att planera dess dagar.</p>
@@ -165,7 +173,7 @@ export function StudyPlanTemplate({
               return (
                 <div key={row.id} className={cn('rounded-lg border p-2', activeIndex === index && 'border-primary bg-primary/5')}>
                   <div className="flex items-center gap-2">
-                    <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start whitespace-normal px-2 text-left" onClick={() => setActiveIndex(index)}>
+                    <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start whitespace-normal px-2 text-left" onClick={() => { setActiveIndex(index); activeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
                       <span className={cn('mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white', color.dot)}>{index + 1}</span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate">{row.title}</span>
@@ -235,7 +243,7 @@ export function StudyPlanTemplate({
 
         </section>
 
-        <section className="space-y-4">
+        <section ref={activeSectionRef} className="order-1 scroll-mt-24 space-y-4 md:order-2">
           {activeRow ? (
             <>
               <div className="space-y-2">
@@ -252,7 +260,7 @@ export function StudyPlanTemplate({
                 <h3 className="font-semibold">Vilka dagar görs momentet?</h3>
                 <p className="text-xs text-muted-foreground">Välj gärna flera dagar för repetition.</p>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
                 {days.map(day => {
                   const date = format(day, 'yyyy-MM-dd');
                   const selected = activeRow.dates.includes(date);
