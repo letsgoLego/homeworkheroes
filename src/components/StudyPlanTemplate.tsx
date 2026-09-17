@@ -118,13 +118,41 @@ export function StudyPlanTemplate({
 
   return (
     <div className="space-y-4">
-      <div className="sticky top-0 z-10 grid grid-cols-3 gap-2 rounded-lg border bg-background p-3 shadow-sm">
-        <div><p className="text-xs text-muted-foreground">Moment</p><p className="font-bold">{rows.length}</p></div>
-        <div><p className="text-xs text-muted-foreground">Pluggtillfällen</p><p className="font-bold">{sessions}</p></div>
-        <div><p className="text-xs text-muted-foreground">Saknar dag</p><p className={cn('font-bold', missing > 0 && 'text-destructive')}>{missing}</p></div>
+      <div className="sticky top-0 z-10 space-y-3 rounded-lg border bg-background p-3 shadow-sm">
+        <div className="grid grid-cols-3 gap-2">
+          <div><p className="text-xs text-muted-foreground">Moment</p><p className="font-bold">{rows.length}</p></div>
+          <div><p className="text-xs text-muted-foreground">Pluggtillfällen</p><p className="font-bold">{sessions}</p></div>
+          <div><p className="text-xs text-muted-foreground">Saknar dag</p><p className={cn('font-bold', missing > 0 && 'text-destructive')}>{missing}</p></div>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            Upplägget bygger på forskning om testbaserat lärande och spridd repetition – samma
+            studieteknik som skolan lutar sig mot.
+          </p>
+          <Button type="button" size="sm" variant="secondary" onClick={applySuggestedPlan} disabled={suggestions.length === 0}>
+            <Wand2 className="mr-1.5 h-4 w-4" />
+            Föreslå upplägg
+          </Button>
+        </div>
       </div>
 
+      {rows.length > 0 && !hasPracticeRow && (
+        <p className="flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs">
+          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          Lägg till ett moment där du testar dig själv – det är den teknik som ger mest.
+        </p>
+      )}
+      {singleDayRows > 0 && days.length >= 3 && (
+        <p className="flex items-start gap-2 rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+          Lägg gärna till en dag längre fram för {singleDayRows === 1 ? 'momentet' : 'momenten'} med
+          bara en dag – repetition med mellanrum fastnar bäst.
+        </p>
+      )}
+
       <div className="grid gap-5 md:grid-cols-[minmax(240px,0.8fr)_minmax(0,1.6fr)]">
+
         <section className="space-y-3">
           <div>
             <h3 className="font-semibold">Momentens ordning</h3>
