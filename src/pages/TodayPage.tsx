@@ -33,6 +33,7 @@ import { PerfectDaySplash } from '@/components/PerfectDaySplash';
 import { ChildWeekDashboard } from '@/components/ChildWeekDashboard';
 import { HolidayBanner } from '@/components/HolidayBanner';
 import { HomeworkInbox } from '@/components/HomeworkInbox';
+import { GettingStartedCard } from '@/components/GettingStartedCard';
 import { computeCurrentStreak } from '@/lib/streak';
 import { track } from '@/lib/analytics';
 import { scheduleInboxReminder } from '@/lib/nativeNotifications';
@@ -306,6 +307,15 @@ export default function TodayPage() {
           </TabsList>
           
           <TabsContent value="today" className="space-y-6 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0 [&>section]:min-w-0">
+            {/* Getting-started checklist for new parents */}
+            {userRole !== 'child' && (
+              <GettingStartedCard
+                children={children}
+                homeworkCount={homework.length}
+                onAddChild={() => setShowAddChild(true)}
+              />
+            )}
+
             {/* Holiday mode banner */}
             <HolidayBanner childId={activeChildId} />
 
