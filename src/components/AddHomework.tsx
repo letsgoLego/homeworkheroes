@@ -919,7 +919,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               )}
               
               {/* Legend */}
-              {availableDays.length > 0 && (
+              {availableDays.length > 0 && planningMode !== 'template' && (
                 <p className="text-xs text-muted-foreground text-center">
                   Grön = lugn dag · Gul = några läxor · Röd = full dag
                 </p>

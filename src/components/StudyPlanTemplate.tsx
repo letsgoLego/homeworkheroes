@@ -78,6 +78,7 @@ export function StudyPlanTemplate({
 
   const hasPracticeRow = rows.some(row => phaseByLabel.get(row.title) === 'practice');
   const singleDayRows = rows.filter(row => row.dates.length === 1).length;
+  const activePhase = activeRow ? phaseByLabel.get(activeRow.title) : undefined;
 
   const applySuggestedPlan = () => {
     const plan = buildSuggestedPlan(days, suggestions);
@@ -294,8 +295,8 @@ export function StudyPlanTemplate({
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <Label htmlFor="active-study-part">Aktivt moment {activeIndex + 1}</Label>
-                    {phaseByLabel.get(activeRow.title) && (
-                      <p className="text-xs text-muted-foreground">{STUDY_PHASE_LABELS[phaseByLabel.get(activeRow.title) as StudyPhase]}</p>
+                    {activePhase && (
+                      <p className="text-xs text-muted-foreground">{STUDY_PHASE_LABELS[activePhase]}</p>
                     )}
                   </div>
                   <div className="flex gap-1 md:hidden">

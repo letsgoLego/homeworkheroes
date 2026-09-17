@@ -20,8 +20,8 @@ const LABELS: Record<StudyPlanningMode, string> = {
 export function StudyPlanningModeChoice({ value, onChange, collapsible, onReset }: StudyPlanningModeChoiceProps) {
   if (collapsible && value) {
     return (
-      <div className="flex items-center justify-between gap-2 rounded-lg border bg-muted/40 px-3 py-2">
-        <span className="flex min-w-0 items-center gap-2 text-sm">
+      <div className="flex w-full items-center justify-between gap-2 rounded-lg border bg-muted/40 px-3 py-2">
+        <span className="flex min-w-0 flex-1 items-center gap-2 text-sm">
           {value === 'manual' ? (
             <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
           ) : (
@@ -32,7 +32,7 @@ export function StudyPlanningModeChoice({ value, onChange, collapsible, onReset 
             <span className="font-medium">{LABELS[value]}</span>
           </span>
         </span>
-        <Button type="button" variant="ghost" size="sm" onClick={onReset}>
+        <Button type="button" variant="ghost" size="sm" className="shrink-0" onClick={onReset}>
           Byt
         </Button>
       </div>
