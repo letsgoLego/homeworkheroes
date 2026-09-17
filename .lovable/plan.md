@@ -50,7 +50,7 @@ På landningssidan (`LandingPage.tsx`) läggs ett eget avsnitt in: **"Beprövad 
 - `src/components/StudyPlanTemplate.tsx`: fasgrupperade förslagschips, knappen "Föreslå upplägg", tips-rader (saknad träningsfas, moment med bara en dag), källrad.
 - `src/components/AddHomework.tsx` och `src/components/PlanHomeworkSheet.tsx`: skickar in `days` till förslagsbyggaren och använder den vid val av mall-läge i stället för nuvarande `slice(0, 5)`.
 - `src/lib/analytics.ts`: utöka `study_techniques_used` med `phases` och `suggested_plan_used`.
-- Text/innehåll: `src/pages/seo/StudieteknikBarnPage.tsx`, `FEATURES.md`, `README.md`.
+- Text/innehåll: `src/pages/LandingPage.tsx` (nytt avsnitt + hero/metabeskrivning), `src/pages/seo/StudieteknikBarnPage.tsx`, `FEATURES.md`, `README.md`.
 - Inga databasändringar.
 
 ## Verifiering
