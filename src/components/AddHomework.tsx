@@ -858,7 +858,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
               )}
 
               {/* Day list with workload in plain text */}
-              {(homeworkType !== 'forhor' || planningMode === 'manual') && <div className="space-y-2 p-1">
+              {(homeworkType !== 'forhor' || planningMode === 'manual') && <div className="grid grid-cols-2 gap-2 p-1 sm:grid-cols-1">
                 {availableDays.map((day) => {
                   const dateStr = format(day, 'yyyy-MM-dd');
                   const isSelected = selectedDays.includes(dateStr);
@@ -875,7 +875,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                       whileTap={{ scale: 0.98 }}
                       onClick={() => toggleDay(dateStr)}
                       className={cn(
-                        'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all border-2',
+                        'flex min-h-24 w-full items-start gap-2 rounded-xl border-2 p-2 text-left transition-all sm:min-h-0 sm:items-center sm:gap-3 sm:p-3',
                         isSelected
                           ? 'border-primary bg-primary/10'
                           : busy >= 3
@@ -883,7 +883,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                             : 'border-border bg-muted/50 hover:bg-muted'
                       )}
                     >
-                      <div className="w-12 shrink-0 text-center">
+                      <div className="w-10 shrink-0 text-center sm:w-12">
                         <div className={cn('text-xs font-medium capitalize', isWeekendDay && 'text-accent-foreground/80')}>
                           {format(day, 'EEE', { locale: sv })}
                         </div>
@@ -891,9 +891,9 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                         <div className="text-[10px] text-muted-foreground">{format(day, 'MMM', { locale: sv })}</div>
                       </div>
 
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0 flex-1">
                         <DayLoadIndicator homeworkCount={existingTaskCount} activities={dayActivities} />
-                        <div className="mt-1 flex items-center gap-2">
+                        <div className="mt-1 flex flex-wrap items-center gap-1 sm:gap-2">
                           {isToday && <span className="text-xs text-primary font-semibold">idag</span>}
                           {isWeekendDay && <span className="text-xs text-muted-foreground">helg</span>}
                         </div>
@@ -901,7 +901,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
 
                       <div
                         className={cn(
-                          'w-6 h-6 rounded-full shrink-0 flex items-center justify-center border-2',
+                          'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2',
                           isSelected ? 'bg-primary border-primary text-primary-foreground' : 'border-border'
                         )}
                       >

@@ -304,7 +304,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
           {!isTemplate && (homeworkType !== 'forhor' || isManualExam) && (
             <div className="space-y-3">
               <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><p className="font-medium">Välj pluggdagar</p></div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
                 {days.map(day => {
                   const date = format(day, 'yyyy-MM-dd');
                   const selected = manualDays.includes(date);
