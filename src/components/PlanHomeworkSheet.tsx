@@ -278,8 +278,13 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
               onReset={() => setPlanningMode(null)}
               onChange={mode => {
                 setPlanningMode(mode);
-                if (mode === 'template' && !rows.some(row => row.dates.length > 0)) {
-                  setRows(buildSuggestedPlan(days, studyTechniqueSuggestions));
+                if (mode === 'template') {
+                  if (!rows.some(row => row.dates.length > 0)) {
+                    setRows(buildSuggestedPlan(days, studyTechniqueSuggestions));
+                  }
+                  toast.success('Vi har föreslagit ett upplägg', {
+                    description: 'Förstå först, träna två gånger och repetera nära förhöret.',
+                  });
                 }
               }}
             />
@@ -299,7 +304,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
           {!isTemplate && (homeworkType !== 'forhor' || isManualExam) && (
             <div className="space-y-3">
               <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /><p className="font-medium">Välj pluggdagar</p></div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
                 {days.map(day => {
                   const date = format(day, 'yyyy-MM-dd');
                   const selected = manualDays.includes(date);

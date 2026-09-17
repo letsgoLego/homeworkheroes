@@ -14,25 +14,25 @@ interface StudyPlanningModeChoiceProps {
 
 const LABELS: Record<StudyPlanningMode, string> = {
   manual: 'Välj dagar själv',
-  template: 'Följ en mall',
+  template: 'Få hjälp att planera',
 };
 
 export function StudyPlanningModeChoice({ value, onChange, collapsible, onReset }: StudyPlanningModeChoiceProps) {
   if (collapsible && value) {
     return (
-      <div className="flex items-center justify-between gap-2 rounded-lg border bg-muted/40 px-3 py-2">
-        <span className="flex min-w-0 items-center gap-2 text-sm">
+      <div className="flex w-full items-center justify-between gap-2 rounded-lg border bg-muted/40 px-3 py-2">
+        <span className="flex min-w-0 flex-1 items-center gap-2 text-sm">
           {value === 'manual' ? (
             <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
           ) : (
             <ListChecks className="h-4 w-4 shrink-0 text-primary" />
           )}
           <span className="truncate">
-            <span className="text-muted-foreground">Planeringssätt: </span>
+            <span className="hidden text-muted-foreground sm:inline">Planeringssätt: </span>
             <span className="font-medium">{LABELS[value]}</span>
           </span>
         </span>
-        <Button type="button" variant="ghost" size="sm" onClick={onReset}>
+        <Button type="button" variant="ghost" size="sm" className="shrink-0 px-2" onClick={onReset}>
           Byt
         </Button>
       </div>
@@ -43,7 +43,7 @@ export function StudyPlanningModeChoice({ value, onChange, collapsible, onReset 
     <div className="space-y-3">
       <div>
         <h3 className="font-semibold">Hur vill du planera?</h3>
-        <p className="text-sm text-muted-foreground">Du kan gå tillbaka och byta utan att läxans uppgifter försvinner.</p>
+        <p className="text-sm text-muted-foreground">Välj själv eller låt appen föreslå ett upplägg.</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {(['manual', 'template'] as StudyPlanningMode[]).map(mode => {
@@ -65,8 +65,8 @@ export function StudyPlanningModeChoice({ value, onChange, collapsible, onReset 
                 <span className="block font-semibold">{LABELS[mode]}</span>
                 <span className="mt-1 block text-xs font-normal text-muted-foreground">
                   {mode === 'manual'
-                    ? 'Välj fritt bland dagarna och se läxor och aktiviteter.'
-                    : 'Få föreslagna moment och välj en eller flera dagar för varje.'}
+                    ? 'Markera dagarna direkt i kalendern.'
+                    : 'Appen föreslår moment och dagar åt dig.'}
                 </span>
               </span>
               {selected && (
