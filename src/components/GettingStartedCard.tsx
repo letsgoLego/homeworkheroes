@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Circle, ArrowRight, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface ChildLike {
   id: string;
