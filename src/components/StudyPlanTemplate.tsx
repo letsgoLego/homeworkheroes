@@ -173,7 +173,7 @@ export function StudyPlanTemplate({
               return (
                 <div key={row.id} className={cn('rounded-lg border p-2', activeIndex === index && 'border-primary bg-primary/5')}>
                   <div className="flex items-center gap-2">
-                    <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start whitespace-normal px-2 text-left" onClick={() => setActiveIndex(index)}>
+                    <Button type="button" variant="ghost" className="h-auto min-w-0 flex-1 justify-start whitespace-normal px-2 text-left" onClick={() => { setActiveIndex(index); activeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
                       <span className={cn('mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white', color.dot)}>{index + 1}</span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate">{row.title}</span>
@@ -260,7 +260,7 @@ export function StudyPlanTemplate({
                 <h3 className="font-semibold">Vilka dagar görs momentet?</h3>
                 <p className="text-xs text-muted-foreground">Välj gärna flera dagar för repetition.</p>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
                 {days.map(day => {
                   const date = format(day, 'yyyy-MM-dd');
                   const selected = activeRow.dates.includes(date);
