@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Circle, ArrowRight, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface ChildLike {
   id: string;
@@ -24,10 +25,15 @@ interface Props {
 export function GettingStartedCard({ children, homeworkCount, onAddChild }: Props) {
   const navigate = useNavigate();
 
+  const { isSubscribed, loading: notificationsLoading } = useNotifications();
+
+  // A stored subscription counts as "on" even on a device where the browser
+  // permission prompt was never shown.
   const notificationsOn =
-    typeof window !== 'undefined' &&
-    'Notification' in window &&
-    Notification.permission === 'granted';
+    isSubscribed ||
+    (typeof window !== 'undefined' &&
+      'Notification' in window &&
+      Notification.permission === 'granted');
 
   const steps = useMemo(
     () => [
@@ -68,6 +74,7 @@ export function GettingStartedCard({ children, homeworkCount, onAddChild }: Prop
   );
 
   const doneCount = steps.filter((s) => s.done).length;
+  if (notificationsLoading) return null;
   if (doneCount === steps.length) return null;
 
   const next = steps.find((s) => !s.done)!;
