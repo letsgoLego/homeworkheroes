@@ -24,10 +24,15 @@ interface Props {
 export function GettingStartedCard({ children, homeworkCount, onAddChild }: Props) {
   const navigate = useNavigate();
 
+  const { isSubscribed, loading: notificationsLoading } = useNotifications();
+
+  // A stored subscription counts as "on" even on a device where the browser
+  // permission prompt was never shown.
   const notificationsOn =
-    typeof window !== 'undefined' &&
-    'Notification' in window &&
-    Notification.permission === 'granted';
+    isSubscribed ||
+    (typeof window !== 'undefined' &&
+      'Notification' in window &&
+      Notification.permission === 'granted');
 
   const steps = useMemo(
     () => [
