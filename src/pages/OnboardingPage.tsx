@@ -180,11 +180,32 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (addedChildren.length === 0) {
       toast.error('Lägg till minst ett barn');
       return;
     }
+
+    // Welcome email with the remaining setup steps — best effort, never blocks.
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email && familyId) {
+        await supabase.functions.invoke('send-transactional-email', {
+          body: {
+            templateName: 'welcome-parent',
+            recipientEmail: user.email,
+            idempotencyKey: `welcome-parent-${familyId}`,
+            templateData: {
+              familyName: familyName.trim(),
+              childName: addedChildren[0]?.name,
+            },
+          },
+        });
+      }
+    } catch (err) {
+      console.error('[Onboarding] welcome email failed:', err);
+    }
+
     toast.success('Allt klart! Nu börjar vi hålla koll på läxorna! 📚');
     navigate('/');
   };
