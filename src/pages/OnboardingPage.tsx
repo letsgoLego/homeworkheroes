@@ -190,15 +190,10 @@ export default function OnboardingPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.email && familyId) {
-        await supabase.functions.invoke('send-transactional-email', {
+        await supabase.functions.invoke('send-welcome-email', {
           body: {
-            templateName: 'welcome-parent',
-            recipientEmail: user.email,
-            idempotencyKey: `welcome-parent-${familyId}`,
-            templateData: {
-              familyName: familyName.trim(),
-              childName: addedChildren[0]?.name,
-            },
+            familyName: familyName.trim(),
+            childName: addedChildren[0]?.name,
           },
         });
       }
