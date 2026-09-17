@@ -12,7 +12,7 @@ import { useFamily } from '@/hooks/useFamily';
 import { celebrateAssignment } from '@/lib/confetti';
 import { track } from '@/lib/analytics';
 import { SUBJECT_LABELS, SUBJECT_ICONS, HOMEWORK_TYPE_LABELS, Subject, HomeworkType } from '@/types/homework';
-import { getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
+import { buildSuggestedPlan, getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
 import type { InboxHomework } from '@/hooks/queries/useHomeworkData';
 import { StudyPlanningModeChoice, type StudyPlanningMode } from '@/components/StudyPlanningModeChoice';
 import { DayLoadIndicator } from '@/components/DayLoadIndicator';
@@ -157,6 +157,9 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
           sessions: sessionCount,
           subject,
           flow: 'child',
+          phases: [...new Set(rows
+            .map(row => studyTechniqueSuggestions.find(s => s.label === row.title)?.phase)
+            .filter(Boolean))].join(','),
         });
       }
       setInitialisedFor(null);
@@ -276,7 +279,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
               onChange={mode => {
                 setPlanningMode(mode);
                 if (mode === 'template' && !rows.some(row => row.dates.length > 0)) {
-                  setRows(studyTechniqueSuggestions.slice(0, 5).map(item => ({ id: crypto.randomUUID(), title: item.label, dates: [] })));
+                  setRows(buildSuggestedPlan(days, studyTechniqueSuggestions));
                 }
               }}
             />

@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Subject, SUBJECT_LABELS, SUBJECT_ICONS, HomeworkType, HOMEWORK_TYPE_LABELS, HOMEWORK_TYPE_ICONS } from '@/types/homework';
-import { getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
+import { buildSuggestedPlan, getStudyTechniqueSuggestions } from '@/lib/studyTechniques';
 import { StudyPlanningModeChoice, type StudyPlanningMode } from '@/components/StudyPlanningModeChoice';
 import { StudyPlanTemplate } from '@/components/StudyPlanTemplate';
 import { useFamily } from '@/hooks/useFamily';
@@ -350,6 +350,9 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
           sessions: studySessionCount,
           subject,
           flow: 'parent',
+          phases: [...new Set(studyParts
+            .map(part => studyTechniqueSuggestions.find(s => s.label === part.title)?.phase)
+            .filter(Boolean))].join(','),
         });
       } else {
         for (const dateStr of taskDates) {
@@ -828,12 +831,9 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   onChange={mode => {
                     setPlanningMode(mode);
                     if (mode === 'template' && studyParts.length === 0) {
-                      setStudyParts(studyTechniqueSuggestions.slice(0, 5).map(item => ({
-                        id: crypto.randomUUID(),
-                        title: item.label,
-                        dates: [],
-                      })));
+                      setStudyParts(buildSuggestedPlan(availableDays, studyTechniqueSuggestions));
                     }
+
                   }}
                 />
               )}

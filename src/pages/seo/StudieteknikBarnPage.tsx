@@ -74,11 +74,44 @@ export default function StudieteknikBarnPage() {
         istället för "Du är så smart".
       </p>
 
+      <h2>Så hänger teknikerna ihop: Förstå – Träna – Repetera</h2>
+      <p>
+        De forskningssammanställningar om studieteknik som Skolverket sprider pekar på tre saker
+        som ger mest: att eleven testar sig själv (testbaserat lärande), att repetitionen sprids ut
+        över flera korta tillfällen, och att områden blandas i stället för att nötas ett i taget.
+        Ett bra upplägg inför ett förhör följer därför tre faser:
+      </p>
+      <ol>
+        <li>
+          <strong>Förstå</strong> – läs igenom, sammanfatta med egna ord eller gör en tankekarta så
+          att helheten sitter innan detaljerna tränas.
+        </li>
+        <li>
+          <strong>Träna</strong> – testa dig själv utan att titta, gör delförhör, lucktext eller
+          räkna gamla uppgifter. Det är den fas som ger störst effekt, och den som elever oftast
+          hoppar över.
+        </li>
+        <li>
+          <strong>Repetera</strong> – blanda gamla och nya delar, förklara för någon och gör en
+          sista koll på det som känns svårast, gärna med minst en dags mellanrum till förra passet.
+        </li>
+      </ol>
+      <p>
+        När du väljer förhör eller prov i Läxhjälp föreslås moment i just den ordningen, och
+        träningsmomenten får automatiskt en extra dag längre fram så att repetitionen blir spridd.
+      </p>
+
       <h2>Hitta rätt metod</h2>
       <p>
         Testa några av teknikerna och se vilka som passar ditt barn bäst. Kombinera gärna —
         en Pomodoro-session med aktivt återberättande i slutet kan vara riktigt kraftfullt.
       </p>
+      <h2>Källor</h2>
+      <p>
+        Skolverkets forskningssammanställningar om studieteknik, testbaserat lärande och spridd
+        repetition, samt Skolverkets material om självreglerat lärande.
+      </p>
+
     </SeoArticleLayout>
   );
 }

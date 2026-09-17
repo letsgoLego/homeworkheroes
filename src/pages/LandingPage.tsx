@@ -297,6 +297,62 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ============ STUDY TECHNIQUE SECTION ============ */}
+      <section id="studieteknik" className="py-16 sm:py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center"
+          >
+            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
+              Beprövad studieteknik – samma forskning som skolan lutar sig mot
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-muted-foreground text-lg mb-10">
+              Inför förhör och prov föreslår Läxhjälp ett upplägg som bygger på testbaserat lärande
+              och spridd repetition: att testa sig själv och repetera vid flera korta tillfällen ger
+              mer än att läsa om samma text kvällen före.
+            </motion.p>
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid gap-4 sm:grid-cols-3"
+          >
+            {[
+              { title: 'Förstå', text: 'Skaffa överblick och sätt ord på innehållet med egna ord.' },
+              { title: 'Träna', text: 'Testa dig själv utan att titta – den teknik som ger mest effekt.' },
+              { title: 'Repetera', text: 'Blanda områden och repetera med mellanrum fram till provet.' },
+            ].map((phase, index) => (
+              <motion.div key={phase.title} variants={fadeUp} className="rounded-2xl border bg-card p-6 text-left shadow-soft">
+                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
+                  {index + 1}
+                </div>
+                <h3 className="mb-2 text-lg font-bold text-foreground">{phase.title}</h3>
+                <p className="text-sm text-muted-foreground">{phase.text}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+          <motion.p
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="mt-6 text-center text-sm text-muted-foreground"
+          >
+            Upplägget följer de forskningssammanställningar om studieteknik som Skolverket sprider.{' '}
+            <Link to="/tips/studieteknik-barn" className="font-semibold text-primary underline">
+              Läs vår guide till studieteknik för barn
+            </Link>
+          </motion.p>
+        </div>
+      </section>
+
+
       {/* ============ HOW-TO GUIDE (Step by step features) ============ */}
       <section id="how-to" className="py-16 sm:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
