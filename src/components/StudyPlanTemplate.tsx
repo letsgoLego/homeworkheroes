@@ -190,13 +190,40 @@ export function StudyPlanTemplate({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {suggestions.filter(item => !rows.some(row => row.title === item.label)).map(item => (
-              <Button key={item.id} type="button" size="sm" variant="outline" onClick={() => { onRowsChange([...rows, { id: crypto.randomUUID(), title: item.label, dates: [] }]); setActiveIndex(rows.length); }}>
-                {item.icon} {item.label}
-              </Button>
-            ))}
+          <div className="space-y-3">
+            {(['understand', 'practice', 'review'] as StudyPhase[]).map(phase => {
+              const items = suggestions.filter(
+                item => item.phase === phase && !rows.some(row => row.title === item.label)
+              );
+              if (items.length === 0) return null;
+              return (
+                <div key={phase} className="space-y-1.5">
+                  <div>
+                    <p className="text-xs font-semibold">{STUDY_PHASE_LABELS[phase]}</p>
+                    <p className="text-[11px] text-muted-foreground">{STUDY_PHASE_HINTS[phase]}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {items.map(item => (
+                      <Button
+                        key={item.id}
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        title={item.why}
+                        onClick={() => {
+                          onRowsChange([...rows, { id: crypto.randomUUID(), title: item.label, dates: [] }]);
+                          setActiveIndex(rows.length);
+                        }}
+                      >
+                        {item.icon} {item.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
+
         </section>
 
         <section className="space-y-4">
