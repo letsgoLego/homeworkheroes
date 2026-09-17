@@ -276,7 +276,7 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
               onChange={mode => {
                 setPlanningMode(mode);
                 if (mode === 'template' && !rows.some(row => row.dates.length > 0)) {
-                  setRows(studyTechniqueSuggestions.slice(0, 5).map(item => ({ id: crypto.randomUUID(), title: item.label, dates: [] })));
+                  setRows(buildSuggestedPlan(days, studyTechniqueSuggestions));
                 }
               }}
             />
