@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, Info, Lightbulb, Plus, Wand2, X } from 'lucide-react';
@@ -55,6 +56,7 @@ export function StudyPlanTemplate({
 }: StudyPlanTemplateProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [newTitle, setNewTitle] = useState('');
+  const activeSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (rows.length === 0) setActiveIndex(0);
@@ -79,6 +81,12 @@ export function StudyPlanTemplate({
     if (plan.length === 0) return;
     onRowsChange(plan);
     setActiveIndex(0);
+    toast.success(`Upplägg föreslaget – ${plan.length} moment tillagda`, {
+      description: 'Välj dagarna för varje moment nedan.',
+    });
+    setTimeout(() => {
+      activeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
 
