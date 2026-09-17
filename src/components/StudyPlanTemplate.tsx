@@ -133,7 +133,7 @@ export function StudyPlanTemplate({
           <div><p className="text-xs text-muted-foreground">Saknar dag</p><p className={cn('font-bold', missing > 0 && 'text-destructive')}>{missing}</p></div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+          <p className="hidden items-start gap-1.5 text-xs text-muted-foreground md:flex">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             Upplägget bygger på forskning om testbaserat lärande och spridd repetition – samma
             studieteknik som skolan lutar sig mot.
@@ -161,7 +161,7 @@ export function StudyPlanTemplate({
 
       <div className="grid gap-5 md:grid-cols-[minmax(240px,0.8fr)_minmax(0,1.6fr)]">
 
-        <section className="space-y-3">
+        <section className="order-2 space-y-3 md:order-1">
           <div>
             <h3 className="font-semibold">Momentens ordning</h3>
             <p className="text-xs text-muted-foreground">Välj ett moment för att planera dess dagar.</p>
@@ -243,7 +243,7 @@ export function StudyPlanTemplate({
 
         </section>
 
-        <section className="space-y-4">
+        <section ref={activeSectionRef} className="order-1 scroll-mt-24 space-y-4 md:order-2">
           {activeRow ? (
             <>
               <div className="space-y-2">
