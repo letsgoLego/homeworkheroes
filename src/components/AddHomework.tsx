@@ -350,6 +350,9 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
           sessions: studySessionCount,
           subject,
           flow: 'parent',
+          phases: [...new Set(studyParts
+            .map(part => studyTechniqueSuggestions.find(s => s.label === part.title)?.phase)
+            .filter(Boolean))].join(','),
         });
       } else {
         for (const dateStr of taskDates) {
