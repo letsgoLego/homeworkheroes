@@ -141,12 +141,23 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
       setSaving(false);
       return;
     }
-    const ok = await planHomework(
-      homework.id,
-      !isTemplate
-        ? manualDays.map(date => ({ title: finalTitle, date }))
-        : rows.flatMap(r => r.dates.map(date => ({ title: `${finalTitle} – ${r.title.trim() || finalTitle}`, date })))
-    );
+    let plan: { title: string; date: string }[];
+    if (isTemplate) {
+      plan = rows.flatMap(r => r.dates.map(date => ({ title: `${finalTitle} – ${r.title.trim() || finalTitle}`, date })));
+    } else if (rows.length > 1) {
+      // Keep the parts the parent sent: spread them over the chosen days
+      const steps = Math.max(rows.length, manualDays.length);
+      plan = Array.from({ length: steps }, (_, i) => {
+        const row = rows[i % rows.length];
+        return {
+          title: `${finalTitle} – ${row.title.trim() || finalTitle}`,
+          date: manualDays[i % manualDays.length],
+        };
+      });
+    } else {
+      plan = manualDays.map(date => ({ title: finalTitle, date }));
+    }
+    const ok = await planHomework(homework.id, plan);
     setSaving(false);
     if (ok) {
       celebrateAssignment();
@@ -330,7 +341,9 @@ export function PlanHomeworkSheet({ homework, onClose }: PlanHomeworkSheetProps)
             {saving ? 'Sparar…' : 'Klart – planera!'}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            {SUBJECT_LABELS[subject]} · {rows.filter(r => r.dates.length > 0).length}/{rows.length} delar planerade
+            {SUBJECT_LABELS[subject]} · {isTemplate
+              ? `${rows.filter(r => r.dates.length > 0).length}/${rows.length} delar planerade`
+              : `${manualDays.length} ${manualDays.length === 1 ? 'dag' : 'dagar'} valda${rows.length > 1 ? ` · ${rows.length} delar` : ''}`}
           </p>
         </div>
       </DialogContent>
