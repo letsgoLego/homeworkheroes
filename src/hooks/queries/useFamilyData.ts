@@ -16,8 +16,9 @@ interface FamilyDataResult {
 async function fetchFamilyData(userId: string): Promise<FamilyDataResult> {
   const { data: roles, error: rolesError } = await supabase
     .from('user_roles')
-    .select('family_id, child_id, role')
-    .eq('user_id', userId);
+    .select('family_id, child_id, role, created_at')
+    .eq('user_id', userId)
+    .order('created_at');
 
   if (rolesError) {
     console.error('[useFamilyData] Failed to fetch user_roles:', rolesError);
@@ -30,9 +31,31 @@ async function fetchFamilyData(userId: string): Promise<FamilyDataResult> {
 
   // Prioritize child role if user has both (handles edge case of legacy/duplicate roles)
   const childRole = roles.find(r => r.role === 'child' && r.child_id);
-  const userRoleData = childRole || roles[0];
+  let userRoleData = childRole || roles[0];
+
+  // Some accounts ended up with several parent families from repeated onboarding.
+  // Pick the one that actually has children so they don't land in an empty family.
+  if (!childRole) {
+    const parentFamilyIds = roles
+      .filter(r => r.role === 'parent' && r.family_id)
+      .map(r => r.family_id as string);
+    if (parentFamilyIds.length > 1) {
+      const { data: kids } = await supabase
+        .from('children')
+        .select('family_id')
+        .in('family_id', parentFamilyIds);
+      const counts = new Map<string, number>();
+      (kids || []).forEach(k => counts.set(k.family_id, (counts.get(k.family_id) || 0) + 1));
+      const best = parentFamilyIds
+        .slice()
+        .sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0))[0];
+      userRoleData = roles.find(r => r.family_id === best) || userRoleData;
+    }
+  }
+
   const role = userRoleData.role as 'parent' | 'child';
   let familyId: string | null = userRoleData.family_id;
+
 
   if (!familyId && userRoleData.child_id) {
     const { data: childData, error: childError } = await supabase
