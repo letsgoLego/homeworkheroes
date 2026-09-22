@@ -20,6 +20,8 @@ import { sv } from 'date-fns/locale';
 import type { Tables } from '@/integrations/supabase/types';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { UpgradeModal } from '@/components/UpgradeModal';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+
 
 type Child = Tables<'children'>;
 
@@ -31,6 +33,8 @@ export default function FamilyPage() {
   const { children, homework, family, loading, refetch } = useFamily();
   const { signOut, user } = useAuth();
   const { subscribed, status: subStatus, subscriptionEnd, openCustomerPortal } = useSubscriptionContext();
+  const { isAdmin } = useIsAdmin();
+
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
@@ -93,7 +97,17 @@ export default function FamilyPage() {
       </header>
       
       <main className="px-4 py-4 space-y-6 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0 md:px-8 md:py-6">
+        {/* Admin link */}
+        {isAdmin && (
+          <Button variant="outline" className="w-full" onClick={() => navigate('/admin')}>
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Adminöversikt
+            <ChevronRight className="w-4 h-4 ml-auto" />
+          </Button>
+        )}
+
         {/* Invite Code */}
+
         {family?.invite_code && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
