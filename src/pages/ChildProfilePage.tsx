@@ -125,6 +125,14 @@ export default function ChildProfilePage() {
         {/* Share app */}
         <ShareAppButton />
 
+        {/* Admin link */}
+        {isAdmin && (
+          <Button variant="outline" className="w-full" onClick={() => navigate('/admin')}>
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Adminöversikt
+          </Button>
+        )}
+
         {/* Update App */}
         <UpdateAppButton />
 

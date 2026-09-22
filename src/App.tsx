@@ -48,6 +48,8 @@ import SkolstartRutinerPage from "./pages/seo/SkolstartRutinerPage";
 import SkolmaterialPacklistaPage from "./pages/seo/SkolmaterialPacklistaPage";
 import PlaneraLaxorForaldrarPage from "./pages/seo/PlaneraLaxorForaldrarPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
+import AdminPage from "./pages/AdminPage";
+import AdminRouteGuard from "./components/AdminRouteGuard";
 
 
 const queryClient = new QueryClient();
@@ -143,6 +145,7 @@ function AppRoutes() {
       <Route path="/family" element={<ProtectedRoute><ParentRouteGuard><FamilyPage /></ParentRouteGuard></ProtectedRoute>} />
       <Route path="/insights" element={<ProtectedRoute><ParentRouteGuard><InsightsPage /></ParentRouteGuard></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ChildProfilePage /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><AdminRouteGuard><AdminPage /></AdminRouteGuard></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
