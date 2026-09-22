@@ -29,7 +29,7 @@ type Child = Tables<'children'>;
 interface FamilyMember {
   user_id: string;
   email: string;
-  role: 'parent' | 'child';
+  role: 'parent' | 'child' | 'admin';
   child_id: string | null;
   blocked: boolean;
   child_name: string | null;
