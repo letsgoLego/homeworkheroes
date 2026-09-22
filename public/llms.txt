@@ -28,3 +28,4 @@ Läxhjälp hjälper familjer att planera läxor, dela upp arbete på lugna dagar
 - [Terminsstart – checklista](/tips/terminsstart-checklista): Steg-för-steg inför skolstart.
 - [Skolstart – rutiner](/tips/skolstart-rutiner): Sovtider och morgonrutiner efter lovet.
 - [Skolmaterial & packlista](/tips/skolmaterial-packlista): Vad barnet behöver inför terminsstart.
+- [Lära barnet klockan](/tips/lara-sig-klockan): Steg-för-steg-guide för föräldrar — analog först, hel/halvtimmar till minuter, vardagsövningar.

@@ -31,8 +31,8 @@ export default function LandingPage() {
         <title>Läxhjälp – familjeappen för läxor, prov och packlistor</title>
         <meta name="description" content="Planera läxor, prov och packlistor tillsammans i familjen. Mindre läxstress, fler firade framgångar. Gratis att komma igång." />
         <link rel="canonical" href="https://laxhjalp.app/" />
-        <meta property="og:title" content="Läxhjälp – familjeappen för läxor och prov" />
-        <meta property="og:description" content="Planera läxor och packlistor tillsammans – som familj." />
+        <meta property="og:title" content="Läxhjälp – planera läxor och prov tillsammans i familjen" />
+        <meta property="og:description" content="Se hur Läxhjälp fungerar: planera läxor, dela upp prov och håll koll på packlistor – som familj." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://laxhjalp.app/" />
       </Helmet>
