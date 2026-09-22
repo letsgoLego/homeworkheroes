@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, BookOpen, Calendar, Brain, Heart, Sparkles, Users, Home, GraduationCap, Languages, Calculator, Smartphone, Zap, BookText, Award, ClipboardList, Sunrise, Backpack } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Calendar, Brain, Clock, Heart, Sparkles, Users, Home, GraduationCap, Languages, Calculator, Smartphone, Zap, BookText, Award, ClipboardList, Sunrise, Backpack } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 
@@ -29,6 +29,7 @@ const ARTICLES: Article[] = [
   { path: '/tips/hogstadiet-studieteknik', title: 'Studieteknik för högstadiet (åk 7–9)', description: 'Active recall, spaced repetition och planering inför nationella prov.', icon: Award, color: 'bg-indigo-500/10 text-indigo-500', category: 'Studieteknik' },
 
   // Per ämne
+  { path: '/tips/lara-sig-klockan', title: 'Lära barnet klockan — steg-för-steg-guide', description: 'När barn lär sig klockan, om analog eller digital först, konkreta övningar per steg och vanliga hinder.', icon: Clock, color: 'bg-violet-500/10 text-violet-600', category: 'Per ämne' },
   { path: '/tips/lasforstaelse-barn', title: 'Läsförståelse hos barn (åk 1–6)', description: 'Träna läsförståelse hemma med 7 enkla övningar och tips på böcker per åldersgrupp.', icon: BookText, color: 'bg-emerald-500/10 text-emerald-600', category: 'Per ämne' },
   { path: '/tips/matematik-hjalp-barn', title: 'Hjälpa barn med matte — utan att ta över', description: 'Strategier per årskurs för matteläxor, vanliga föräldrafällor och verktyg som hjälper.', icon: Calculator, color: 'bg-orange-500/10 text-orange-500', category: 'Per ämne' },
   { path: '/tips/engelska-glosor', title: 'Engelska glosor — effektiv pluggteknik', description: 'Spaced repetition, appar och tekniker som gör att glosorna faktiskt fastnar.', icon: Languages, color: 'bg-cyan-500/10 text-cyan-600', category: 'Per ämne' },
@@ -55,7 +56,7 @@ export default function TipsIndexPage() {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>Tips & guider om läxor och studieteknik | Läxhjälp</title>
-        <meta name="description" content="19 fördjupande guider om läxplanering, studieteknik, läsförståelse, mattehjälp, engelska glosor, ADHD-anpassningar och mer — skrivna för svenska föräldrar." />
+        <meta name="description" content="20 fördjupande guider om läxplanering, studieteknik, klockan, läsförståelse, mattehjälp, engelska glosor, ADHD-anpassningar och mer — skrivna för svenska föräldrar." />
         <link rel="canonical" href="https://laxhjalp.app/tips" />
         <meta property="og:title" content="Tips & guider om läxor och studieteknik" />
         <meta property="og:description" content="Praktiska, fördjupande guider om läxor, studieteknik och välmående — för svenska familjer." />
@@ -102,7 +103,7 @@ export default function TipsIndexPage() {
             Läxor, studieteknik & motivation
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            19 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
+            20 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
             högstadiets nationella prov.
           </p>
         </motion.div>

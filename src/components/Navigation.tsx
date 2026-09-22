@@ -40,7 +40,7 @@ export function Navigation() {
           
           if (item.isAction) {
             return (
-              <Link key={item.path} to={item.path} className="md:w-full">
+              <Link key={item.path} to={item.path} className="md:w-full" aria-label="Lägg till ny läxa">
                 <motion.div
                   whileTap={{ scale: 0.9 }}
                   className="relative -mt-6 md:mt-0 md:flex md:justify-center"

@@ -159,6 +159,7 @@ export function TaskCard({ task, homework, onToggle, onSnooze, onUnsnooze, onDel
           <div className="flex items-start gap-4">
             <button
               onClick={handleToggle}
+              aria-label={task.completed ? 'Markera som ej klar' : 'Markera som klar'}
               className={cn(
                 'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-200',
                 task.completed
