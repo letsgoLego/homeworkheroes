@@ -15,6 +15,13 @@
       "when": 1790108780078,
       "tag": "0001_add_admin_role_enum",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790108820626,
+      "tag": "0002_admin_stats_rpc",
+      "breakpoints": true
     }
   ]
 }
