@@ -19,6 +19,8 @@ import { useState } from 'react';
 export default function ChildProfilePage() {
   const { children, activeChildId, homework, loading } = useFamily();
   const { signOut, user } = useAuth();
+  const { isAdmin } = useIsAdmin();
+  const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
   const activeChild = children.find(c => c.id === activeChildId);
