@@ -87,6 +87,14 @@ function StatCard({
   );
 }
 
+interface HelpQuestion {
+  id: string;
+  email: string | null;
+  message: string;
+  answered: boolean;
+  created_at: string;
+}
+
 export default function AdminPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin-stats'],
@@ -94,6 +102,20 @@ export default function AdminPage() {
       const { data, error } = await supabase.rpc('get_admin_stats');
       if (error) throw error;
       return data as unknown as AdminStats;
+    },
+    staleTime: 60 * 1000,
+  });
+
+  const { data: questions } = useQuery({
+    queryKey: ['admin-help-questions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('help_questions')
+        .select('id, email, message, answered, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data as HelpQuestion[];
     },
     staleTime: 60 * 1000,
   });
@@ -201,6 +223,41 @@ export default function AdminPage() {
                     <Bar name="Inloggningar" dataKey="logins" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Senaste frågorna</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {questions && questions.length > 0 ? (
+                  questions.map(q => (
+                    <div
+                      key={q.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/50 p-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-semibold">{q.email ?? 'Okänd användare'}</p>
+                        <p className="text-sm text-muted-foreground">{q.message}</p>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        {!q.answered && (
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">
+                            Obesvarad
+                          </span>
+                        )}
+                        <span>
+                          {format(parseISO(q.created_at), 'd MMM yyyy', { locale: sv })}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Inga hjälpfrågor ännu – nya användares frågor dyker upp här.
+                  </p>
+                )}
               </CardContent>
             </Card>
 

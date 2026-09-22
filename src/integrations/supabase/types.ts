@@ -290,6 +290,33 @@ export type Database = {
         }
         Relationships: []
       }
+      help_questions: {
+        Row: {
+          answered: boolean
+          created_at: string
+          email: string | null
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          answered?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          answered?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       holiday_goal_entries: {
         Row: {
           created_at: string

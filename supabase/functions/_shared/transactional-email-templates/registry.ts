@@ -3,6 +3,7 @@
 import type * as React from 'npm:react@18.3.1'
 
 import { template as welcomeParent } from './welcome-parent.tsx'
+import { template as helpQuestion } from './help-question.tsx'
 
 export interface TemplateEntry {
   component: React.ComponentType<any>
@@ -14,4 +15,5 @@ export interface TemplateEntry {
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'welcome-parent': welcomeParent,
+  'help-question': helpQuestion,
 }
