@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Navigation } from '@/components/Navigation';
+import { HelpQuestionButton } from '@/components/HelpQuestionButton';
 import { cn } from '@/lib/utils';
 
 interface AppShellProps {
