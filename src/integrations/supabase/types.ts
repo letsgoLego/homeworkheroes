@@ -804,6 +804,7 @@ export type Database = {
         Args: { _family_name: string }
         Returns: string
       }
+      get_admin_stats: { Args: never; Returns: Json }
       get_family_members: {
         Args: { _family_id: string }
         Returns: {
@@ -849,7 +850,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "parent" | "child"
+      app_role: "parent" | "child" | "admin"
       holiday_goal_type:
         | "count_per_day"
         | "minutes_per_day"
@@ -982,7 +983,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["parent", "child"],
+      app_role: ["parent", "child", "admin"],
       holiday_goal_type: [
         "count_per_day",
         "minutes_per_day",

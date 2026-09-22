@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 import { AppShell } from '@/components/AppShell';
 import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Smartphone, Download, Flame } from 'lucide-react';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { LogOut, Smartphone, Download, Flame, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StreakStats } from '@/components/StreakStats';
 import { NotificationSettings } from '@/components/NotificationSettings';
@@ -17,6 +19,8 @@ import { useState } from 'react';
 export default function ChildProfilePage() {
   const { children, activeChildId, homework, loading } = useFamily();
   const { signOut, user } = useAuth();
+  const { isAdmin } = useIsAdmin();
+  const navigate = useNavigate();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
   const activeChild = children.find(c => c.id === activeChildId);
@@ -124,6 +128,14 @@ export default function ChildProfilePage() {
 
         {/* Share app */}
         <ShareAppButton />
+
+        {/* Admin link */}
+        {isAdmin && (
+          <Button variant="outline" className="w-full" onClick={() => navigate('/admin')}>
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Adminöversikt
+          </Button>
+        )}
 
         {/* Update App */}
         <UpdateAppButton />
