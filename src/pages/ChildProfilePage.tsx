@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 import { AppShell } from '@/components/AppShell';
 import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Smartphone, Download, Flame } from 'lucide-react';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { LogOut, Smartphone, Download, Flame, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StreakStats } from '@/components/StreakStats';
 import { NotificationSettings } from '@/components/NotificationSettings';
