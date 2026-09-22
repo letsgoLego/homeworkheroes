@@ -15,4 +15,5 @@ export interface TemplateEntry {
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'welcome-parent': welcomeParent,
+  'help-question': helpQuestion,
 }
