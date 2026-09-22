@@ -1,6 +1,7 @@
 import SeoArticleLayout, { FaqItem } from '@/components/SeoArticleLayout';
 
 const related = [
+  { path: '/tips/lara-sig-klockan', title: 'Lära barnet klockan — steg-för-steg-guide för föräldrar' },
   { path: '/tips/lasforstaelse-barn', title: 'Läsförståelse hos barn — guide för åk 1–6' },
   { path: '/tips/motivation-laxor', title: 'Motivera barn till läxor — utan tjat' },
   { path: '/tips/laxor-arskurs-4-6', title: 'Läxor för åk 4–6 — komplett guide för mellanstadiet' },
@@ -117,7 +118,7 @@ export default function LaxorArskurs1_3Page() {
         <li>Räkna saker i vardagen: tallrikar, trappsteg, bilar.</li>
         <li>Använd fingrar, klossar, knappar — barn behöver något att hålla i.</li>
         <li>När multiplikationstabellen kommer i åk 3: 5 minuter/dag med flashcards eller app.</li>
-        <li>Klockan: ha en analog klocka i hemmet. Digital ger ingen tidskänsla.</li>
+        <li>Klockan: ha en analog klocka i hemmet — digital ger ingen tidskänsla. Se vår guide <a href="/tips/lara-sig-klockan">Lära barnet klockan</a> för steg-för-steg-övningar.</li>
       </ul>
 
       <h2>Engelska — högläsning och hörselning</h2>

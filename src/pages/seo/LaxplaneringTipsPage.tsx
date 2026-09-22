@@ -49,6 +49,12 @@ export default function LaxplaneringTipsPage() {
       faqItems={faqItems}
     >
       <p>
+        Läxplanering är enklast i tre steg: ta en överblick av veckans läxor en gång i
+        veckan, fördela dem på lugna eftermiddagar och låt barnet bocka av självmant.
+        Sju konkreta tips för att komma dit finns nedan — det första brukar ge märkbar
+        skillnad redan första veckan.
+      </p>
+      <p>
         Läxplanering låter tråkigt och vuxet, men det är den enskilt största hävstången för att
         minska stressen i familjens vardag. Skillnaden mellan ett barn som planerar och ett barn
         som "tar dagen som den kommer" är inte intelligens — det är vana. Och vanor går att
