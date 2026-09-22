@@ -7,7 +7,8 @@ import { AddChild } from '@/components/AddChild';
 import { ManageChildAccount } from '@/components/ManageChildAccount';
 import { useFamily } from '@/hooks/useFamily';
 import { useAuth } from '@/contexts/AuthContext';
-import { Users, Download, Smartphone, LogOut, Copy, Check, Settings, UserPlus, ExternalLink, Crown, CreditCard, BarChart3, ChevronRight } from 'lucide-react';
+import { Users, Download, Smartphone, LogOut, Copy, Check, Settings, UserPlus, ExternalLink, Crown, CreditCard, BarChart3, ChevronRight, CircleHelp } from 'lucide-react';
+import { HelpQuestionDialog } from '@/components/HelpQuestionButton';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { UpdateAppButton } from '@/components/UpdateAppButton';
 import { ShareAppButton } from '@/components/ShareAppButton';
@@ -36,6 +37,7 @@ export default function FamilyPage() {
   const { isAdmin } = useIsAdmin();
 
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   
   // Listen for install prompt
@@ -218,6 +220,13 @@ export default function FamilyPage() {
 
         {/* Share app */}
         <ShareAppButton />
+
+        {/* Help / contact */}
+        <Button variant="outline" className="w-full" onClick={() => setShowHelp(true)}>
+          <CircleHelp className="w-4 h-4 mr-2" />
+          Har du frågor? Kontakta oss
+        </Button>
+        <HelpQuestionDialog open={showHelp} onOpenChange={setShowHelp} />
 
         {/* Update App */}
         <UpdateAppButton />
