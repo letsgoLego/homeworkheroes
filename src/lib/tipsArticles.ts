@@ -15,6 +15,7 @@ export const TIPS_ARTICLES: TipsArticle[] = [
   { slug: 'skolmaterial-packlista', path: '/tips/skolmaterial-packlista', title: 'Skolmaterial & packlista inför terminsstarten', category: 'Terminsstart' },
   { slug: 'studieteknik-barn', path: '/tips/studieteknik-barn', title: 'Studieteknik för barn — 8 metoder som fungerar', category: 'Studieteknik' },
   { slug: 'hogstadiet-studieteknik', path: '/tips/hogstadiet-studieteknik', title: 'Studieteknik för högstadiet (åk 7–9)', category: 'Studieteknik' },
+  { slug: 'lara-sig-klockan', path: '/tips/lara-sig-klockan', title: 'Lära barnet klockan — steg-för-steg-guide för föräldrar', category: 'Per ämne' },
   { slug: 'lasforstaelse-barn', path: '/tips/lasforstaelse-barn', title: 'Läsförståelse hos barn (åk 1–6)', category: 'Per ämne' },
   { slug: 'matematik-hjalp-barn', path: '/tips/matematik-hjalp-barn', title: 'Hjälpa barn med matte — utan att ta över', category: 'Per ämne' },
   { slug: 'engelska-glosor', path: '/tips/engelska-glosor', title: 'Engelska glosor — effektiv pluggteknik', category: 'Per ämne' },
