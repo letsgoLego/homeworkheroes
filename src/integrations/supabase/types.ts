@@ -849,7 +849,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "parent" | "child"
+      app_role: "parent" | "child" | "admin"
       holiday_goal_type:
         | "count_per_day"
         | "minutes_per_day"
@@ -982,7 +982,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["parent", "child"],
+      app_role: ["parent", "child", "admin"],
       holiday_goal_type: [
         "count_per_day",
         "minutes_per_day",
