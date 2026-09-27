@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { triggerOnboardingEmail } from '@/lib/onboardingEmail';
 import { KeyRound, Link2, ArrowLeft, User, Lock } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -75,6 +76,7 @@ export function ChildLoginSetup({ child, onDone, onSkip, skipLabel = 'Hoppa öve
       }
       toast.success(`Konto skapat för ${child.name}! 🎉`);
       window.dispatchEvent(new Event(FAMILY_MEMBERS_CHANGED));
+      triggerOnboardingEmail('child-login');
       onDone();
     } catch (e: any) {
       toast.error(e.message || 'Kunde inte skapa konto');
@@ -94,6 +96,7 @@ export function ChildLoginSetup({ child, onDone, onSkip, skipLabel = 'Hoppa öve
     if (error) return toast.error('Kunde inte koppla kontot');
     toast.success(`${member.email} är nu kopplat till ${child.name}`);
     window.dispatchEvent(new Event(FAMILY_MEMBERS_CHANGED));
+      triggerOnboardingEmail('child-login');
     onDone();
   };
 
