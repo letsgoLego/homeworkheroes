@@ -246,9 +246,6 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
           ) : (
             <ChildLoginSetup child={accountChild} onDone={async () => { await onUpdate(); onClose(); }} />
           )}
-              </Button>
-            </>
-          )}
         </div>
       </DialogContent>
     </Dialog>
