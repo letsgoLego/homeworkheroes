@@ -1,3 +1,4 @@
+import { triggerOnboardingEmail } from '@/lib/onboardingEmail';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -153,6 +154,7 @@ export function useFamily() {
     }
     toast.success(`${name} tillagt! 👋`);
     invalidateFamily();
+    triggerOnboardingEmail('child-added');
     return data;
   };
 
@@ -195,6 +197,7 @@ export function useFamily() {
     }
     toast.success('Läxa tillagd! 📚');
     invalidateHomework();
+    triggerOnboardingEmail('homework');
     return data;
   };
 
@@ -237,6 +240,7 @@ export function useFamily() {
     }
     toast.success('Skickat till barnet att planera! 📥');
     invalidateHomework();
+    triggerOnboardingEmail('homework');
     return data;
   };
 

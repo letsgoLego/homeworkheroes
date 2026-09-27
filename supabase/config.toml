@@ -9,3 +9,6 @@ project_id = "wgykdruvnxhpvqspyzbc"
     verify_jwt = false
   [functions.send-welcome-email]
     verify_jwt = true
+
+[functions.send-onboarding-email]
+  verify_jwt = true
