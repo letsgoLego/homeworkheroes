@@ -15,6 +15,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 
 import type { TemplateEntry } from './registry.ts'
+import { HomeScreenSection } from './onboarding-layout.tsx'
 
 interface WelcomeParentProps {
   familyName?: string
@@ -62,6 +63,8 @@ const WelcomeParentEmail = ({ familyName, childName }: WelcomeParentProps) => (
         <Button style={button} href="https://laxhjalp.app/">
           Fortsätt där du slutade
         </Button>
+
+        <HomeScreenSection />
 
         <Text style={footer}>
           Har du en fråga? Svara bara på det här mejlet – vi läser allt.
