@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     try {
       const result = await sendTemplateEmail(template, email, {
         templateData,
-        idempotencyKey: `catchup-${template}-${role.family_id}`,
+        idempotencyKey: `catchup-${template}-${role.family_id}-${role.user_id}`,
       })
       results.push({ email, template, sent: result.sent, reason: result.reason })
       if (result.sent) emailed.add(email)
