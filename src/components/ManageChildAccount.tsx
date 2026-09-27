@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { User, Lock, Check } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { ChildLoginSetup } from '@/components/ChildLoginSetup';
 
 type Child = Tables<'children'>;
 
@@ -243,6 +244,9 @@ export function ManageChildAccount({ child, open, onClose, onUpdate }: ManageChi
               </div>
             </>
           ) : (
+            <ChildLoginSetup child={accountChild} onDone={async () => { await onUpdate(); onClose(); }} />
+          )}
+          {false && (
             <>
               <p className="text-sm text-muted-foreground">
                 Skapa ett konto så att {accountChild.name} kan logga in själv och se sina läxor.
