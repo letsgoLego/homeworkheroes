@@ -108,29 +108,6 @@ export default function FamilyPage() {
           </Button>
         )}
 
-        {/* Invite Code */}
-
-        {family?.invite_code && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-2xl bg-secondary"
-          >
-            <p className="text-sm text-muted-foreground mb-2">Familjens inbjudningskod</p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-2xl font-mono font-bold tracking-widest">
-                {family.invite_code.toUpperCase()}
-              </code>
-              <Button variant="outline" size="icon" onClick={handleCopyInviteCode}>
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Dela denna kod med familjemedlemmar för att bjuda in dem
-            </p>
-          </motion.div>
-        )}
-        
         {/* Subscription Status */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -170,7 +147,85 @@ export default function FamilyPage() {
 
         {/* Family Members Management */}
         {family && (
-          <FamilyMembers familyId={family.id} children={children} />
+          <FamilyMembers
+            familyId={family.id}
+            children={children}
+            inviteCode={family.invite_code}
+            onAddChild={() => setShowAddChild(true)}
+            renderChildren={(linkedByChild) => (
+              <div className="space-y-3">
+            {children.map((child) => {
+              const linked = linkedByChild[child.id];
+              const childHomework = homework.filter((hw) => hw.child_id === child.id);
+              const activeCount = childHomework.filter((hw) => !hw.completed).length;
+              const today = format(new Date(), 'yyyy-MM-dd');
+              const todayTasks = childHomework.flatMap((hw) =>
+                hw.tasks.filter(
+                  (t) => t.task_date === today && !t.completed
+                )
+              );
+              
+              return (
+                <motion.div
+                  key={child.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="p-4 rounded-2xl bg-card shadow-card"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-white"
+                      style={{ backgroundColor: child.color }}
+                    >
+                      {child.name[0]}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg">{child.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {activeCount} aktiva läxor
+                        {child.has_account ? (
+                          <span className="ml-2 text-xs bg-success/20 text-success px-2 py-0.5 rounded-full">
+                            Konto: {child.username}
+                          </span>
+                        ) : linked ? (
+                          <span className="ml-2 text-xs bg-success/20 text-success px-2 py-0.5 rounded-full">
+                            Kopplad: {linked.email}
+                          </span>
+                        ) : (
+                          <button onClick={() => setSelectedChildId(child.id)} className="ml-2 text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-medium">
+                            + Lägg till inloggning
+                          </button>
+                        )}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setSelectedChildId(child.id)}
+                    >
+                      <Settings className="w-5 h-5" />
+                    </Button>
+                  </div>
+                  
+                  {todayTasks.length > 0 ? (
+                    <div className="p-3 rounded-xl bg-accent/20">
+                      <p className="text-sm font-medium">
+                        📝 {todayTasks.length} uppgifter idag
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-success/10">
+                      <p className="text-sm font-medium text-success">
+                        ✓ Allt klart för idag!
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+              </div>
+            )}
+          />
         )}
 
         {/* Insights link */}
@@ -234,82 +289,6 @@ export default function FamilyPage() {
 
 
         
-        {/* Children list */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold">Barn</h2>
-            <Button
-              onClick={() => setShowAddChild(true)}
-              variant="ghost"
-              size="sm"
-            >
-              + Lägg till
-            </Button>
-          </div>
-          
-          <div className="space-y-3">
-            {children.map((child) => {
-              const childHomework = homework.filter((hw) => hw.child_id === child.id);
-              const activeCount = childHomework.filter((hw) => !hw.completed).length;
-              const today = format(new Date(), 'yyyy-MM-dd');
-              const todayTasks = childHomework.flatMap((hw) =>
-                hw.tasks.filter(
-                  (t) => t.task_date === today && !t.completed
-                )
-              );
-              
-              return (
-                <motion.div
-                  key={child.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="p-4 rounded-2xl bg-card shadow-card"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div
-                      className="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-white"
-                      style={{ backgroundColor: child.color }}
-                    >
-                      {child.name[0]}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg">{child.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {activeCount} aktiva läxor
-                        {child.has_account && (
-                          <span className="ml-2 text-xs bg-success/20 text-success px-2 py-0.5 rounded-full">
-                            Har konto
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setSelectedChildId(child.id)}
-                    >
-                      <Settings className="w-5 h-5" />
-                    </Button>
-                  </div>
-                  
-                  {todayTasks.length > 0 ? (
-                    <div className="p-3 rounded-xl bg-accent/20">
-                      <p className="text-sm font-medium">
-                        📝 {todayTasks.length} uppgifter idag
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="p-3 rounded-xl bg-success/10">
-                      <p className="text-sm font-medium text-success">
-                        ✓ Allt klart för idag!
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        </section>
         
         {/* Join another family */}
         <motion.div

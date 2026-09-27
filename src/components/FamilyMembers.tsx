@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
+import { FAMILY_MEMBERS_CHANGED } from '@/components/ChildLoginSetup';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Shield, ShieldOff, UserX, Users, ChevronDown, ChevronUp, KeyRound } from 'lucide-react';
+import { Shield, ShieldOff, UserX, Users, ChevronDown, ChevronUp, KeyRound, Copy, Check, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Select,
@@ -38,13 +39,17 @@ interface FamilyMember {
 interface FamilyMembersProps {
   familyId: string;
   children: Child[];
+  inviteCode?: string | null;
+  onAddChild?: () => void;
+  renderChildren?: (linkedByChild: Record<string, FamilyMember>) => ReactNode;
 }
 
-export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
+export function FamilyMembers({ familyId, children, inviteCode, onAddChild, renderChildren }: FamilyMembersProps) {
+  const [copied, setCopied] = useState(false);
   const { user } = useAuth();
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [resetTarget, setResetTarget] = useState<FamilyMember | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [resetting, setResetting] = useState(false);
@@ -86,7 +91,17 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
 
   useEffect(() => {
     fetchMembers();
-  }, [familyId]);
+    const h = () => fetchMembers();
+    window.addEventListener(FAMILY_MEMBERS_CHANGED, h);
+    return () => window.removeEventListener(FAMILY_MEMBERS_CHANGED, h);
+  }, [familyId, children.length]);
+
+  const linkedByChild: Record<string, FamilyMember> = {};
+  members.forEach((m) => {
+    if (m.role === 'child' && m.child_id && !m.email.endsWith('@laxhjalpen.child')) linkedByChild[m.child_id] = m;
+  });
+  const adults = members.filter((m) => !(m.role === 'child' && m.child_id));
+  const unlinkedCount = adults.filter((m) => m.role === 'child').length;
 
   const handleRoleChange = async (memberId: string, newRole: 'parent' | 'child') => {
     const { error } = await supabase
@@ -170,7 +185,7 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
       <div className="p-4 rounded-2xl bg-card shadow-card">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5" />
-          <h2 className="font-bold">Familjemedlemmar</h2>
+          <h2 className="font-bold">Familjen</h2>
         </div>
         <div className="mt-3 flex justify-center">
           <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -191,9 +206,9 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
       >
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5" />
-          <h2 className="font-bold">Familjemedlemmar</h2>
+          <h2 className="font-bold">Familjen</h2>
           <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
-            {members.length}
+            {adults.length + children.length}
           </span>
         </div>
         {expanded ? (
@@ -205,7 +220,11 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
 
       {expanded && (
         <div className="mt-4 space-y-3">
-          {members.map((member) => {
+          <h3 className="text-sm font-semibold text-muted-foreground">Vuxna</h3>
+          {unlinkedCount > 0 && (
+            <p className="text-xs text-primary">⚠️ Någon har gått med som barn men är inte kopplad – välj barnprofil nedan.</p>
+          )}
+          {adults.map((member) => {
             const isCurrentUser = member.user_id === user?.id;
 
             return (
@@ -332,6 +351,40 @@ export function FamilyMembers({ familyId, children }: FamilyMembersProps) {
               </div>
             );
           })}
+          {renderChildren && (
+            <>
+              <div className="flex items-center justify-between pt-2">
+                <h3 className="text-sm font-semibold text-muted-foreground">Barn</h3>
+                {onAddChild && (
+                  <Button variant="ghost" size="sm" onClick={onAddChild}>
+                    <Plus className="w-4 h-4 mr-1" /> Lägg till barn
+                  </Button>
+                )}
+              </div>
+              {renderChildren(linkedByChild)}
+            </>
+          )}
+          {inviteCode && (
+            <div className="p-3 rounded-xl bg-secondary">
+              <p className="text-xs text-muted-foreground mb-1">Bjud in fler med familjens kod</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-xl font-mono font-bold tracking-widest">{inviteCode.toUpperCase()}</code>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label="Kopiera inbjudningskod"
+                  onClick={() => {
+                    navigator.clipboard.writeText(inviteCode);
+                    setCopied(true);
+                    toast.success('Inbjudningskod kopierad!');
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
