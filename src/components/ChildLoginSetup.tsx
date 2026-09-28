@@ -86,6 +86,14 @@ export function ChildLoginSetup({ child, onDone, onSkip, skipLabel = 'Hoppa öve
   };
 
   const handleLink = async (member: Member) => {
+    if (
+      member.role === 'parent' &&
+      !window.confirm(
+        `${member.email} är registrerad som förälder. Vill du verkligen göra kontot till ${child.name}s barnkonto? Du kan ändra tillbaka under Familjen.`
+      )
+    ) {
+      return;
+    }
     setLoading(true);
     const { error } = await supabase
       .from('user_roles')
@@ -167,6 +175,9 @@ export function ChildLoginSetup({ child, onDone, onSkip, skipLabel = 'Hoppa öve
                 className="w-full p-3 rounded-xl border border-border hover:bg-muted/50 text-left text-sm font-medium truncate"
               >
                 {m.email}
+                {m.role === 'parent' && (
+                  <span className="ml-2 text-xs text-muted-foreground font-normal">(förälder)</span>
+                )}
               </button>
             ))}
           </div>
