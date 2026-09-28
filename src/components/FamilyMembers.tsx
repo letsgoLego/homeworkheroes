@@ -100,8 +100,12 @@ export function FamilyMembers({ familyId, children, inviteCode, onAddChild, rend
   members.forEach((m) => {
     if (m.role === 'child' && m.child_id && !m.email.endsWith('@laxhjalpen.child')) linkedByChild[m.child_id] = m;
   });
-  const adults = members.filter((m) => !(m.role === 'child' && m.child_id));
-  const unlinkedCount = adults.filter((m) => m.role === 'child').length;
+  // Only hide username-based child accounts (managed from the child card).
+  // Email accounts linked to a child stay listed so they can be unlinked, blocked or removed.
+  const adults = members.filter(
+    (m) => !(m.role === 'child' && m.child_id && m.email.endsWith('@laxhjalpen.child'))
+  );
+  const unlinkedCount = adults.filter((m) => m.role === 'child' && !m.child_id).length;
 
   const handleRoleChange = async (memberId: string, newRole: 'parent' | 'child') => {
     const { error } = await supabase
@@ -220,7 +224,7 @@ export function FamilyMembers({ familyId, children, inviteCode, onAddChild, rend
 
       {expanded && (
         <div className="mt-4 space-y-3">
-          <h3 className="text-sm font-semibold text-muted-foreground">Vuxna</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">Konton</h3>
           {unlinkedCount > 0 && (
             <p className="text-xs text-primary">⚠️ Någon har gått med som barn men är inte kopplad – välj barnprofil nedan.</p>
           )}
