@@ -61,7 +61,9 @@ export function FamilyMembers({ familyId, children, inviteCode, onAddChild, rend
     }
     setResetting(true);
     const body: Record<string, string> = { password: newPassword };
-    if (resetTarget.role === 'child' && resetTarget.child_id) {
+    // Username-based child accounts are resolved via childId; email-linked
+    // accounts are reset directly on their own auth user.
+    if (resetTarget.role === 'child' && resetTarget.child_id && resetTarget.email.endsWith('@laxhjalpen.child')) {
       body.childId = resetTarget.child_id;
     } else {
       body.targetUserId = resetTarget.user_id;
