@@ -43,6 +43,17 @@ interface AdminStats {
     child_accounts: number;
     homework: number;
     last_child_seen: string | null;
+    adults?: number;
+    last_adult_login?: string | null;
+  }[];
+  recent_users?: {
+    id: string;
+    email: string | null;
+    created_at: string;
+    last_sign_in_at: string | null;
+    is_child: boolean;
+    family_name: string | null;
+    logins: number;
   }[];
 }
 
@@ -281,10 +292,53 @@ export default function AdminPage() {
                       <span>{f.children} barn</span>
                       <span>{f.child_accounts} barnkonto</span>
                       <span>{f.homework} läxor</span>
+                      <span>{f.adults ?? 0} vuxna</span>
+                      <span>
+                        {f.last_adult_login
+                          ? `Vuxen inloggad ${format(parseISO(f.last_adult_login), 'd MMM', { locale: sv })}`
+                          : 'Vuxen aldrig inloggad'}
+                      </span>
                       <span>
                         {f.last_child_seen
                           ? `Barn aktivt ${format(parseISO(f.last_child_seen), 'd MMM', { locale: sv })}`
                           : 'Barn aldrig aktivt'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Senaste kontona</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {(data.recent_users ?? []).map(u => (
+                  <div
+                    key={u.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/50 p-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">
+                        {u.email ?? 'Okänd'}
+                        {u.is_child && (
+                          <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                            Barnkonto
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Skapat {format(parseISO(u.created_at), 'd MMM yyyy', { locale: sv })}
+                        {u.family_name ? ` · ${u.family_name}` : ' · Ingen familj'}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                      <span>{u.logins} inloggningar</span>
+                      <span>
+                        {u.last_sign_in_at
+                          ? `Senast inloggad ${format(parseISO(u.last_sign_in_at), 'd MMM', { locale: sv })}`
+                          : 'Aldrig inloggad'}
                       </span>
                     </div>
                   </div>
