@@ -5,7 +5,7 @@ import { track } from '@/lib/analytics';
 
 interface SubscriptionState {
   subscribed: boolean;
-  status: 'free' | 'active' | 'canceled' | 'gifted';
+  status: 'free' | 'active' | 'canceled' | 'gifted' | 'trial';
   subscriptionEnd: string | null;
   interval: string | null;
   loading: boolean;
@@ -50,7 +50,7 @@ export function useSubscription() {
         const familyId = roles[0].family_id;
         const { data: familyData } = await supabase
           .from('families')
-          .select('subscription_override, subscription_status, subscription_end, subscription_interval, subscription_checked_at')
+          .select('subscription_override, subscription_status, subscription_end, subscription_interval, subscription_checked_at, trial_ends_at')
           .eq('id', familyId)
           .maybeSingle();
 
@@ -63,6 +63,13 @@ export function useSubscription() {
             interval: null,
             loading: false,
           });
+          return;
+        }
+
+        // Free trial from the premium offer
+        if (familyData?.subscription_override === 'trial' && familyData.trial_ends_at
+            && new Date(familyData.trial_ends_at) > new Date()) {
+          setState({ subscribed: true, status: 'trial', subscriptionEnd: familyData.trial_ends_at, interval: null, loading: false });
           return;
         }
 

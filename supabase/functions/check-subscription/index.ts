@@ -59,7 +59,7 @@ serve(async (req) => {
     if (familyId && !forceRefresh) {
       const { data: familyData } = await supabaseClient
         .from('families')
-        .select('subscription_override, subscription_status, subscription_end, subscription_interval, subscription_checked_at')
+        .select('subscription_override, subscription_status, subscription_end, subscription_interval, subscription_checked_at, trial_ends_at')
         .eq('id', familyId)
         .maybeSingle();
 
@@ -75,6 +75,14 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
         });
+      }
+
+      // Free trial (premium offer) → Premium until trial_ends_at, no renewal
+      if (familyData?.subscription_override === 'trial' && familyData.trial_ends_at
+          && new Date(familyData.trial_ends_at) > new Date()) {
+        return new Response(JSON.stringify({
+          subscribed: true, status: 'trial', subscription_end: familyData.trial_ends_at, interval: null,
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
       }
 
       // Check if cache is still fresh
