@@ -1,9 +1,12 @@
 # Erbjudande: 3 månaders gratis Premium mot feedback
 
-## Viktigt om utskicket
-Appens mejlfunktion får bara skicka mejl som en person själv utlöst (t.ex. välkomstmejl). Ett erbjudande till många familjer räknas som marknadsföring och skulle skada leveransen av appens vanliga mejl. Därför:
-- Erbjudandet visas **inne i appen** för utvalda familjer (ruta på dagsvyn).
-- Mejlet skickar **du själv** från din Gmail. Jag tar fram mottagarlistan (med personlig länk per familj) och färdig text i adminvyn, så du kopierar och skickar.
+## Utskicket via Resend
+Erbjudandet är marknadsföring och skickas därför via en separat tjänst (Resend), så appens vanliga mejl inte påverkas.
+- Du skapar ett gratis Resend-konto och kopplar det till appen när jag ber om det (ett kopplingskort visas här i chatten).
+- Avsändare från en egen adress, t.ex. `elias@hej.laxhjalp.app`. Resend visar några domäninställningar som du lägger in hos din domänleverantör. Svar går till din Gmail.
+- I adminvyn: förhandsgranska mottagarlistan och tryck "Skicka erbjudandet". Varje familj får sitt mejl med personlig länk, och ingen familj får det två gånger.
+- Varje mejl har en länk för att avregistrera sig, och den som avregistrerar sig får inga fler erbjudanden.
+- Erbjudandet visas även **inne i appen** för berättigade familjer (ruta på dagsvyn).
 
 ## Vem får det
 Alla familjer utom familjen Nordblad och vuxna kopplade dit. Familjer som redan har Premium hoppas över. Du granskar listan i adminvyn först.
