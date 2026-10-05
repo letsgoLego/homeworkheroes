@@ -389,6 +389,26 @@ export function FamilyMembers({ familyId, children, inviteCode, onAddChild, rend
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </Button>
               </div>
+              <Button
+                variant="default"
+                className="w-full mt-2"
+                onClick={async () => {
+                  const url = `https://laxhjalp.app/join-family-start?code=${inviteCode.toLowerCase()}`;
+                  const text = 'Gå med i vår familj på Läxhjälp så planerar vi läxorna tillsammans:';
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({ title: 'Läxhjälp', text, url });
+                      return;
+                    }
+                  } catch {
+                    return;
+                  }
+                  await navigator.clipboard.writeText(`${text} ${url}`);
+                  toast.success('Inbjudningslänk kopierad!');
+                }}
+              >
+                Bjud in medförälder med länk
+              </Button>
             </div>
           )}
         </div>

@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 import { toast } from 'sonner';
 import { Users, ArrowRight, ArrowLeft, Mail, Lock, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { savePendingInvite } from '@/components/PendingInviteHandler';
 
 export default function JoinFamilyStartPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const [step, setStep] = useState<'code' | 'auth' | 'confirm'>('code');
-  const [inviteCode, setInviteCode] = useState('');
+  const [inviteCode, setInviteCode] = useState(() => (searchParams.get('code') || '').toLowerCase());
   const [familyInfo, setFamilyInfo] = useState<{ id: string; name: string } | null>(null);
   const [loading, setLoading] = useState(false);
   
@@ -320,6 +323,22 @@ export default function JoinFamilyStartPage() {
                 {isLogin ? 'Logga in för att gå med' : 'Skapa konto för att gå med'}
               </p>
             </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-12 font-semibold mb-4"
+              onClick={async () => {
+                savePendingInvite(inviteCode);
+                const result = await lovable.auth.signInWithOAuth('google', {
+                  redirect_uri: window.location.origin,
+                });
+                if (result?.error) toast.error('Google-inloggning misslyckades');
+              }}
+            >
+              Fortsätt med Google
+            </Button>
+            <p className="text-center text-xs text-muted-foreground mb-4">eller med e-post</p>
 
             {/* Toggle */}
             <div className="flex rounded-xl bg-muted p-1 mb-6">

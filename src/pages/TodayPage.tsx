@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, addDays, parseISO } from 'date-fns';
+import { Button } from '@/components/ui/button';
 import { sv } from 'date-fns/locale';
 import { useFamily } from '@/hooks/useFamily';
 import { TaskCard } from '@/components/TaskCard';
@@ -152,10 +153,10 @@ export default function TodayPage() {
   // that have no family yet. To avoid race conditions where a parent has just
   // joined a family but the cached query hasn't refreshed, we first try a
   // refetch and only redirect if the role is still missing.
-  if (!userRole && user?.created_at) {
-    const accountAge = Date.now() - new Date(user.created_at).getTime();
-    const TEN_MINUTES = 10 * 60 * 1000;
-    if (accountAge < TEN_MINUTES) {
+  // Any signed-in account without a family (e.g. a partner whose invite was
+  // lost during Google sign-in) is sent to onboarding to join or create one.
+  if (!userRole && user) {
+    {
       if (!refetchAttempted) {
         setRefetchAttempted(true);
         refetch();
@@ -210,6 +211,20 @@ export default function TodayPage() {
   const upcomingHomework = homework
     .filter(hw => hw.child_id === activeChildId && !hw.completed)
     .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
+    .slice(0, 3);
+
+  // Next future study day per homework – shown when today is empty so planned
+  // homework far ahead doesn't make the app look empty.
+  const nextUpcomingTasks = homework
+    .filter(hw => hw.child_id === activeChildId && !hw.completed)
+    .map(hw => {
+      const task = hw.tasks
+        .filter(t => !t.completed && t.task_date > todayStr)
+        .sort((a, b) => a.task_date.localeCompare(b.task_date))[0];
+      return task ? { task, hw } : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => !!x)
+    .sort((a, b) => a.task.task_date.localeCompare(b.task.task_date))
     .slice(0, 3);
   
   // Filter tasks: 
@@ -312,6 +327,7 @@ export default function TodayPage() {
               <GettingStartedCard
                 children={children}
                 homeworkCount={homework.length}
+                onChildUpdated={refetch}
                 onAddChild={() => setShowAddChild(true)}
               />
             )}
@@ -424,6 +440,25 @@ export default function TodayPage() {
                     </motion.div>
                     <p className="text-lg font-medium">Inga uppgifter idag!</p>
                     <p className="text-muted-foreground">Njut av din lediga tid!</p>
+
+                    {nextUpcomingTasks.length > 0 && (
+                      <div className="mt-6 text-left rounded-2xl border border-primary/20 bg-card p-4 space-y-3">
+                        <p className="font-semibold text-sm">Kommande läxor & prov</p>
+                        {nextUpcomingTasks.map(({ task, hw }) => (
+                          <div key={task.id} className="flex items-center gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{hw.title}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Nästa pluggdag {format(parseISO(task.task_date), 'EEE d MMM', { locale: sv })}
+                              </p>
+                            </div>
+                            <Button size="sm" variant="outline" onClick={() => toggleTask(task.id, true)}>
+                              Gör idag
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     
                     {/* Add adhoc task button when empty */}
                     {activeChildId && (
