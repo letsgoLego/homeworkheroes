@@ -327,6 +327,7 @@ export default function TodayPage() {
               <GettingStartedCard
                 children={children}
                 homeworkCount={homework.length}
+                onChildUpdated={refetch}
                 onAddChild={() => setShowAddChild(true)}
               />
             )}
