@@ -128,6 +128,7 @@ function AppRoutes() {
       <Route path="/tips/tonaringar-laxor" element={<TonaringarLaxorPage />} />
       <Route path="/tips/laxhjalp-hemma" element={<LaxhjalpHemmaPage />} />
       <Route path="/tips/lara-sig-klockan" element={<LaraSigKlockanPage />} />
+      <Route path="/tips/laxloggen" element={<LaxloggenPage />} />
       <Route path="/tips/lasforstaelse-barn" element={<LasforstaelseBarnPage />} />
       <Route path="/tips/matematik-hjalp-barn" element={<MatematikHjalpBarnPage />} />
       <Route path="/tips/engelska-glosor" element={<EngelskaGlosorPage />} />
