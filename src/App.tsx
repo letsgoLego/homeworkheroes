@@ -37,6 +37,7 @@ import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { OfflineBanner } from "./components/OfflineBanner";
 import SeoNoIndex from "./components/SeoNoIndex";
 import LaraSigKlockanPage from "./pages/seo/LaraSigKlockanPage";
+import LaxloggenPage from "./pages/seo/LaxloggenPage";
 import LasforstaelseBarnPage from "./pages/seo/LasforstaelseBarnPage";
 import MatematikHjalpBarnPage from "./pages/seo/MatematikHjalpBarnPage";
 import EngelskaGlosorPage from "./pages/seo/EngelskaGlosorPage";

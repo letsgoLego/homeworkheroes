@@ -1,6 +1,7 @@
 import SeoArticleLayout, { FaqItem } from '@/components/SeoArticleLayout';
 
 const related = [
+  { path: '/tips/laxloggen', title: 'Läxloggen — så skapar ni en läxlogg som funkar' },
   { path: '/tips/studieteknik-barn', title: 'Studieteknik för barn — metoder som fungerar' },
   { path: '/tips/laxrutin', title: 'Skapa en läxrutin som håller hela terminen' },
   { path: '/tips/motivation-laxor', title: 'Motivera barn till läxor — utan tjat' },

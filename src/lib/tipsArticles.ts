@@ -9,6 +9,7 @@ export interface TipsArticle {
 export const TIPS_ARTICLES: TipsArticle[] = [
   { slug: 'planera-laxor-foraldrar', path: '/tips/planera-laxor-foraldrar', title: 'Varför läxplanering är avgörande — och hur du som förälder hjälper', category: 'Planering' },
   { slug: 'laxplanering', path: '/tips/laxplanering', title: 'Läxplanering — 7 smarta tips för föräldrar och barn', category: 'Planering' },
+  { slug: 'laxloggen', path: '/tips/laxloggen', title: 'Läxloggen — så skapar ni en läxlogg som funkar', category: 'Planering' },
   { slug: 'laxrutin', path: '/tips/laxrutin', title: 'Skapa en läxrutin som håller hela terminen', category: 'Rutiner' },
   { slug: 'terminsstart-checklista', path: '/tips/terminsstart-checklista', title: 'Terminsstart — checklista för föräldrar', category: 'Terminsstart' },
   { slug: 'skolstart-rutiner', path: '/tips/skolstart-rutiner', title: 'Morgon- och sovrutiner efter lovet', category: 'Terminsstart' },
