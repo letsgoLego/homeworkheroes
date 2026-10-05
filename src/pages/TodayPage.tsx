@@ -35,6 +35,7 @@ import { ChildWeekDashboard } from '@/components/ChildWeekDashboard';
 import { HolidayBanner } from '@/components/HolidayBanner';
 import { HomeworkInbox } from '@/components/HomeworkInbox';
 import { GettingStartedCard } from '@/components/GettingStartedCard';
+import { PremiumOfferCard } from '@/components/PremiumOfferCard';
 import { computeCurrentStreak } from '@/lib/streak';
 import { track } from '@/lib/analytics';
 import { scheduleInboxReminder } from '@/lib/nativeNotifications';
@@ -331,6 +332,8 @@ export default function TodayPage() {
                 onAddChild={() => setShowAddChild(true)}
               />
             )}
+
+            {userRole !== 'child' && <PremiumOfferCard familyId={family?.id} />}
 
             {/* Holiday mode banner */}
             <HolidayBanner childId={activeChildId} />
