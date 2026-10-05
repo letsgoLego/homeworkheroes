@@ -45,7 +45,7 @@ export default function LaxorArskurs1_3Page() {
       relatedArticles={related}
       toolParagraph="I Läxhjälp kan du som förälder skicka läsläxan eller mattetabellerna till barnets inkorg, och barnet får välja vilka dagar de ska göras med hjälp av tydliga färger. Packlistan per veckodag gör att gympapåsen och boken följer med utan morgonstress."
       datePublished="2026-03-05"
-      dateModified="2026-06-23"
+      dateModified="2026-10-05"
       readingTimeMin={13}
       faqItems={faqItems}
     >
@@ -146,6 +146,23 @@ export default function LaxorArskurs1_3Page() {
         <li>Fira avslut. Konfetti, klistermärken, eller bara en high five. Belöningssystem fungerar fantastiskt i lågstadiet.</li>
         <li>Var konsekvent. Samma tid, samma plats, samma upplägg. Tråkigt för dig — magiskt för barnet.</li>
       </ul>
+
+      <h2>Att ge läxhjälp för barn i åk 1–3 — utan att ta över</h2>
+      <p>
+        Hjälp med läxor i lågstadiet handlar inte om att förklara svåra saker — det är
+        sällan svårt. Det handlar om att vara strukturen tills barnet har en egen. Tre
+        saker gör störst skillnad:
+      </p>
+      <ul>
+        <li><strong>Var ett stöd, inte en chef.</strong> Sitt bredvid, gör något eget, och hjälp bara när barnet frågar. Frågan "vad tror du?" slår svaret "det är såhär".</li>
+        <li><strong>Gör det svåra mindre.</strong> Fem mattetal i taget i stället för tjugo. En mening i stället för en sida. Barnet som får små steg klarar fler steg totalt.</li>
+        <li><strong>Låt loggen sköta minnet.</strong> En tydlig läxlogg eller app visar vad som ska göras — då slipper du vara familjens läxminne och kan lägga energin på uppmuntran i stället. Se vår guide <a href="/tips/laxloggen">Läxloggen — så skapar ni en som funkar</a>.</li>
+      </ul>
+      <p>
+        Kom ihåg målet: en åttaåring som upplever "jag klarade det själv" bygga både
+        färdigheten och viljan. Förälderns uppgift är att bygga ramen runt det — tid,
+        plats, ro och en tydlig plan. Mer om det i vår guide <a href="/tips/laxplanering">Läxplanering — 7 smarta tips</a>.
+      </p>
 
       <h2>När det är dags att kontakta läraren</h2>
       <p>
