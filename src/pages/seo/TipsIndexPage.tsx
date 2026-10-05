@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, BookOpen, Calendar, Brain, Clock, Heart, Sparkles, Users, Home, GraduationCap, Languages, Calculator, Smartphone, Zap, BookText, Award, ClipboardList, Sunrise, Backpack } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Calendar, Brain, Clock, Heart, NotebookPen, Sparkles, Users, Home, GraduationCap, Languages, Calculator, Smartphone, Zap, BookText, Award, ClipboardList, Sunrise, Backpack } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 
@@ -17,6 +17,7 @@ const ARTICLES: Article[] = [
   // Planering & rutiner
   { path: '/tips/planera-laxor-foraldrar', title: 'Vikten av att planera läxor — och hur du som förälder hjälper', description: 'Varför planering minskar läxstress, vad forskningen säger och fem konkreta steg per ålder.', icon: Calendar, color: 'bg-primary/10 text-primary', category: 'Planering' },
   { path: '/tips/laxplanering', title: 'Läxplanering: 7 tips för en strukturerad vecka', description: 'Lär dig hur du planerar veckans läxor smart så att stressen minskar och inget glöms bort.', icon: Calendar, color: 'bg-primary/10 text-primary', category: 'Planering' },
+  { path: '/tips/laxloggen', title: 'Läxloggen — så skapar ni en som funkar', description: 'Papper eller digital läxlogg? Vad ni ska logga, hur ofta ni går igenom den och hur barnet tar över.', icon: NotebookPen, color: 'bg-primary/10 text-primary', category: 'Planering' },
   { path: '/tips/laxrutin', title: 'Skapa en läxrutin som håller hela terminen', description: 'Steg-för-steg-guide för att bygga en hållbar läxrutin som passar familjens vardag.', icon: BookOpen, color: 'bg-success/10 text-success', category: 'Rutiner' },
 
   // Terminsstart
@@ -51,12 +52,24 @@ const ARTICLES: Article[] = [
 
 const CATEGORIES = ['Terminsstart', 'Planering', 'Rutiner', 'Studieteknik', 'Per ämne', 'Per åldersgrupp', 'Välmående', 'Motivation', 'Föräldraroll'];
 
+const CATEGORY_INTROS: Record<string, string> = {
+  Terminsstart: 'Inför skolstart eller terminsstart: checklistor, rutiner och packlistor som ger en lugn start.',
+  Planering: 'Hur ni planerar veckans läxor, delar upp stora uppgifter och håller koll på deadlines — utan stress.',
+  Rutiner: 'Fasta läxtider och rutiner som gör att pluggandet sker av sig självt, utan förhandling varje dag.',
+  Studieteknik: 'Beprövade metoder — testbaserat lärande, spridd repetition och planering inför prov.',
+  'Per ämne': 'Konkreta strategier per skolämne: klockan, läsförståelse, matte och engelska glosor.',
+  'Per åldersgrupp': 'Vad som är rimligt och vad som funkar, från lågstadiets första läsläxa till gymnasiets tentor.',
+  Välmående: 'När läxorna tar för mycket plats: stress, skärmtid och koncentrationssvårigheter.',
+  Motivation: 'Hur du skapar inre motivation och gör läxandet till något barnet själv vill lyckas med.',
+  Föräldraroll: 'Din roll som läxcoach: stötta, uppmuntra och släppa taget i rätt ordning.',
+};
+
 export default function TipsIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>Tips & guider om läxor och studieteknik | Läxhjälp</title>
-        <meta name="description" content="20 fördjupande guider om läxplanering, studieteknik, klockan, läsförståelse, mattehjälp, engelska glosor, ADHD-anpassningar och mer — skrivna för svenska föräldrar." />
+        <meta name="description" content="21 fördjupande guider om läxplanering, läxlogg, studieteknik, klockan, läsförståelse, mattehjälp, engelska glosor, ADHD-anpassningar och mer — skrivna för svenska föräldrar." />
         <link rel="canonical" href="https://laxhjalp.app/tips" />
         <meta property="og:title" content="Tips & guider om läxor och studieteknik" />
         <meta property="og:description" content="Praktiska, fördjupande guider om läxor, studieteknik och välmående — för svenska familjer." />
@@ -103,7 +116,7 @@ export default function TipsIndexPage() {
             Läxor, studieteknik & motivation
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            20 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
+            21 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
             högstadiets nationella prov.
           </p>
         </motion.div>
@@ -136,7 +149,10 @@ export default function TipsIndexPage() {
           if (inCat.length === 0) return null;
           return (
             <section key={cat} className="mb-12">
-              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-4">{cat}</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">{cat}</h2>
+              {CATEGORY_INTROS[cat] && (
+                <p className="text-sm sm:text-base text-muted-foreground mb-4 max-w-3xl">{CATEGORY_INTROS[cat]}</p>
+              )}
               <div className="grid sm:grid-cols-2 gap-5 sm:gap-6">
                 {inCat.map((article) => (
                   <Link

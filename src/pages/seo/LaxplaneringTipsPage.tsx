@@ -1,6 +1,7 @@
 import SeoArticleLayout, { FaqItem } from '@/components/SeoArticleLayout';
 
 const related = [
+  { path: '/tips/laxloggen', title: 'Läxloggen — så skapar ni en läxlogg som funkar' },
   { path: '/tips/studieteknik-barn', title: 'Studieteknik för barn — metoder som fungerar' },
   { path: '/tips/laxrutin', title: 'Skapa en läxrutin som håller hela terminen' },
   { path: '/tips/motivation-laxor', title: 'Motivera barn till läxor — utan tjat' },
@@ -44,7 +45,7 @@ export default function LaxplaneringTipsPage() {
       relatedArticles={related}
       toolParagraph="I Läxhjälp gör du hela veckoplaneringen på några minuter: lägg in läxor, prov och aktiviteter, välj pluggdagar i en vy som visar hur mycket varje dag redan innehåller, och dela stora uppgifter i mindre steg. Appen påminner innan deadline, håller packlistan per veckodag och firar avklarade läxor med streaks och XP."
       datePublished="2025-09-12"
-      dateModified="2026-06-23"
+      dateModified="2026-10-05"
       readingTimeMin={11}
       faqItems={faqItems}
     >
@@ -174,6 +175,27 @@ export default function LaxplaneringTipsPage() {
       <p>
         Med rätt verktyg kan även en 8-åring lära sig att planera sina läxor själv. Tilliten
         bygger självkänslan som bygger motivationen som bygger resultaten.
+      </p>
+
+      <h2>Läxplanering i praktiken — så kan en vecka se ut</h2>
+      <p>
+        Abstrakta tips är bra, men läxplanering blir tydligast som ett riktigt exempel.
+        Så här kan en vecka se ut för ett barn i åk 4 med två läxor, ett prov och två
+        träningar (fotboll tisdag, ridning torsdag):
+      </p>
+      <ul>
+        <li><strong>Söndag (10 min):</strong> hela familjen tar överblicken. Matteuppgifter in på onsdag, Svenska bokprojekt in på fredag, Naturkunskapsförhör på fredag nästa vecka. Läxan med tidigast deadline får inte ta mer än två dagar.</li>
+        <li><strong>Måndag (läxtid 15:30):</strong> bokprojektet delas upp — läsa kapitel, skriva sammanfattning. En halv timme.</li>
+        <li><strong>Tisdag:</strong> fotboll. Bara packning och en kort glosrunda på bilvägen.</li>
+        <li><strong>Onsdag:</strong> matteuppgifterna klara och avbockade. Bokprojektet fortsätter.</li>
+        <li><strong>Torsdag:</strong> ridning. Lätt dag — förhöret får sin första korta repetition ("testa dig själv" utan att titta).</li>
+        <li><strong>Fredag:</strong> sista passet på bokprojektet, inlämning klart. Helgen är fri — det är själva belöningen som gör planeringen populär.</li>
+      </ul>
+      <p>
+        Notera vad som inte finns med: inget kvällsregn kvällen före deadline, inget tjat
+        under veckan, inga överraskningar. Allt det löste söndagsöverblicken. Vill ni ha
+        en samlad lista över veckans läxor att utgå ifrån är en läxlogg det enklaste
+        verktyget — se vår guide <a href="/tips/laxloggen">Läxloggen — så skapar ni en som funkar</a>.
       </p>
 
       <h2>Bonus: undvik fem vanliga fällor</h2>
