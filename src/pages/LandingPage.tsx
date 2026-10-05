@@ -29,7 +29,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Helmet>
         <title>Läxhjälp – familjeappen för läxor, prov och packlistor</title>
-        <meta name="description" content="Planera läxor, prov och packlistor tillsammans i familjen. Mindre läxstress, fler firade framgångar. Gratis att komma igång." />
+        <meta name="description" content="Läxhjälp för hela familjen – planera läxor, prov och packlistor tillsammans. Mindre läxstress, fler firade framgångar. Gratis att komma igång." />
         <link rel="canonical" href="https://laxhjalp.app/" />
         <meta property="og:title" content="Läxhjälp – planera läxor och prov tillsammans i familjen" />
         <meta property="og:description" content="Se hur Läxhjälp fungerar: planera läxor, dela upp prov och håll koll på packlistor – som familj." />
@@ -84,12 +84,12 @@ export default function LandingPage() {
                 Gratis att komma igång
               </motion.div>
               <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight mb-6">
-                Läxläsning som{' '}
+                Läxhjälp som{' '}
                 <span className="text-primary">hela familjen</span>{' '}
                 har koll på
               </motion.h1>
               <motion.p variants={fadeUp} className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-lg mx-auto lg:mx-0">
-                Hjälp ditt barn planera, prioritera och klara sina läxor – medan du som förälder får full insyn och kan stötta på riktigt.
+                Läxhjälp för hela familjen: hjälp ditt barn planera, prioritera och klara sina läxor – medan du som förälder får full insyn och kan stötta på riktigt.
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Link to="/auth">
@@ -633,6 +633,53 @@ export default function LandingPage() {
                   Välj årsplan
                 </Button>
               </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ============ WHAT IS LÄXHJÄLP (SEO) ============ */}
+      <section className="py-16 sm:py-24 bg-primary/5">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-80px' }}
+            variants={stagger}
+          >
+            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-extrabold text-foreground mb-6">
+              Vad är läxhjälp – och hur får man det?
+            </motion.h2>
+            <motion.div variants={fadeUp} className="space-y-4 text-muted-foreground text-lg leading-relaxed">
+              <p>
+                Läxhjälp är stöd som hjälper ett barn att faktiskt göra och förstå sina
+                läxor — utan att någon vuxen gör jobbet åt barnet. Det kan vara en
+                privatlärare, ett läxhjälpsteam i kommunen, eller — för de flesta
+                familjer — en tydlig struktur hemma: en fast läxtid, en överblick av
+                veckans uppgifter och en förälder som uppmuntrar i stället för att tjata.
+              </p>
+              <p>
+                Det är den tredje sortens läxhjälp Läxhjälp är byggt för. Appen samlar
+                barnets läxor och prov, delar upp stora uppgifter i pluggbara steg,
+                påminner innan deadlines och visar föräldern hur det går — så att
+                vardagsläxhjälpen sker hemma, på barnets villkor och helt gratis att
+                komma igång med.
+              </p>
+              <p>
+                Vill du läsa mer om hur man ger bra läxhjälp? Börja med våra guider{' '}
+                <Link to="/tips/laxhjalp-hemma" className="font-semibold text-primary underline">
+                  läxhjälp hemma
+                </Link>{' '}
+                och{' '}
+                <Link to="/tips/laxplanering" className="font-semibold text-primary underline">
+                  läxplanering — 7 smarta tips
+                </Link>
+                , eller bläddra bland alla{' '}
+                <Link to="/tips" className="font-semibold text-primary underline">
+                  guider om läxor och studieteknik
+                </Link>
+                .
+              </p>
             </motion.div>
           </motion.div>
         </div>
