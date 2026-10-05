@@ -1,4 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import { ManageChildAccount } from '@/components/ManageChildAccount';
+import type { Tables } from '@/integrations/supabase/types';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Circle, ArrowRight, Rocket } from 'lucide-react';
@@ -14,6 +17,7 @@ interface ChildLike {
 
 interface Props {
   children: ChildLike[];
+  onChildUpdated?: () => Promise<void> | void;
   homeworkCount: number;
   onAddChild: () => void;
 }
@@ -22,10 +26,17 @@ interface Props {
  * Shown to parents until the basics are in place. New families tended to stop
  * right after adding a child, so we spell out the remaining steps.
  */
-export function GettingStartedCard({ children, homeworkCount, onAddChild }: Props) {
+export function GettingStartedCard({ children, homeworkCount, onAddChild, onChildUpdated }: Props) {
   const navigate = useNavigate();
+  const [loginChild, setLoginChild] = useState<ChildLike | null>(null);
 
-  const { isSubscribed, loading: notificationsLoading } = useNotifications();
+  const { isSubscribed, loading: notificationsLoading, subscribe } = useNotifications();
+
+  const enableNotifications = async () => {
+    const ok = await subscribe();
+    if (ok) toast.success('Påminnelser är påslagna! 🔔');
+    else toast.error('Kunde inte slå på påminnelser. Tillåt notiser i webbläsaren eller lägg appen på hemskärmen.');
+  };
 
   // A stored subscription counts as "on" even on a device where the browser
   // permission prompt was never shown.
@@ -50,7 +61,11 @@ export function GettingStartedCard({ children, homeworkCount, onAddChild }: Prop
         label: 'Skapa inloggning till barnet',
         hint: 'Då kan barnet bocka av själv – och du ser framstegen.',
         done: children.some((c) => !!c.has_account),
-        action: () => navigate('/family'),
+        action: () => {
+          const c = children.find((x) => !x.has_account);
+          if (c) setLoginChild(c);
+          else navigate('/family');
+        },
         cta: 'Skapa inloggning',
       },
       {
@@ -58,8 +73,8 @@ export function GettingStartedCard({ children, homeworkCount, onAddChild }: Prop
         label: 'Slå på påminnelser',
         hint: 'Små puffar på eftermiddagen istället för tjat.',
         done: notificationsOn,
-        action: () => navigate('/family'),
-        cta: 'Slå på',
+        action: enableNotifications,
+        cta: 'Slå på påminnelser',
       },
       {
         key: 'homework',
@@ -122,6 +137,14 @@ export function GettingStartedCard({ children, homeworkCount, onAddChild }: Prop
         {next.cta}
         <ArrowRight className="w-4 h-4 ml-2" />
       </Button>
+      {loginChild && (
+        <ManageChildAccount
+          child={loginChild as Tables<'children'>}
+          open={!!loginChild}
+          onClose={() => setLoginChild(null)}
+          onUpdate={async () => { await onChildUpdated?.(); }}
+        />
+      )}
     </motion.section>
   );
 }
