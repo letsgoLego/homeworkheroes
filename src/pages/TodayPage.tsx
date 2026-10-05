@@ -49,6 +49,7 @@ export default function TodayPage() {
   const [deletingActivityId, setDeletingActivityId] = useState<string | null>(null);
 
   const {
+    family,
     homework,
     inboxHomework,
     children,
