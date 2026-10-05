@@ -62,6 +62,7 @@ END $$;
 CREATE OR REPLACE FUNCTION public.admin_prepare_premium_offers()
 RETURNS TABLE(family_id uuid, family_name text, recipient_email text, token text, sent_at timestamptz, accepted_at timestamptz, unsubscribed_at timestamptz)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+#variable_conflict use_column
 BEGIN
   IF NOT has_role(auth.uid(), 'admin') THEN RAISE EXCEPTION 'forbidden'; END IF;
   INSERT INTO premium_offers(family_id, recipient_email)
