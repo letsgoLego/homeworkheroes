@@ -29,6 +29,13 @@
       "when": 1790943093825,
       "tag": "0003_admin_stats_adult_logins_recent_users",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791202280799,
+      "tag": "0004_premium_offer",
+      "breakpoints": true
     }
   ]
 }
