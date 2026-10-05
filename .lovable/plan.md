@@ -1,9 +1,12 @@
 # Erbjudande: 3 månaders gratis Premium mot feedback
 
-## Viktigt om utskicket
-Appens mejlfunktion får bara skicka mejl som en person själv utlöst (t.ex. välkomstmejl). Ett erbjudande till många familjer räknas som marknadsföring och skulle skada leveransen av appens vanliga mejl. Därför:
-- Erbjudandet visas **inne i appen** för utvalda familjer (ruta på dagsvyn).
-- Mejlet skickar **du själv** från din Gmail. Jag tar fram mottagarlistan (med personlig länk per familj) och färdig text i adminvyn, så du kopierar och skickar.
+## Utskicket via Resend
+Erbjudandet är marknadsföring och skickas därför via en separat tjänst (Resend), så appens vanliga mejl inte påverkas.
+- Du skapar ett gratis Resend-konto och kopplar det till appen när jag ber om det (ett kopplingskort visas här i chatten).
+- Avsändare från en egen adress, t.ex. `elias@hej.laxhjalp.app`. Resend visar några domäninställningar som du lägger in hos din domänleverantör. Svar går till din Gmail.
+- I adminvyn: förhandsgranska mottagarlistan och tryck "Skicka erbjudandet". Varje familj får sitt mejl med personlig länk, och ingen familj får det två gånger.
+- Varje mejl har en länk för att avregistrera sig, och den som avregistrerar sig får inga fler erbjudanden.
+- Erbjudandet visas även **inne i appen** för berättigade familjer (ruta på dagsvyn).
 
 ## Vem får det
 Alla familjer utom familjen Nordblad och vuxna kopplade dit. Familjer som redan har Premium hoppas över. Du granskar listan i adminvyn först.
@@ -24,10 +27,10 @@ Alla familjer utom familjen Nordblad och vuxna kopplade dit. Familjer som redan 
 - Allt kopplas till familjen så du ser hela resan, och du ser även hur aktiva de varit (inloggningar, läxor) bredvid svaren.
 
 ## För dig i adminvyn
-- Sektion "Premiumerbjudande": mottagarlista med personliga länkar, mejltext att kopiera, antal aktiverade, och alla feedbacksvar per familj i tidsordning.
+- Sektion "Premiumerbjudande": mottagarlista, knapp "Skicka erbjudandet", antal skickade, aktiverade och avregistrerade, samt alla feedbacksvar per familj i tidsordning.
 - Nya svar mejlas till dig, precis som hjälpfrågorna.
 
-## Förslag på mejl (skickas från din Gmail)
+## Förslag på mejl (skickas via Resend)
 
 **Ämne:** En gåva till er familj – 3 månader Premium gratis
 
@@ -56,7 +59,8 @@ Elias, Läxhjälp
 - Sida `/erbjudande?token=...` (noindex), token sparas inför inloggning.
 - Avstämningsrutan beräknar vilket steg som är aktuellt utifrån `accepted_at` och vilka steg som redan besvarats.
 - Notismejl till Elias vid ny feedback via befintlig funktion för hjälpfrågor (en mottagare, utlöst av händelsen).
+- Resend kopplas via connector; edge function `send-premium-offer` (bara admin) skickar ett mejl per familj via gatewayen, loggar utskick i `premium_offers.sent_at` (idempotent) och lägger till `List-Unsubscribe` + avregistreringslänk (`/erbjudande/avregistrera?token=`) som sätter `unsubscribed_at`.
+- Avsändardomän `hej.laxhjalp.app` (skild från appens befintliga mejldomän). Utskick blockeras tills domänen är verifierad i Resend.
 
 ## Frågor att bekräfta
-- OK att du skickar mejlet själv från Gmail (rekommenderas)? Alternativt kan vi koppla en separat tjänst för utskick, t.ex. Resend.
 - Alla familjer, eller bara de med minst ett barn tillagt?
