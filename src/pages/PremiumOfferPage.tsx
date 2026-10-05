@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SeoNoIndex } from '@/components/SeoNoIndex';
+import SeoNoIndex from '@/components/SeoNoIndex';
 import { notifyOwner } from '@/components/PremiumOfferCard';
 import { toast } from 'sonner';
 
