@@ -163,6 +163,7 @@ const App = () => (
           <SubscriptionProvider>
             <OfflineBanner />
             <SeoNoIndex />
+            <PendingInviteHandler />
             <AppRoutes />
             <CookieBanner />
           </SubscriptionProvider>
