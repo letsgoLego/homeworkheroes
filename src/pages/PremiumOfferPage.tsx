@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import SeoNoIndex from '@/components/SeoNoIndex';
 import { notifyOwner } from '@/components/PremiumOfferCard';
 import { toast } from 'sonner';
 
@@ -48,7 +47,6 @@ export default function PremiumOfferPage() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-8">
-      <SeoNoIndex />
       <div className="mx-auto max-w-md space-y-6">
         <div className="text-center space-y-2">
           <Gift className="w-10 h-10 text-primary mx-auto" />
@@ -99,7 +97,6 @@ export function PremiumOfferUnsubscribePage() {
   }, [params]);
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <SeoNoIndex />
       <p className="text-center max-w-sm">
         {state === 'loading' && 'Ett ögonblick…'}
         {state === 'done' && 'Klart. Du får inga fler erbjudanden från oss. Ditt konto påverkas inte.'}
