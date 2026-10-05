@@ -265,6 +265,7 @@ export type Database = {
           subscription_interval: string | null
           subscription_override: string | null
           subscription_status: string | null
+          trial_ends_at: string | null
         }
         Insert: {
           created_at?: string
@@ -276,6 +277,7 @@ export type Database = {
           subscription_interval?: string | null
           subscription_override?: string | null
           subscription_status?: string | null
+          trial_ends_at?: string | null
         }
         Update: {
           created_at?: string
@@ -287,6 +289,7 @@ export type Database = {
           subscription_interval?: string | null
           subscription_override?: string | null
           subscription_status?: string | null
+          trial_ends_at?: string | null
         }
         Relationships: []
       }
@@ -626,6 +629,88 @@ export type Database = {
           },
         ]
       }
+      offer_feedback: {
+        Row: {
+          answers: Json
+          created_at: string
+          family_id: string
+          id: string
+          rating: number | null
+          stage: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          family_id: string
+          id?: string
+          rating?: number | null
+          stage: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          family_id?: string
+          id?: string
+          rating?: number | null
+          stage?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_feedback_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      premium_offers: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          family_id: string
+          id: string
+          recipient_email: string | null
+          sent_at: string | null
+          token: string
+          unsubscribed_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          family_id: string
+          id?: string
+          recipient_email?: string | null
+          sent_at?: string | null
+          token?: string
+          unsubscribed_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          family_id?: string
+          id?: string
+          recipient_email?: string | null
+          sent_at?: string | null
+          token?: string
+          unsubscribed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "premium_offers_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: true
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           auth_key: string | null
@@ -827,6 +912,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_premium_offer: {
+        Args: { _answers: Json; _token: string }
+        Returns: string
+      }
+      admin_list_offer_feedback: {
+        Args: never
+        Returns: {
+          answers: Json
+          created_at: string
+          email: string
+          family_name: string
+          id: string
+          rating: number
+          stage: string
+        }[]
+      }
+      admin_prepare_premium_offers: {
+        Args: never
+        Returns: {
+          accepted_at: string
+          family_id: string
+          family_name: string
+          recipient_email: string
+          sent_at: string
+          token: string
+          unsubscribed_at: string
+        }[]
+      }
       create_family_with_role: {
         Args: { _family_name: string }
         Returns: string
@@ -867,6 +980,7 @@ export type Database = {
         }[]
       }
       nudges_remaining_today: { Args: { _child_id: string }; Returns: number }
+      unsubscribe_premium_offer: { Args: { _token: string }; Returns: boolean }
       update_child_last_seen: {
         Args: { _child_id: string }
         Returns: undefined

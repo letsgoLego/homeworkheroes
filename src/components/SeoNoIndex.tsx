@@ -19,6 +19,7 @@ const NON_INDEXABLE_PREFIXES = [
   '/insights',
   '/profile',
   '/holiday',
+  '/erbjudande',
 ];
 
 const NON_INDEXABLE_EXACT = new Set<string>([]);
