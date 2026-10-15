@@ -57,6 +57,7 @@ export function StudyPlanTemplate({
   getActivitiesForDay,
 }: StudyPlanTemplateProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [compactView, setCompactView] = useState(true);
   const [newTitle, setNewTitle] = useState('');
   const activeSectionRef = useRef<HTMLElement>(null);
 
