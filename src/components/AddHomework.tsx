@@ -530,7 +530,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 </div>
               )}
 
-              <AIHomeworkAssistant busyDates={aiBusyDates} onApply={applyAiCard} />
+              <AIHomeworkAssistant dayLoad={aiDayLoad} onApply={applyAiCard} />
 
               {/* Quick templates */}
               <div>

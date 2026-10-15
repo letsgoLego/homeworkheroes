@@ -28,7 +28,7 @@ export interface AIHomeworkCard {
 type Msg = { role: 'user' | 'assistant'; text: string; image?: string };
 
 interface Props {
-  busyDates: string[];
+  dayLoad: { date: string; summary: string }[];
   onApply: (card: AIHomeworkCard) => void;
 }
 
