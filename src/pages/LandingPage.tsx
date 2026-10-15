@@ -29,7 +29,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Helmet>
         <title>Läxhjälp – familjeappen för läxor, prov och packlistor</title>
-        <meta name="description" content="Läxhjälp för hela familjen – planera läxor, prov och packlistor tillsammans. Mindre läxstress, fler firade framgångar. Gratis att komma igång." />
+        <meta name="description" content="Läxhjälp för hela familjen – prata in eller fota läxan så planerar AI:n resten. Mindre läxstress, fler firade framgångar. Gratis att komma igång." />
         <link rel="canonical" href="https://laxhjalp.app/" />
         <meta property="og:title" content="Läxhjälp – planera läxor och prov tillsammans i familjen" />
         <meta property="og:description" content="Se hur Läxhjälp fungerar: planera läxor, dela upp prov och håll koll på packlistor – som familj." />
@@ -89,7 +89,7 @@ export default function LandingPage() {
                 har koll på
               </motion.h1>
               <motion.p variants={fadeUp} className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-lg mx-auto lg:mx-0">
-                Läxhjälp för hela familjen: hjälp ditt barn planera, prioritera och klara sina läxor – medan du som förälder får full insyn och kan stötta på riktigt.
+                Läxhjälp för hela familjen: prata in eller fota läxan så planerar AI:n resten – medan du som förälder får full insyn och kan stötta på riktigt.
               </motion.p>
               <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
                 <Link to="/auth">
