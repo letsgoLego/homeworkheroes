@@ -108,67 +108,70 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
     setMessages([...next.map(m => ({ role: m.role, text: m.text })), { role: 'assistant', text: c.question ?? 'Klart!' }]);
   };
 
-  const dictationHint = () =>
-    toast('Tryck på mikrofonen på tangentbordet för att prata in texten.');
+  const transcribe = async (blob: Blob, mimeType: string) => {
+    setTranscribing(true);
+    try {
+      const buf = await blob.arrayBuffer();
+      let bin = '';
+      const bytes = new Uint8Array(buf);
+      for (let i = 0; i < bytes.length; i += 0x8000) {
+        bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      }
+      const { data, error } = await supabase.functions.invoke('homework-assistant', {
+        body: { action: 'transcribe', audio: btoa(bin), mimeType },
+      });
+      if (error || !data?.text) {
+        let msg = 'Kunde inte tolka ljudet. Försök igen.';
+        if (error instanceof FunctionsHttpError) {
+          try { msg = (await error.context.json()).error ?? msg; } catch { /* ignore */ }
+        }
+        toast.error(msg);
+        return;
+      }
+      setInput(prev => (prev ? prev.trimEnd() + ' ' : '') + data.text);
+      track('ai_homework_transcribed', { chars: data.text.length });
+    } catch {
+      toast.error('Kunde inte tolka ljudet. Försök igen.');
+    } finally {
+      setTranscribing(false);
+    }
+  };
 
-  const startListening = () => {
-    const ua = navigator.userAgent;
-    const isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document);
-    const standalone = (window.matchMedia?.('(display-mode: standalone)').matches) || (navigator as any).standalone;
-    const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
-    // iOS hemskärmsapp/native-app: webbläsarens taligenkänning hänger sig där – använd tangentbordets diktering
-    if (!SpeechRec || (isIOS && (standalone || isNative))) {
-      dictationHint();
+  const startListening = async () => {
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      toast('Tryck på mikrofonen på tangentbordet för att prata in texten.');
       return;
     }
-    let rec: any;
     try {
-      rec = new SpeechRec();
-      rec.lang = 'sv-SE';
-      rec.continuous = !isIOS; // continuous är buggigt i iOS Safari
-      rec.interimResults = true;
-    } catch {
-      dictationHint();
-      return;
-    }
-    baseTextRef.current = input ? input + ' ' : '';
-    let gotResult = false;
-    const watchdog = window.setTimeout(() => {
-      if (!gotResult) {
-        try { rec.abort(); } catch { /* ignore */ }
-        setListening(false);
-        dictationHint();
-      }
-    }, 8000);
-    rec.onresult = (e: any) => {
-      gotResult = true;
-      let t = '';
-      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
-      setInput(baseTextRef.current + t);
-    };
-    rec.onend = () => { window.clearTimeout(watchdog); setListening(false); };
-    rec.onerror = (e: any) => {
-      window.clearTimeout(watchdog);
-      setListening(false);
-      if (e?.error === 'not-allowed' || e?.error === 'service-not-allowed') {
-        toast.error('Mikrofonen är blockerad. Tillåt mikrofon i inställningarna, eller använd tangentbordets mikrofon.');
-      } else if (e?.error !== 'aborted' && e?.error !== 'no-speech') {
-        dictationHint();
-      }
-    };
-    recRef.current = rec;
-    try {
-      rec.start();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mimeType = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg']
+        .find(m => MediaRecorder.isTypeSupported(m)) ?? '';
+      const rec = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => { if (e.data.size) chunksRef.current.push(e.data); };
+      rec.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+        const blob = new Blob(chunksRef.current, { type: rec.mimeType || 'audio/webm' });
+        chunksRef.current = [];
+        if (blob.size > 500) transcribe(blob, blob.type);
+      };
+      recRef.current = rec;
+      rec.start(250);
       setListening(true);
-    } catch {
-      window.clearTimeout(watchdog);
-      setListening(false);
-      dictationHint();
+    } catch (e: any) {
+      if (e?.name === 'NotAllowedError' || e?.name === 'SecurityError') {
+        toast.error('Mikrofonen är blockerad. Tillåt mikrofonen i webbläsarens inställningar.');
+      } else {
+        toast.error('Kunde inte starta mikrofonen.');
+      }
     }
   };
 
   const stopListening = () => {
-    try { recRef.current?.stop?.(); } catch { /* ignore */ }
+    try { recRef.current?.stop(); } catch { /* ignore */ }
+    recRef.current = null;
     setListening(false);
   };
 
