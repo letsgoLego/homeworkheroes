@@ -218,6 +218,58 @@ export function StudyPlanTemplate({
         </p>
       )}
 
+      {rows.length > 0 && compactView && (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Tryck på en dag för att lägga till eller ta bort den. Grön prick = lugn dag, röd = full.
+          </p>
+          {rows.map((row, index) => {
+            const color = momentColor(index);
+            const phase = phaseByLabel.get(row.title);
+            return (
+              <div key={row.id} className="rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                  <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-primary-foreground', color.dot)}>{index + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{row.title}</p>
+                    {phase && <p className="text-[11px] text-muted-foreground">{STUDY_PHASE_LABELS[phase]}</p>}
+                  </div>
+                  <span className={cn('text-[11px]', row.dates.length ? color.text : 'text-destructive')}>
+                    {row.dates.length ? `${row.dates.length} dag${row.dates.length > 1 ? 'ar' : ''}` : 'Välj dag'}
+                  </span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {days.map(day => {
+                    const date = format(day, 'yyyy-MM-dd');
+                    const selected = row.dates.includes(date);
+                    const load = (taskCountsByDate[date] || 0) + getActivitiesForDay(day).length;
+                    return (
+                      <button
+                        key={date}
+                        type="button"
+                        onClick={() => toggleDateForRow(index, date)}
+                        className={cn(
+                          'flex w-12 flex-col items-center rounded-md border px-1 py-1.5',
+                          selected ? cn(color.ring, color.softBg, color.text, 'font-semibold') : 'text-muted-foreground'
+                        )}
+                      >
+                        <span className="text-[10px] capitalize">{format(day, 'EEE', { locale: sv })}</span>
+                        <span className="text-sm font-bold">{format(day, 'd')}</span>
+                        <span className={cn('mt-0.5 h-1.5 w-1.5 rounded-full', load === 0 ? 'bg-emerald-500' : load <= 2 ? 'bg-amber-500' : 'bg-red-500')} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+          <Button type="button" variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={() => setCompactView(false)}>
+            Fler val – redigera moment i detalj
+          </Button>
+        </div>
+      )}
+
+      {(!compactView || rows.length === 0) && (
       <div className="grid gap-5 md:grid-cols-[minmax(240px,0.8fr)_minmax(0,1.6fr)]">
 
         <section className="hidden space-y-3 md:order-1 md:block">
