@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
     headers: { 'Content-Type': 'application/json', 'Lovable-API-Key': apiKey, 'X-Lovable-AIG-SDK': 'fetch' },
     body: JSON.stringify({
       model: MODEL,
-      instructions: instructions(today, weekday, busy),
+      instructions: instructions(today, weekday, schedule),
       input,
       stream: true,
       store: false,
