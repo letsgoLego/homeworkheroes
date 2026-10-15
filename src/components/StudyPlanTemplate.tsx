@@ -57,6 +57,7 @@ export function StudyPlanTemplate({
   getActivitiesForDay,
 }: StudyPlanTemplateProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [compactView, setCompactView] = useState(true);
   const [newTitle, setNewTitle] = useState('');
   const activeSectionRef = useRef<HTMLElement>(null);
 
@@ -100,10 +101,16 @@ export function StudyPlanTemplate({
 
   const toggleDate = (date: string) => {
     if (!activeRow) return;
-    updateRow(activeIndex, {
-      dates: activeRow.dates.includes(date)
-        ? activeRow.dates.filter(item => item !== date)
-        : [...activeRow.dates, date].sort(),
+    toggleDateForRow(activeIndex, date);
+  };
+
+  const toggleDateForRow = (index: number, date: string) => {
+    const row = rows[index];
+    if (!row) return;
+    updateRow(index, {
+      dates: row.dates.includes(date)
+        ? row.dates.filter(item => item !== date)
+        : [...row.dates, date].sort(),
     });
   };
 
@@ -142,14 +149,21 @@ export function StudyPlanTemplate({
             Upplägget bygger på forskning om testbaserat lärande och spridd repetition – samma
             studieteknik som skolan lutar sig mot.
           </p>
-          <Button type="button" size="sm" variant="secondary" onClick={applySuggestedPlan} disabled={suggestions.length === 0}>
-            <Wand2 className="mr-1.5 h-4 w-4" />
-            {rows.length > 0 ? 'Gör om förslag' : 'Föreslå upplägg'}
-          </Button>
+          <div className="flex items-center gap-2">
+            {rows.length > 0 && !compactView && (
+              <Button type="button" size="sm" variant="outline" onClick={() => setCompactView(true)}>
+                Översikt
+              </Button>
+            )}
+            <Button type="button" size="sm" variant="secondary" onClick={applySuggestedPlan} disabled={suggestions.length === 0}>
+              <Wand2 className="mr-1.5 h-4 w-4" />
+              {rows.length > 0 ? 'Gör om förslag' : 'Föreslå upplägg'}
+            </Button>
+          </div>
         </div>
       </div>
 
-      {rows.length > 0 && (
+      {rows.length > 0 && !compactView && (
         <div className="space-y-3 md:hidden">
           <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted/40 p-1 text-[11px] font-medium">
             <span className="rounded-md bg-background px-2 py-1 text-center text-primary">1 Moment</span>
@@ -204,6 +218,58 @@ export function StudyPlanTemplate({
         </p>
       )}
 
+      {rows.length > 0 && compactView && (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            Tryck på en dag för att lägga till eller ta bort den. Grön prick = lugn dag, röd = full.
+          </p>
+          {rows.map((row, index) => {
+            const color = momentColor(index);
+            const phase = phaseByLabel.get(row.title);
+            return (
+              <div key={row.id} className="rounded-lg border p-3">
+                <div className="flex items-center gap-2">
+                  <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-primary-foreground', color.dot)}>{index + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{row.title}</p>
+                    {phase && <p className="text-[11px] text-muted-foreground">{STUDY_PHASE_LABELS[phase]}</p>}
+                  </div>
+                  <span className={cn('text-[11px]', row.dates.length ? color.text : 'text-destructive')}>
+                    {row.dates.length ? `${row.dates.length} dag${row.dates.length > 1 ? 'ar' : ''}` : 'Välj dag'}
+                  </span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {days.map(day => {
+                    const date = format(day, 'yyyy-MM-dd');
+                    const selected = row.dates.includes(date);
+                    const load = (taskCountsByDate[date] || 0) + getActivitiesForDay(day).length;
+                    return (
+                      <button
+                        key={date}
+                        type="button"
+                        onClick={() => toggleDateForRow(index, date)}
+                        className={cn(
+                          'flex w-12 flex-col items-center rounded-md border px-1 py-1.5',
+                          selected ? cn(color.ring, color.softBg, color.text, 'font-semibold') : 'text-muted-foreground'
+                        )}
+                      >
+                        <span className="text-[10px] capitalize">{format(day, 'EEE', { locale: sv })}</span>
+                        <span className="text-sm font-bold">{format(day, 'd')}</span>
+                        <span className={cn('mt-0.5 h-1.5 w-1.5 rounded-full', load === 0 ? 'bg-emerald-500' : load <= 2 ? 'bg-amber-500' : 'bg-red-500')} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+          <Button type="button" variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={() => setCompactView(false)}>
+            Fler val – redigera moment i detalj
+          </Button>
+        </div>
+      )}
+
+      {(!compactView || rows.length === 0) && (
       <div className="grid gap-5 md:grid-cols-[minmax(240px,0.8fr)_minmax(0,1.6fr)]">
 
         <section className="hidden space-y-3 md:order-1 md:block">
@@ -435,6 +501,7 @@ export function StudyPlanTemplate({
           )}
         </section>
       </div>
+      )}
     </div>
   );
 }
