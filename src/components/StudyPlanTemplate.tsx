@@ -163,7 +163,7 @@ export function StudyPlanTemplate({
         </div>
       </div>
 
-      {rows.length > 0 && (
+      {rows.length > 0 && !compactView && (
         <div className="space-y-3 md:hidden">
           <div className="grid grid-cols-3 gap-1 rounded-lg bg-muted/40 p-1 text-[11px] font-medium">
             <span className="rounded-md bg-background px-2 py-1 text-center text-primary">1 Moment</span>
