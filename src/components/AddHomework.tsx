@@ -21,6 +21,7 @@ import { UpgradeModal } from '@/components/UpgradeModal';
 import { celebrateTask } from '@/lib/confetti';
 import { track } from '@/lib/analytics';
 import { DayLoadIndicator } from '@/components/DayLoadIndicator';
+import { AIHomeworkAssistant, type AIHomeworkCard } from '@/components/AIHomeworkAssistant';
 
 interface AddHomeworkProps {
   open: boolean;
@@ -259,6 +260,41 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setSubjectAnimKey(prev => prev + 1);
   };
 
+  const aiBusyDates = useMemo(() => {
+    const out: string[] = [];
+    for (let i = 0; i < 21; i++) {
+      const d = addDays(today, i);
+      const ds = format(d, 'yyyy-MM-dd');
+      const acts = targetChildId ? getActivitiesForDate(targetChildId, d).length : 0;
+      if ((taskCountsByDate[ds] || 0) + acts >= 2) out.push(ds);
+    }
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskCountsByDate, targetChildId]);
+
+  const applyAiCard = (card: AIHomeworkCard) => {
+    const type = card.homework_type ?? 'inlamning';
+    setActiveTemplate(null);
+    setIsRecurring(false);
+    setHomeworkType(type);
+    if (card.title) setTitle(card.title);
+    if (card.subject) { setSubject(card.subject); setSubjectAnimKey(k => k + 1); }
+    if (card.description) setDescription(card.description);
+    if (card.bring_items.length) setBringItems(card.bring_items);
+    const due = card.due_date && card.due_date >= minDate ? card.due_date : '';
+    setDueDate(due);
+    const plan = card.study_plan.filter(p => p.date >= minDate && (!due || p.date < due));
+    if (type === 'forhor' && plan.length) {
+      setStudyParts(plan.map((p, i) => ({ id: `ai-${i}`, title: p.title, dates: [p.date] })));
+      setPlanningMode('template');
+    } else {
+      setSelectedDays([...new Set(plan.map(p => p.date))]);
+      if (type === 'forhor') setPlanningMode('manual');
+    }
+    if (due) setStep(2);
+    toast.success('Läxan är ifylld – granska och spara');
+  };
+
   const handleSubmit = async () => {
     if (!targetChildId) {
       toast.error("Välj ett barn först");
@@ -485,6 +521,8 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                   </span>
                 </div>
               )}
+
+              <AIHomeworkAssistant busyDates={aiBusyDates} onApply={applyAiCard} />
 
               {/* Quick templates */}
               <div>

@@ -18,3 +18,6 @@ project_id = "wgykdruvnxhpvqspyzbc"
 
 [functions.send-premium-offer]
   verify_jwt = true
+
+[functions.homework-assistant]
+  verify_jwt = true
