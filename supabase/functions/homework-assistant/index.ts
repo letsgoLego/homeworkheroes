@@ -107,6 +107,37 @@ Deno.serve(async (req) => {
 
   let body: any
   try { body = await req.json() } catch { return json({ error: 'Ogiltig förfrågan' }, 400) }
+
+  // Röstinmatning: tolka inspelat ljud till text via gatewayens transkribering
+  if (body?.action === 'transcribe') {
+    const audio = typeof body.audio === 'string' ? body.audio : ''
+    const mime = String(body.mimeType ?? 'audio/webm').slice(0, 50)
+    if (!audio || audio.length > 8_000_000) return json({ error: 'Inget ljud' }, 400)
+    const bytes = Uint8Array.from(atob(audio), (c) => c.charCodeAt(0))
+    const ext = mime.includes('mp4') || mime.includes('aac') ? 'mp4' : mime.includes('ogg') ? 'ogg' : 'webm'
+    const form = new FormData()
+    form.append('file', new Blob([bytes], { type: mime }), `ljud.${ext}`)
+    form.append('model', 'openai/gpt-transcribe')
+    form.append('language', 'sv')
+    const tRes = await fetch('https://ai.gateway.lovable.dev/v1/audio/transcriptions', {
+      method: 'POST',
+      signal: req.signal,
+      headers: { 'Lovable-API-Key': apiKey, 'X-Lovable-AIG-SDK': 'fetch' },
+      body: form,
+    })
+    if (!tRes.ok) {
+      const details = await tRes.text()
+      console.error(`Transcribe failed [${tRes.status}]: ${details}`)
+      const msg = tRes.status === 429 ? 'För många förfrågningar just nu, försök igen om en stund.'
+        : tRes.status === 402 ? 'AI-krediterna är slut.' : 'Kunde inte tolka ljudet.'
+      return json({ error: msg, status: tRes.status, details }, tRes.status)
+    }
+    const tData = await tRes.json()
+    const text = String(tData?.text ?? '').trim()
+    if (!text) return json({ error: 'Hörde inget – försök igen.' }, 422)
+    return json({ text })
+  }
+
   const messages = Array.isArray(body?.messages) ? body.messages.slice(-12) : []
   if (!messages.length) return json({ error: 'Inget meddelande' }, 400)
   const today = String(body.today ?? new Date().toISOString().slice(0, 10)).slice(0, 10)
