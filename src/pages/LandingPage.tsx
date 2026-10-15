@@ -6,7 +6,8 @@ import {
   BookOpen, Calendar, CheckCircle2, Backpack, Users, 
   ArrowRight, Sparkles, Bell, BarChart3, ChevronDown,
   Plus, Flag, Repeat, Moon, Smartphone, UserPlus, Eye,
-  Clock, Star, Zap, Heart, Shield, Crown, Inbox, Sun
+  Clock, Star, Zap, Heart, Shield, Crown, Inbox, Sun,
+  Mic, Camera, MessageCircleQuestion
 } from 'lucide-react';
 import screenshotToday from '@/assets/screenshot-today.png';
 import screenshotAdd from '@/assets/screenshot-add.png';
@@ -267,7 +268,7 @@ export default function LandingPage() {
                 step: '1',
                 icon: Plus,
                 title: 'Lägg till läxan',
-                desc: 'Välj ämne, typ (inlämning eller förhör), deadline och vad som ska tas med till skolan.',
+                desc: 'Prata in, fota eller skriv själv – AI:n fyller i ämne, deadline och detaljer åt dig.',
                 color: 'bg-primary/10 text-primary',
                 image: screenshotAdd,
               },
