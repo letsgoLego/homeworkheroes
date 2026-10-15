@@ -229,8 +229,8 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
     <div className="flex flex-col overflow-hidden rounded-2xl border-2 border-primary/30 bg-primary/5">
       <div className="flex items-center justify-between gap-2 border-b border-primary/20 px-4 py-2.5">
         <div>
-          <p className="font-bold">✨ Läxassistenten</p>
-          <p className="text-xs text-muted-foreground">Prata, skriv eller fota – i samma chatt.</p>
+          <p className="font-bold">🦉 Pluggcoachen</p>
+          <p className="text-xs text-muted-foreground">Grundad i läroplanen – prata, skriv eller fota.</p>
         </div>
         {messages.length > 0 && (
           <Button variant="ghost" size="icon" onClick={reset} aria-label="Börja om">
