@@ -149,10 +149,17 @@ export function StudyPlanTemplate({
             Upplägget bygger på forskning om testbaserat lärande och spridd repetition – samma
             studieteknik som skolan lutar sig mot.
           </p>
-          <Button type="button" size="sm" variant="secondary" onClick={applySuggestedPlan} disabled={suggestions.length === 0}>
-            <Wand2 className="mr-1.5 h-4 w-4" />
-            {rows.length > 0 ? 'Gör om förslag' : 'Föreslå upplägg'}
-          </Button>
+          <div className="flex items-center gap-2">
+            {rows.length > 0 && !compactView && (
+              <Button type="button" size="sm" variant="outline" onClick={() => setCompactView(true)}>
+                Översikt
+              </Button>
+            )}
+            <Button type="button" size="sm" variant="secondary" onClick={applySuggestedPlan} disabled={suggestions.length === 0}>
+              <Wand2 className="mr-1.5 h-4 w-4" />
+              {rows.length > 0 ? 'Gör om förslag' : 'Föreslå upplägg'}
+            </Button>
+          </div>
         </div>
       </div>
 
