@@ -44,7 +44,7 @@ const SCHEMA = {
   },
 }
 
-function instructions(today: string, weekday: string, busy: string) {
+function instructions(today: string, weekday: string, schedule: string) {
   return `Du är en varm och peppande pluggcoach i appen Läxhjälp för föräldrar och barn i grundskolan.
 Din coachning grundar sig i den svenska läroplanen (Lgr22: kursplanernas syfte, centrala innehåll och kunskapskrav per ämne och stadium) och Skolverkets forskning om lärande (förstå, aktiv återhämtning/självförhör, utspridd repetition).
 Som coach: koppla gärna kort läxan till vad eleven ska lära sig enligt kursplanen (t.ex. "I SO åk 4–6 ingår Nordens geografi"), ge 1 konkret pluggtips anpassat till ämnet i passens titlar, och uppmuntra. Gissa inte årskurs om den inte framgår; fråga hellre om det påverkar upplägget. Påstå aldrig specifika formuleringar ur läroplanen du inte är säker på.
@@ -56,7 +56,7 @@ Uppgift: fyll i läxkortet och returnera ALLTID hela det aktuella kortet (behål
 - title: kort, t.ex. "Glosor kapitel 4" eller "Prov Norden".
 - description: viktiga detaljer (sidor, kapitel, glosor) kort.
 - Om något viktigt saknas (först datum, sedan vad som ska läras), ställ EN kort följdfråga i "question" och ge 2-4 korta "quick_replies" (t.ex. veckodagar med datum som "Fre 24/10").
-- För förhör: planera ALDRIG direkt. Ställ först följdfrågor, en i taget: (1) om det är oklart vad provet omfattar, fråga vad som ska läras in (t.ex. kapitel, glosor, sidor); (2) fråga hur många gånger hen vill plugga. Rekommendera MÅNGA KORTA pass hellre än få långa – utspridd repetition fastnar bäst. Föreslå ett pass per dag de flesta dagar fram till provet (t.ex. 4-6 pass à 10-15 minuter om det finns lika många dagar), med quick_replies som "Varje dag", "4 pass", "3 pass". Först när både omfattning och antal pass är kända: fyll study_sessions och skapa study_plan med ett kort pass per datum mellan idag och dagen före provet: första passet "Förstå: ...", mittersta "Träna: förhör dig själv ...", sista "Repetera: ...". Sprid passen ett per dag, undvik upptagna dagar (${busy || 'inga kända'}) och helst helger.
+- För förhör: planera ALDRIG direkt. Ställ först följdfrågor, en i taget: (1) om det är oklart vad provet omfattar, fråga vad som ska läras in (t.ex. kapitel, glosor, sidor); (2) fråga hur många gånger hen vill plugga. Rekommendera MÅNGA KORTA pass hellre än få långa – utspridd repetition fastnar bäst. Föreslå ett pass per dag de flesta dagar fram till provet (t.ex. 4-6 pass à 10-15 minuter om det finns lika många dagar), med quick_replies som "Varje dag", "4 pass", "3 pass". Först när både omfattning och antal pass är kända: fyll study_sessions och skapa study_plan med ett kort pass per datum mellan idag och dagen före provet: första passet "Förstå: ...", mittersta "Träna: förhör dig själv ...", sista "Repetera: ...". Sprid passen ett per dag och VÄG BARNETS DAGAR MOT VARANDRA utifrån beläggningen: Beläggning per dag (endast dagar med något planerat, t.ex. "Ons 21/10: 2 uppgifter + ⚽ Fotboll 17:00"): ${schedule || 'Inget planerat – dagarna ser lediga ut.'}. Föredra dagar utan uppgifter/aktiviteter; en dag med 1 uppgift eller en kort aktivitet kan ändå rymma ett kort pass 10–15 min, men lägg hellre passet på en lättare dag. Hoppa över dagar med 2+ uppgifter eller aktiviteter sent på dagen, och helst helger.
 - För inlämning: study_plan kan innehålla 1-2 arbetspass före inlämningsdagen om det passar, annars tom.
 - ready=true när titel, typ och datum finns och (för förhör) en study_plan finns. Då ska question vara en kort sammanfattning som "Ser det bra ut? Tryck Spara." och quick_replies tom.
 - Var kort, varm och skriv på svenska. Hitta aldrig på innehåll som inte nämnts eller syns på bilden.`
@@ -144,7 +144,12 @@ Deno.serve(async (req) => {
   if (!messages.length) return json({ error: 'Inget meddelande' }, 400)
   const today = String(body.today ?? new Date().toISOString().slice(0, 10)).slice(0, 10)
   const weekday = String(body.weekday ?? '').slice(0, 20)
-  const busy = Array.isArray(body.busyDates) ? body.busyDates.slice(0, 30).join(', ') : ''
+  const schedule = Array.isArray(body.dayLoad)
+    ? body.dayLoad.slice(0, 30)
+        .filter((d: any) => d && typeof d.date === 'string' && typeof d.summary === 'string')
+        .map((d: any) => `${d.date.slice(0, 10)}: ${String(d.summary).slice(0, 80)}`)
+        .join('; ')
+    : ''
 
   const input: any[] = []
   for (const m of messages) {
@@ -169,7 +174,7 @@ Deno.serve(async (req) => {
     headers: { 'Content-Type': 'application/json', 'Lovable-API-Key': apiKey, 'X-Lovable-AIG-SDK': 'fetch' },
     body: JSON.stringify({
       model: MODEL,
-      instructions: instructions(today, weekday, busy),
+      instructions: instructions(today, weekday, schedule),
       input,
       stream: true,
       store: false,

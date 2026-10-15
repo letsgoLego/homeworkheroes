@@ -260,13 +260,21 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
     setSubjectAnimKey(prev => prev + 1);
   };
 
-  const aiBusyDates = useMemo(() => {
-    const out: string[] = [];
+  const aiDayLoad = useMemo(() => {
+    const out: { date: string; summary: string }[] = [];
     for (let i = 0; i < 21; i++) {
       const d = addDays(today, i);
       const ds = format(d, 'yyyy-MM-dd');
-      const acts = targetChildId ? getActivitiesForDate(targetChildId, d).length : 0;
-      if ((taskCountsByDate[ds] || 0) + acts >= 2) out.push(ds);
+      const taskCount = taskCountsByDate[ds] || 0;
+      const acts = targetChildId ? getActivitiesForDate(targetChildId, d) : [];
+      if (taskCount === 0 && acts.length === 0) continue;
+      const parts: string[] = [];
+      if (taskCount) parts.push(taskCount === 1 ? '1 uppgift' : `${taskCount} uppgifter`);
+      for (const a of acts) {
+        const time = a.start_time ? ` ${a.start_time.slice(0, 5)}` : '';
+        parts.push(`${a.emoji ?? ''} ${a.title}${time}`.trim());
+      }
+      out.push({ date: ds, summary: `${format(d, 'EEE d/M', { locale: sv })}: ${parts.join(' + ')}` });
     }
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -522,7 +530,7 @@ export function AddHomework({ open, onClose }: AddHomeworkProps) {
                 </div>
               )}
 
-              <AIHomeworkAssistant busyDates={aiBusyDates} onApply={applyAiCard} />
+              <AIHomeworkAssistant dayLoad={aiDayLoad} onApply={applyAiCard} />
 
               {/* Quick templates */}
               <div>
