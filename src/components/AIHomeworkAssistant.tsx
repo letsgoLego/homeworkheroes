@@ -287,6 +287,13 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
                   <Check className="mr-1 h-4 w-4" /> Använd och granska
                 </Button>
               )}
+              {i === lastIdx && !loading && (
+                <p className="text-xs text-muted-foreground">
+                  {card?.ready
+                    ? 'Vill du ändra något? Prata 🎙️ eller skriv, t.ex. "flytta provet till fredag".'
+                    : 'Svara med 🎙️ eller skriv – jag fyller i kortet ovan.'}
+                </p>
+              )}
             </div>
           </div>
         ))}
