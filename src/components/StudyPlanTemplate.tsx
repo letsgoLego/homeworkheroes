@@ -101,10 +101,16 @@ export function StudyPlanTemplate({
 
   const toggleDate = (date: string) => {
     if (!activeRow) return;
-    updateRow(activeIndex, {
-      dates: activeRow.dates.includes(date)
-        ? activeRow.dates.filter(item => item !== date)
-        : [...activeRow.dates, date].sort(),
+    toggleDateForRow(activeIndex, date);
+  };
+
+  const toggleDateForRow = (index: number, date: string) => {
+    const row = rows[index];
+    if (!row) return;
+    updateRow(index, {
+      dates: row.dates.includes(date)
+        ? row.dates.filter(item => item !== date)
+        : [...row.dates, date].sort(),
     });
   };
 
