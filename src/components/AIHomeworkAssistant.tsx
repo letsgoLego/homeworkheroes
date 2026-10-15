@@ -63,15 +63,16 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
-  const recRef = useRef<any>(null);
-  const baseTextRef = useRef('');
+  const [transcribing, setTranscribing] = useState(false);
+  const recRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const SpeechRec = typeof window !== 'undefined'
-    ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    : null;
-
-  useEffect(() => () => recRef.current?.abort?.(), []);
+  useEffect(() => () => {
+    try { recRef.current?.stop(); } catch { /* ignore */ }
+    streamRef.current?.getTracks().forEach(t => t.stop());
+  }, []);
 
   const send = async (text: string, image?: string) => {
     if (!text.trim() && !image) return;
