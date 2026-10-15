@@ -267,11 +267,11 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
             size="icon"
             variant={listening ? 'destructive' : 'secondary'}
             onClick={listening ? stopListening : startListening}
-            disabled={loading}
+            disabled={loading || transcribing}
             aria-label={listening ? 'Sluta lyssna' : 'Prata'}
             className={cn(listening && 'animate-pulse')}
           >
-            {listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            {transcribing ? <Loader2 className="h-4 w-4 animate-spin" /> : listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </Button>
           <Button size="icon" variant="secondary" onClick={() => fileRef.current?.click()} disabled={loading} aria-label="Fota läxan">
             <Camera className="h-4 w-4" />
