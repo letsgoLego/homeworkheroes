@@ -68,6 +68,13 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+    if (!loading && messages.length) inputRef.current?.focus({ preventScroll: true });
+  }, [messages, loading, card]);
 
   useEffect(() => () => {
     try { recRef.current?.stop(); } catch { /* ignore */ }
@@ -84,7 +91,7 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
     const now = new Date();
     const { data, error } = await supabase.functions.invoke('homework-assistant', {
       body: {
-        messages: next,
+        messages: next.map((m, i) => (i === next.length - 1 ? m : { role: m.role, text: m.text })),
         current: card,
         today: format(now, 'yyyy-MM-dd'),
         weekday: format(now, 'EEEE', { locale: sv }),
@@ -104,8 +111,7 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
     const c = data.card as AIHomeworkCard;
     setCard(c);
     track('ai_homework_turn', { has_image: !!image, ready: c.ready });
-    // Drop image payloads from history after first send to keep requests small
-    setMessages([...next.map(m => ({ role: m.role, text: m.text })), { role: 'assistant', text: c.question ?? 'Klart!' }]);
+    setMessages([...next, { role: 'assistant', text: c.question ?? (c.ready ? 'Klart! Allt är ifyllt.' : 'Berätta gärna mer.') }]);
   };
 
   const transcribe = async (blob: Blob, mimeType: string) => {
@@ -189,17 +195,42 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
 
   const reset = () => { setMessages([]); setCard(null); setInput(''); };
 
-  const lastQuestion = messages.length && messages[messages.length - 1].role === 'assistant'
-    ? messages[messages.length - 1].text : null;
+  const lastIdx = messages.length - 1;
+  const showCard = card && (card.title || card.due_date || card.subject);
+
+  const cardView = showCard && card ? (
+    <div className="rounded-xl border bg-card p-3 shadow-sm space-y-1.5 text-sm">
+      <div className="flex items-center gap-2 font-semibold">
+        <span>{card.subject ? SUBJECT_ICONS[card.subject] : '📝'}</span>
+        <span>{card.title ?? 'Läxa'}</span>
+      </div>
+      <div className="flex flex-wrap gap-1.5 text-xs">
+        {card.subject && <span className="rounded-full bg-muted px-2 py-0.5">{SUBJECT_LABELS[card.subject]}</span>}
+        {card.homework_type && (
+          <span className="rounded-full bg-muted px-2 py-0.5">{card.homework_type === 'forhor' ? 'Förhör / prov' : 'Inlämning'}</span>
+        )}
+        {card.due_date && <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium">📅 {fmtDate(card.due_date)}</span>}
+      </div>
+      {card.description && <p className="text-xs text-muted-foreground">{card.description}</p>}
+      {card.study_plan.length > 0 && (
+        <ul className="space-y-1 pt-1">
+          {card.study_plan.map((p, i) => (
+            <li key={i} className="flex gap-2 text-xs">
+              <span className="w-20 shrink-0 font-medium capitalize">{fmtDate(p.date)}</span>
+              <span>{p.title}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  ) : null;
 
   return (
-    <div className="space-y-3 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
-      <div className="flex items-start justify-between gap-2">
+    <div className="flex flex-col overflow-hidden rounded-2xl border-2 border-primary/30 bg-primary/5">
+      <div className="flex items-center justify-between gap-2 border-b border-primary/20 px-4 py-2.5">
         <div>
-          <p className="font-bold">✨ Berätta om läxan</p>
-          <p className="text-xs text-muted-foreground">
-            Prata fritt eller fota läxpappret – assistenten fyller i och frågar om det som saknas.
-          </p>
+          <p className="font-bold">✨ Läxassistenten</p>
+          <p className="text-xs text-muted-foreground">Prata, skriv eller fota – i samma chatt.</p>
         </div>
         {messages.length > 0 && (
           <Button variant="ghost" size="icon" onClick={reset} aria-label="Börja om">
@@ -208,81 +239,99 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
         )}
       </div>
 
-      {card && (card.title || card.due_date || card.subject) && (
-        <div className="rounded-xl bg-card p-3 shadow-sm space-y-1.5 text-sm">
-          <div className="flex items-center gap-2 font-semibold">
-            <span>{card.subject ? SUBJECT_ICONS[card.subject] : '📝'}</span>
-            <span>{card.title ?? 'Läxa'}</span>
+      <div ref={scrollRef} className="flex min-h-[45vh] max-h-[60vh] flex-col gap-2.5 overflow-y-auto px-3 py-3">
+        {messages.length === 0 && (
+          <div className="flex gap-2">
+            <span className="text-lg leading-none">🦉</span>
+            <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-card px-3 py-2 text-sm shadow-sm">
+              Hej! Berätta om läxan med 🎙️, skriv, eller fota läxpappret med 📷. Jag frågar om det som saknas.
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {['Prov i engelska på fredag', 'Glosor till tisdag', 'Matteläxa sid 34'].map(r => (
+                  <Button key={r} size="sm" variant="outline" className="h-7 rounded-full text-xs" onClick={() => send(r)}>{r}</Button>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-1.5 text-xs">
-            {card.subject && <span className="rounded-full bg-muted px-2 py-0.5">{SUBJECT_LABELS[card.subject]}</span>}
-            {card.homework_type && (
-              <span className="rounded-full bg-muted px-2 py-0.5">{card.homework_type === 'forhor' ? 'Förhör / prov' : 'Inlämning'}</span>
-            )}
-            {card.due_date && <span className="rounded-full bg-primary/15 px-2 py-0.5 font-medium">📅 {fmtDate(card.due_date)}</span>}
+        )}
+
+        {messages.map((m, i) => m.role === 'user' ? (
+          <div key={i} className="flex justify-end">
+            <div className="max-w-[85%] space-y-1.5 rounded-2xl rounded-tr-sm bg-primary px-3 py-2 text-sm text-primary-foreground">
+              {m.image && <img src={m.image} alt="Läxbild" className="max-h-40 rounded-lg" />}
+              <p className="whitespace-pre-wrap">{m.text}</p>
+            </div>
           </div>
-          {card.description && <p className="text-xs text-muted-foreground">{card.description}</p>}
-          {card.study_plan.length > 0 && (
-            <ul className="space-y-1 pt-1">
-              {card.study_plan.map((p, i) => (
-                <li key={i} className="flex gap-2 text-xs">
-                  <span className="w-20 shrink-0 font-medium capitalize">{fmtDate(p.date)}</span>
-                  <span>{p.title}</span>
-                </li>
-              ))}
-            </ul>
+        ) : (
+          <div key={i} className="flex gap-2">
+            <span className="text-lg leading-none">🦉</span>
+            <div className="max-w-[85%] flex-1 space-y-2">
+              {i === lastIdx && cardView}
+              <p className="text-sm">{m.text}</p>
+              {i === lastIdx && !loading && card?.quick_replies?.length ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {card.quick_replies.map(r => (
+                    <Button key={r} size="sm" variant="outline" className="h-8 rounded-full" onClick={() => send(r)}>{r}</Button>
+                  ))}
+                </div>
+              ) : null}
+              {i === lastIdx && card?.ready && !loading && (
+                <Button className="w-full" onClick={() => { track('ai_homework_applied', { type: card.homework_type ?? '' }); onApply(card); }}>
+                  <Check className="mr-1 h-4 w-4" /> Använd och granska
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {loading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="text-lg leading-none">🦉</span>
+            <span className="flex gap-1">
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-primary/20 bg-card/60 p-2">
+        {listening && <p className="pb-1.5 text-center text-xs font-medium text-destructive">● Lyssnar… tryck igen när du är klar</p>}
+        {transcribing && <p className="pb-1.5 text-center text-xs text-muted-foreground">Tolkar det du sa…</p>}
+        <div className="flex items-end gap-1.5">
+          <Button size="icon" variant="ghost" onClick={() => fileRef.current?.click()} disabled={loading} aria-label="Fota läxan" className="shrink-0">
+            <Camera className="h-5 w-5" />
+          </Button>
+          <Textarea
+            ref={inputRef}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }}
+            placeholder={messages.length ? 'Svara här…' : 'Skriv eller prata…'}
+            rows={1}
+            className="min-h-[40px] max-h-28 flex-1 resize-none bg-card"
+            disabled={loading}
+          />
+          {input.trim() ? (
+            <Button size="icon" onClick={() => send(input)} disabled={loading} aria-label="Skicka" className="shrink-0">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            </Button>
+          ) : (
+            <Button
+              size="icon"
+              variant={listening ? 'destructive' : 'default'}
+              onClick={listening ? stopListening : startListening}
+              disabled={loading || transcribing}
+              aria-label={listening ? 'Sluta lyssna' : 'Prata'}
+              className={cn('shrink-0', listening && 'animate-pulse')}
+            >
+              {transcribing ? <Loader2 className="h-4 w-4 animate-spin" /> : listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </Button>
           )}
         </div>
-      )}
-
-      {lastQuestion && !loading && (
-        <p className="rounded-xl bg-card/70 px-3 py-2 text-sm">💬 {lastQuestion}</p>
-      )}
-
-      {card?.quick_replies?.length && !loading ? (
-        <div className="flex flex-wrap gap-2">
-          {card.quick_replies.map(r => (
-            <Button key={r} size="sm" variant="outline" className="rounded-full" onClick={() => send(r)}>{r}</Button>
-          ))}
-        </div>
-      ) : null}
-
-      {card?.ready && !loading && (
-        <Button className="w-full" onClick={() => { track('ai_homework_applied', { type: card.homework_type ?? '' }); onApply(card); }}>
-          <Check className="mr-1 h-4 w-4" /> Använd och granska
-        </Button>
-      )}
-
-      <div className="flex items-end gap-2">
-        <Textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder={messages.length ? 'Svara här…' : 't.ex. "Alvar har prov i geografi om Norden nästa torsdag"'}
-          rows={2}
-          className="min-h-[44px] flex-1 resize-none bg-card"
-          disabled={loading}
-        />
-        <div className="flex flex-col gap-1.5">
-          <Button
-            size="icon"
-            variant={listening ? 'destructive' : 'secondary'}
-            onClick={listening ? stopListening : startListening}
-            disabled={loading || transcribing}
-            aria-label={listening ? 'Sluta lyssna' : 'Prata'}
-            className={cn(listening && 'animate-pulse')}
-          >
-            {transcribing ? <Loader2 className="h-4 w-4 animate-spin" /> : listening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-          </Button>
-          <Button size="icon" variant="secondary" onClick={() => fileRef.current?.click()} disabled={loading} aria-label="Fota läxan">
-            <Camera className="h-4 w-4" />
-          </Button>
-        </div>
-        <Button size="icon" onClick={() => send(input)} disabled={loading || !input.trim()} aria-label="Skicka">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        </Button>
       </div>
       <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPhoto} />
-      <p className="text-center text-[11px] text-muted-foreground">Eller fyll i själv nedan 👇</p>
+      <p className="pb-2 text-center text-[11px] text-muted-foreground">Eller fyll i själv nedan 👇</p>
     </div>
   );
 }
