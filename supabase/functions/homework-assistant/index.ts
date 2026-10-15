@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
     const ext = mime.includes('mp4') || mime.includes('aac') ? 'mp4' : mime.includes('ogg') ? 'ogg' : 'webm'
     const form = new FormData()
     form.append('file', new Blob([bytes], { type: mime }), `ljud.${ext}`)
-    form.append('model', 'openai/gpt-4o-mini-transcribe')
+    form.append('model', 'openai/gpt-transcribe')
     form.append('language', 'sv')
     const tRes = await fetch('https://ai.gateway.lovable.dev/v1/audio/transcriptions', {
       method: 'POST',
