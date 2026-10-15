@@ -81,6 +81,14 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
     streamRef.current?.getTracks().forEach(t => t.stop());
   }, []);
 
+  // Låt textrutan växa med innehållet så man kan se och scrolla i det man pratat in
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, [input]);
+
   const send = async (text: string, image?: string) => {
     if (!text.trim() && !image) return;
     if (listening) stopListening();
@@ -279,6 +287,13 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
                   <Check className="mr-1 h-4 w-4" /> Använd och granska
                 </Button>
               )}
+              {i === lastIdx && !loading && (
+                <p className="text-xs text-muted-foreground">
+                  {card?.ready
+                    ? 'Vill du ändra något? Prata 🎙️ eller skriv, t.ex. "flytta provet till fredag".'
+                    : 'Svara med 🎙️ eller skriv – jag fyller i kortet ovan.'}
+                </p>
+              )}
             </div>
           </div>
         ))}
@@ -307,9 +322,9 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }}
-            placeholder={messages.length ? 'Svara här…' : 'Skriv eller prata…'}
+            placeholder={messages.length ? 'Prata 🎙️ eller skriv ditt svar…' : 'Skriv eller prata…'}
             rows={1}
-            className="min-h-[40px] max-h-28 flex-1 resize-none bg-card"
+            className="min-h-[44px] max-h-40 flex-1 resize-none overflow-y-auto bg-card py-2.5"
             disabled={loading}
           />
           {input.trim() ? (
