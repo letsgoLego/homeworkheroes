@@ -57,7 +57,7 @@ const fmtDate = (d: string) => {
   try { return format(parseISO(d), 'EEE d MMM', { locale: sv }); } catch { return d; }
 };
 
-export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
+export function AIHomeworkAssistant({ dayLoad, onApply }: Props) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [card, setCard] = useState<AIHomeworkCard | null>(null);
   const [input, setInput] = useState('');
@@ -103,7 +103,7 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
         current: card,
         today: format(now, 'yyyy-MM-dd'),
         weekday: format(now, 'EEEE', { locale: sv }),
-        busyDates,
+        dayLoad,
       },
     });
     setLoading(false);
