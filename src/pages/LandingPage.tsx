@@ -167,6 +167,76 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ============ AI ASSISTANT USP SECTION ============ */}
+      <section className="py-16 sm:py-24 bg-gradient-to-b from-primary/5 to-background">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-12"
+          >
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full text-sm font-bold text-primary mb-4">
+              <Sparkles className="w-4 h-4" />
+              Nyhet: AI-assistent
+            </motion.div>
+            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
+              Prata in eller fota läxan –{' '}
+              <span className="text-primary">AI:n planerar resten</span>
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Slipp knappa in rubriker och datum för hand. Berätta vad som gäller med din egen röst,
+              eller ta ett kort på läxpappret – så hjälper assistenten till att lägga upp hela planen.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid gap-4 sm:grid-cols-3 mb-10"
+          >
+            {[
+              { icon: Mic, title: 'Prata fritt', text: '"Alvar har prov i geografi nästa vecka och engelskagloser till fredag" – ingen mall, inga fält.' },
+              { icon: Camera, title: 'Fota läxpappret', text: 'Ta ett kort på lärarens utskick eller whiteboarden så läser AI:n av vad som ska göras.' },
+              { icon: MessageCircleQuestion, title: 'Assistenten frågar tillbaka', text: 'Saknas något, som provdatum eller hur många gånger ni vill plugga, frågar den direkt.' },
+            ].map((item) => (
+              <motion.div key={item.title} variants={fadeUp} className="rounded-2xl border bg-card p-6 text-left shadow-soft">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <item.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="mb-2 text-lg font-bold text-foreground">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.text}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeUp}
+            className="rounded-3xl border border-primary/20 bg-card p-6 sm:p-8 shadow-card"
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+                <Calendar className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground mb-2">Färdig plan på sekunder</h3>
+                <p className="text-muted-foreground">
+                  Assistenten föreslår pluggtillfällen utspridda fram till deadline – med hänsyn till
+                  dagar som redan är fulla. Allt går att justera med ett klick innan du sparar,
+                  och det manuella formuläret finns alltid kvar för den som föredrar det.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ============ HOW IT WORKS (3 steps) ============ */}
       <section id="features" className="py-16 sm:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
