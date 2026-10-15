@@ -168,7 +168,6 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
 
   const stopListening = () => {
     try { recRef.current?.stop?.(); } catch { /* ignore */ }
-    try { recRef.current?.abort?.(); } catch { /* ignore */ }
     setListening(false);
   };
 
