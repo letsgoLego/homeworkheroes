@@ -144,7 +144,12 @@ Deno.serve(async (req) => {
   if (!messages.length) return json({ error: 'Inget meddelande' }, 400)
   const today = String(body.today ?? new Date().toISOString().slice(0, 10)).slice(0, 10)
   const weekday = String(body.weekday ?? '').slice(0, 20)
-  const busy = Array.isArray(body.busyDates) ? body.busyDates.slice(0, 30).join(', ') : ''
+  const schedule = Array.isArray(body.dayLoad)
+    ? body.dayLoad.slice(0, 30)
+        .filter((d: any) => d && typeof d.date === 'string' && typeof d.summary === 'string')
+        .map((d: any) => `${d.date.slice(0, 10)}: ${String(d.summary).slice(0, 80)}`)
+        .join('; ')
+    : ''
 
   const input: any[] = []
   for (const m of messages) {
