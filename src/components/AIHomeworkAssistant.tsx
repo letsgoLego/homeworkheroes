@@ -107,30 +107,67 @@ export function AIHomeworkAssistant({ busyDates, onApply }: Props) {
     setMessages([...next.map(m => ({ role: m.role, text: m.text })), { role: 'assistant', text: c.question ?? 'Klart!' }]);
   };
 
+  const dictationHint = () =>
+    toast('Tryck på mikrofonen på tangentbordet för att prata in texten.');
+
   const startListening = () => {
-    if (!SpeechRec) {
-      toast('Tryck på mikrofonen på tangentbordet för att prata in texten.');
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document);
+    const standalone = (window.matchMedia?.('(display-mode: standalone)').matches) || (navigator as any).standalone;
+    const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
+    // iOS hemskärmsapp/native-app: webbläsarens taligenkänning hänger sig där – använd tangentbordets diktering
+    if (!SpeechRec || (isIOS && (standalone || isNative))) {
+      dictationHint();
       return;
     }
-    const rec = new SpeechRec();
-    rec.lang = 'sv-SE';
-    rec.continuous = true;
-    rec.interimResults = true;
+    let rec: any;
+    try {
+      rec = new SpeechRec();
+      rec.lang = 'sv-SE';
+      rec.continuous = !isIOS; // continuous är buggigt i iOS Safari
+      rec.interimResults = true;
+    } catch {
+      dictationHint();
+      return;
+    }
     baseTextRef.current = input ? input + ' ' : '';
+    let gotResult = false;
+    const watchdog = window.setTimeout(() => {
+      if (!gotResult) {
+        try { rec.abort(); } catch { /* ignore */ }
+        setListening(false);
+        dictationHint();
+      }
+    }, 8000);
     rec.onresult = (e: any) => {
+      gotResult = true;
       let t = '';
       for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
       setInput(baseTextRef.current + t);
     };
-    rec.onend = () => setListening(false);
-    rec.onerror = () => setListening(false);
+    rec.onend = () => { window.clearTimeout(watchdog); setListening(false); };
+    rec.onerror = (e: any) => {
+      window.clearTimeout(watchdog);
+      setListening(false);
+      if (e?.error === 'not-allowed' || e?.error === 'service-not-allowed') {
+        toast.error('Mikrofonen är blockerad. Tillåt mikrofon i inställningarna, eller använd tangentbordets mikrofon.');
+      } else if (e?.error !== 'aborted' && e?.error !== 'no-speech') {
+        dictationHint();
+      }
+    };
     recRef.current = rec;
-    rec.start();
-    setListening(true);
+    try {
+      rec.start();
+      setListening(true);
+    } catch {
+      window.clearTimeout(watchdog);
+      setListening(false);
+      dictationHint();
+    }
   };
 
   const stopListening = () => {
-    recRef.current?.stop?.();
+    try { recRef.current?.stop?.(); } catch { /* ignore */ }
     setListening(false);
   };
 
