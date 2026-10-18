@@ -43,6 +43,13 @@
       "when": 1791207010601,
       "tag": "0005_fix_premium_offer_ambiguity",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792358436354,
+      "tag": "0006_reschedule_push_notifications",
+      "breakpoints": true
     }
   ]
 }
