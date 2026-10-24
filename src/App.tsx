@@ -54,6 +54,7 @@ import UnsubscribePage from "./pages/UnsubscribePage";
 import PremiumOfferPage, { PremiumOfferUnsubscribePage } from "./pages/PremiumOfferPage";
 import AdminPage from "./pages/AdminPage";
 import AdminRouteGuard from "./components/AdminRouteGuard";
+import AppErrorBoundary from "./components/AppErrorBoundary";
 
 
 const queryClient = new QueryClient();
@@ -116,6 +117,8 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/landing" element={<Navigate to="/" replace />} />
+      <Route path="/index" element={<Navigate to="/" replace />} />
+      <Route path="/index.html" element={<Navigate to="/" replace />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/tips" element={<TipsIndexPage />} />
@@ -160,6 +163,7 @@ function AppRoutes() {
 }
 
 const App = () => (
+  <AppErrorBoundary>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -177,6 +181,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </AppErrorBoundary>
 );
 
 export default App;
