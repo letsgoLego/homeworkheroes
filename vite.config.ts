@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
       devOptions: {
         enabled: false,
       },
-      includeAssets: ["favicon.ico", "pwa-192x192.png", "pwa-512x512.png"],
+      includeAssets: ["favicon.ico", "favicon.png", "apple-touch-icon.png", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
         name: "Läxhjälp",
         short_name: "Läxhjälp",
