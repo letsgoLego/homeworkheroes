@@ -39,6 +39,15 @@ if (!isInIframe && !isPreviewHost) {
   }
 }
 
+// A new release replaced cached app files: reload once instead of a white screen.
+window.addEventListener("vite:preloadError", () => {
+  if (!sessionStorage.getItem("laxhjalp_chunk_reload")) {
+    sessionStorage.setItem("laxhjalp_chunk_reload", "1");
+    window.location.reload();
+  }
+});
+window.setTimeout(() => sessionStorage.removeItem("laxhjalp_chunk_reload"), 10000);
+
 
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
