@@ -34,6 +34,7 @@ const ARTICLES: Article[] = [
   { path: '/tips/lasforstaelse-barn', title: 'Läsförståelse hos barn (åk 1–6)', description: 'Träna läsförståelse hemma med 7 enkla övningar och tips på böcker per åldersgrupp.', icon: BookText, color: 'bg-emerald-500/10 text-emerald-600', category: 'Per ämne' },
   { path: '/tips/matematik-hjalp-barn', title: 'Hjälpa barn med matte — utan att ta över', description: 'Strategier per årskurs för matteläxor, vanliga föräldrafällor och verktyg som hjälper.', icon: Calculator, color: 'bg-orange-500/10 text-orange-500', category: 'Per ämne' },
   { path: '/tips/engelska-glosor', title: 'Engelska glosor — effektiv pluggteknik', description: 'Spaced repetition, appar och tekniker som gör att glosorna faktiskt fastnar.', icon: Languages, color: 'bg-cyan-500/10 text-cyan-600', category: 'Per ämne' },
+  { path: '/tips/laxforhor', title: 'Läxförhör hemma — så förhör du rätt', description: 'Glosförhör, engelska och SO/NO: hur du förhör barnet, hur ofta och vad du gör när det inte sitter.', icon: Languages, color: 'bg-cyan-500/10 text-cyan-600', category: 'Per ämne' },
 
   // Per åldersgrupp
   { path: '/tips/laxor-arskurs-1-3', title: 'Läxor i åk 1–3 — komplett guide för lågstadiet', description: 'Allt om läsläxor, mattetabeller, glosor och rutiner i lågstadiet.', icon: BookOpen, color: 'bg-pink-500/10 text-pink-500', category: 'Per åldersgrupp' },
@@ -113,12 +114,24 @@ export default function TipsIndexPage() {
             Tips & guider
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground mb-4">
-            Läxor, studieteknik & motivation
+            Hjälp med läxor — gratis guider för föräldrar
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            21 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
+            22 fördjupande guider för svenska familjer — från lågstadiets första läsläxor till
             högstadiets nationella prov.
           </p>
+          <div className="max-w-2xl mx-auto mt-6 text-left bg-card border border-border rounded-2xl p-5">
+            <p className="font-bold text-foreground mb-2">Kort svar: så hjälper du barnet med läxorna</p>
+            <ol className="list-decimal pl-5 space-y-1 text-muted-foreground text-sm sm:text-base">
+              <li>Ha en fast läxtid och plats varje vardag.</li>
+              <li>Planera veckan i förväg — sprid ut pluggandet inför prov i korta pass på ca 20 minuter.</li>
+              <li>Förhör i stället för att läsa igen — det är det som får kunskapen att fastna.</li>
+              <li>Stötta, men låt barnet göra jobbet själv.</li>
+            </ol>
+            <p className="text-sm text-muted-foreground mt-3">
+              Börja med guiden för ditt barns <Link to="/tips/laxor-arskurs-1-3" className="text-primary font-semibold">årskurs 1–3</Link>, <Link to="/tips/laxor-arskurs-4-6" className="text-primary font-semibold">årskurs 4–6</Link> eller <Link to="/tips/hogstadiet-studieteknik" className="text-primary font-semibold">högstadiet</Link>.
+            </p>
+          </div>
         </motion.div>
 
         {/* Editorial intro */}
