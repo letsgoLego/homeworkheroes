@@ -44,7 +44,7 @@ export default function LaraSigKlockanPage() {
       relatedArticles={related}
       toolParagraph="I Läxhjälp byggs tidskänslan in i vardagen: barnet ser veckans läxor per dag, packar efter en lista som nollställs varje morgon och avbockar moment i en fast läxtid. När dagen har en tydlig struktur får klockan en mening — och övningarna blir en naturlig del av eftermiddagen."
       datePublished="2026-09-22"
-      dateModified="2026-09-22"
+      dateModified="2026-10-28"
       readingTimeMin={12}
       faqItems={faqItems}
     >

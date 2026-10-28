@@ -3,7 +3,7 @@ import SeoArticleLayout from '@/components/SeoArticleLayout';
 const related = [
   { path: '/tips/laxrutin', title: 'Skapa en läxrutin som håller hela terminen' },
   { path: '/tips/studieteknik-barn', title: 'Studieteknik för barn — 8 metoder som fungerar' },
-  { path: '/tips/motivation-laxor', title: 'Så motiverar du ditt barn att göra läxor' },
+  { path: '/tips/laxloggen', title: 'Läxloggen — så skapar ni en som funkar' },
 ];
 
 export default function LaxhjalpHemmaPage() {

@@ -33,11 +33,11 @@ export default function SkolmaterialPacklistaPage() {
   return (
     <SeoArticleLayout
       title="Skolmaterial & packlista inför terminsstarten"
-      metaTitle="Skolmaterial och packlista inför skolstart | Läxhjälp"
+      metaTitle="Skolsaker inför skolstart: packlista per årskurs (2026)"
       slug="skolmaterial-packlista"
       metaDescription="Vad behöver barnet faktiskt inför terminsstarten? Packlista per årskurs, vad skolan står för, budgettips och så får du barnet att packa själv."
       datePublished="2026-08-23"
-      dateModified="2026-08-23"
+      dateModified="2026-10-28"
       readingTimeMin={7}
       relatedArticles={related}
       toolParagraph="I Läxhjälp bygger ni en digital packlista per veckodag — gympakläder på tisdag, mattebok på onsdag — som återställs varje dag. Barnet packar själv kvällen innan och bockar av, så morgonen blir lugn."

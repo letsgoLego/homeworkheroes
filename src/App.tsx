@@ -38,6 +38,7 @@ import { OfflineBanner } from "./components/OfflineBanner";
 import SeoNoIndex from "./components/SeoNoIndex";
 import LaraSigKlockanPage from "./pages/seo/LaraSigKlockanPage";
 import LaxloggenPage from "./pages/seo/LaxloggenPage";
+import LaxforhorPage from "./pages/seo/LaxforhorPage";
 import LasforstaelseBarnPage from "./pages/seo/LasforstaelseBarnPage";
 import MatematikHjalpBarnPage from "./pages/seo/MatematikHjalpBarnPage";
 import EngelskaGlosorPage from "./pages/seo/EngelskaGlosorPage";
@@ -133,6 +134,7 @@ function AppRoutes() {
       <Route path="/tips/laxhjalp-hemma" element={<LaxhjalpHemmaPage />} />
       <Route path="/tips/lara-sig-klockan" element={<LaraSigKlockanPage />} />
       <Route path="/tips/laxloggen" element={<LaxloggenPage />} />
+      <Route path="/tips/laxforhor" element={<LaxforhorPage />} />
       <Route path="/tips/lasforstaelse-barn" element={<LasforstaelseBarnPage />} />
       <Route path="/tips/matematik-hjalp-barn" element={<MatematikHjalpBarnPage />} />
       <Route path="/tips/engelska-glosor" element={<EngelskaGlosorPage />} />

@@ -3,7 +3,7 @@ import SeoArticleLayout, { FaqItem } from '@/components/SeoArticleLayout';
 const related = [
   { path: '/tips/tonaringar-laxor', title: 'Tonåringar och läxor — så stöttar du utan att kontrollera' },
   { path: '/tips/laxor-arskurs-4-6', title: 'Läxor för åk 4–6 — komplett guide för mellanstadiet' },
-  { path: '/tips/studieteknik-barn', title: 'Studieteknik för barn — metoder som fungerar' },
+  { path: '/tips/laxforhor', title: 'Läxförhör hemma — så förhör du rätt' },
 ];
 
 const faqItems: FaqItem[] = [
