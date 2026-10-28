@@ -2,7 +2,7 @@ import SeoArticleLayout, { FaqItem } from '@/components/SeoArticleLayout';
 
 const related = [
   { path: '/tips/studieteknik-barn', title: 'Studieteknik för barn — metoder som fungerar' },
-  { path: '/tips/laxplanering', title: 'Läxplanering — 7 tips för en strukturerad vecka' },
+  { path: '/tips/laxforhor', title: 'Läxförhör hemma — så förhör du barnet rätt' },
   { path: '/tips/hogstadiet-studieteknik', title: 'Studieteknik för högstadiet — åk 7–9' },
 ];
 

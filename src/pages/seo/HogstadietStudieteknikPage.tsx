@@ -3,7 +3,7 @@ import SeoArticleLayout, { FaqItem } from '@/components/SeoArticleLayout';
 const related = [
   { path: '/tips/tonaringar-laxor', title: 'Tonåringar och läxor — så stöttar du utan att kontrollera' },
   { path: '/tips/laxor-arskurs-4-6', title: 'Läxor för åk 4–6 — komplett guide för mellanstadiet' },
-  { path: '/tips/studieteknik-barn', title: 'Studieteknik för barn — metoder som fungerar' },
+  { path: '/tips/laxforhor', title: 'Läxförhör hemma — så förhör du rätt' },
 ];
 
 const faqItems: FaqItem[] = [
@@ -38,9 +38,9 @@ export default function HogstadietStudieteknikPage() {
   return (
     <SeoArticleLayout
       title="Studieteknik för högstadiet — bli effektiv i åk 7–9"
-      metaTitle="Studieteknik för högstadiet — åk 7–9 | Läxhjälp"
+      metaTitle="Studieteknik högstadiet: så pluggar du inför prov (åk 7–9)"
       slug="hogstadiet-studieteknik"
-      metaDescription="Bevisade studietekniker för högstadiet: aktivt lärande, spaced repetition, planering inför prov och hur du undviker cramming. Skrivet för elever och föräldrar."
+      metaDescription="Så pluggar du smart i åk 7–9: förhör dig själv, sprid ut passen och planera inför nationella prov. Enkla metoder som ger mer på kortare tid."
       relatedArticles={related}
       toolParagraph="Läxhjälp stöttar högstadiets provplugg: prov och inlämningar får egna deadlines, pluggpassen fördelas över flera dagar med föreslagna tekniker (läsa på, delförhör, gamla prov) och veckovyn visar var det finns tid mellan träningar och andra ämnen."
       datePublished="2026-03-12"

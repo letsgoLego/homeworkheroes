@@ -3,16 +3,16 @@ import SeoArticleLayout from '@/components/SeoArticleLayout';
 const related = [
   { path: '/tips/laxrutin', title: 'Skapa en läxrutin som håller hela terminen' },
   { path: '/tips/studieteknik-barn', title: 'Studieteknik för barn — 8 metoder som fungerar' },
-  { path: '/tips/motivation-laxor', title: 'Så motiverar du ditt barn att göra läxor' },
+  { path: '/tips/laxloggen', title: 'Läxloggen — så skapar ni en som funkar' },
 ];
 
 export default function LaxhjalpHemmaPage() {
   return (
     <SeoArticleLayout
       title="Läxhjälp hemma — den kompletta guiden för föräldrar"
-      metaTitle="Läxhjälp hemma — komplett guide för föräldrar"
+      metaTitle="Läxhjälp hemma: så hjälper du utan att ta över (2026)"
       slug="laxhjalp-hemma"
-      metaDescription="Allt du behöver veta om att hjälpa ditt barn med läxor hemma. Från rätt miljö till effektiva strategier för alla åldrar."
+      metaDescription="Gratis läxhjälp hemma: så hjälper du barnet med läxorna utan bråk, vilken roll du ska ha i varje ålder och vad du gör när ni kör fast."
       relatedArticles={related}
       toolParagraph="Läxhjälp gör det enklare att vara coach istället för kontrollant: barnet lägger in och planerar sina läxor, du ser veckans överblick, och appen sköter påminnelser och packlistor. Frågan “har du läxor idag?” försvinner från middagsbordet."
     >
