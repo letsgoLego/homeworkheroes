@@ -185,6 +185,28 @@ export default function LaraSigKlockanPage() {
         <li><strong>Visarlek.</strong> En av er "är klockan" med armarna som visare, den andra gissar. Perfekt för tråkiga väntstunder.</li>
       </ol>
 
+      <h2>Bästa sättet att lära sig klockan — per ålder</h2>
+      <ul>
+        <li><strong>5–6 år:</strong> prata tid i vardagen, räkna femmor, lek med en leksaksklocka. Inga krav på att kunna läsa av.</li>
+        <li><strong>6–7 år:</strong> hela och halva timmar. Två korta övningar om dagen, kopplade till middag och läggdags.</li>
+        <li><strong>7–8 år:</strong> kvart över och kvart i, sedan femminutersintervallen.</li>
+        <li><strong>8–10 år:</strong> exakta minuter, ”i”-tider, digital tid och tidräkning (”hur länge är det kvar?”).</li>
+      </ul>
+
+      <h2>Övningsblad att göra själv</h2>
+      <p>Rita tre-fyra tomma urtavlor på ett papper och välj en övning:</p>
+      <ul>
+        <li><strong>Rita visarna:</strong> skriv en tid under varje klocka (”halv fyra”) och låt barnet rita visarna.</li>
+        <li><strong>Skriv tiden:</strong> du ritar visarna, barnet skriver tiden i ord och siffror.</li>
+        <li><strong>Para ihop:</strong> en kolumn analoga klockor, en kolumn digitala tider — dra streck mellan rätt par.</li>
+        <li><strong>Dagens schema:</strong> barnet ritar när frukost, skola och läggdags är på varsin klocka.</li>
+      </ul>
+      <p>
+        Två–tre klockor per dag räcker. Klockan är också en vanlig matteläxa — fler tips finns i guiden
+        om att <a href="/tips/matematik-hjalp-barn">hjälpa barn med matte</a>.
+      </p>
+
+
       <h2>Vanliga hinder — och vad man gör</h2>
       <ul>
         <li><strong>Femmor fastnar inte.</strong> Kolla grunderna: kan barnet räkna 5, 10, 15 … 60 utan att tveka? Icke? Börja där, inte vid klockan.</li>

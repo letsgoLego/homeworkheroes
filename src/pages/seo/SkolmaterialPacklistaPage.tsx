@@ -98,6 +98,32 @@ export default function SkolmaterialPacklistaPage() {
         <li>Vänta med "önskeprylar" till efter första skolveckan — behovet ändrar sig</li>
       </ul>
 
+      <h2>Checklista: skolsaker per årskurs</h2>
+      <p>Bocka av det ni redan har innan ni handlar.</p>
+      <h3>F-klass och åk 1–3</h3>
+      <ul>
+        <li>Ryggsäck barnet själv kan öppna och stänga</li>
+        <li>Extrakläder i en namnmärkt påse (byxor, strumpor, tröja)</li>
+        <li>Gympapåse med kläder, skor och handduk</li>
+        <li>Vattenflaska och eventuellt mellanmålsburk</li>
+        <li>Regnkläder, stövlar och vantar/mössa efter säsong</li>
+      </ul>
+      <h3>Åk 4–6</h3>
+      <ul>
+        <li>Allt ovan, utom extrakläderna</li>
+        <li>Hörlurar till skolans dator eller iPad</li>
+        <li>Litet pennskrin: blyerts, sudd, linjal, vässare</li>
+        <li>Plastmapp för papper hem och tillbaka</li>
+      </ul>
+      <h3>Åk 7–9</h3>
+      <ul>
+        <li>Laddare till datorn</li>
+        <li>Hörlurar</li>
+        <li>Miniräknare om skolan inte lånar ut</li>
+        <li>Kalender eller app för prov och inlämningar</li>
+        <li>Deodorant och ombyte till idrotten</li>
+      </ul>
+
       <h2>Namnmärk allt</h2>
       <p>
         Vattenflaskor, jackor, mössor och inneskor. Fem minuter med en tuschpenna sparar
