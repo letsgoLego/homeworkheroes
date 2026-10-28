@@ -10,9 +10,9 @@ export default function LaxhjalpHemmaPage() {
   return (
     <SeoArticleLayout
       title="Läxhjälp hemma — den kompletta guiden för föräldrar"
-      metaTitle="Läxhjälp hemma — komplett guide för föräldrar"
+      metaTitle="Läxhjälp hemma: så hjälper du utan att ta över (2026)"
       slug="laxhjalp-hemma"
-      metaDescription="Allt du behöver veta om att hjälpa ditt barn med läxor hemma. Från rätt miljö till effektiva strategier för alla åldrar."
+      metaDescription="Gratis läxhjälp hemma: så hjälper du barnet med läxorna utan bråk, vilken roll du ska ha i varje ålder och vad du gör när ni kör fast."
       relatedArticles={related}
       toolParagraph="Läxhjälp gör det enklare att vara coach istället för kontrollant: barnet lägger in och planerar sina läxor, du ser veckans överblick, och appen sköter påminnelser och packlistor. Frågan “har du läxor idag?” försvinner från middagsbordet."
     >

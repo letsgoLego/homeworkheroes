@@ -68,8 +68,8 @@ export default function TipsIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Tips & guider om läxor och studieteknik | Läxhjälp</title>
-        <meta name="description" content="21 fördjupande guider om läxplanering, läxlogg, studieteknik, klockan, läsförståelse, mattehjälp, engelska glosor, ADHD-anpassningar och mer — skrivna för svenska föräldrar." />
+        <title>Hjälp med läxor 2026 — 22 gratis guider för föräldrar</title>
+        <meta name="description" content="Gratis hjälp med läxor: guider per årskurs, läxförhör, glosor, klockan, matte, ADHD och studieteknik. Konkreta tips du kan använda redan i kväll." />
         <link rel="canonical" href="https://laxhjalp.app/tips" />
         <meta property="og:title" content="Tips & guider om läxor och studieteknik" />
         <meta property="og:description" content="Praktiska, fördjupande guider om läxor, studieteknik och välmående — för svenska familjer." />
