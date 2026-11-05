@@ -47,7 +47,21 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;text-align:center;padding:24px">
+        <div id="boot-fallback" style="opacity:0;transition:opacity .3s">
+          <div style="font-size:44px">📚</div>
+          <p style="margin:12px 0 16px">Läxhjälp startar inte som den ska.</p>
+          <a href="/?sw=off" style="display:inline-block;padding:12px 20px;border-radius:12px;background:#2eb8a6;color:#fff;text-decoration:none;font-weight:600">Ladda om Läxhjälp</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      setTimeout(function () {
+        var el = document.getElementById("boot-fallback");
+        if (el) el.style.opacity = "1";
+      }, 6000);
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
