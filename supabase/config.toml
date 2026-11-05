@@ -21,3 +21,9 @@ project_id = "wgykdruvnxhpvqspyzbc"
 
 [functions.homework-assistant]
   verify_jwt = true
+
+[functions.child-login-link]
+  verify_jwt = false
+
+[functions.send-weekly-digest]
+  verify_jwt = false
