@@ -2,6 +2,9 @@ import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
+import { registerServiceWorker } from "./lib/registerServiceWorker";
+
+registerServiceWorker();
 
 // Guard: unregister service workers in iframe/preview contexts
 const isInIframe = (() => {

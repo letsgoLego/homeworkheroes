@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: null,
       devOptions: {
         enabled: false,
       },
@@ -48,10 +49,25 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,woff,ttf}"],
+        // Never precache index.html: the app page must always come fresh from the
+        // network so it points at files that actually exist after a release.
+        globPatterns: ["**/*.{js,css,ico,png,svg,woff2,woff,ttf}"],
+        navigateFallback: null,
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         importScripts: ["/sw-push.js"],
-        navigateFallbackDenylist: [/^\/~oauth/],
         runtimeCaching: [
+          {
+            urlPattern: ({ request, url }) =>
+              request.mode === "navigate" && !url.pathname.startsWith("/~oauth"),
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "app-pages",
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 7 },
+            },
+          },
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/.*/,
             handler: "NetworkFirst",
