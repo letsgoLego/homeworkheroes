@@ -50,6 +50,13 @@
       "when": 1792358436354,
       "tag": "0006_reschedule_push_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793914975223,
+      "tag": "0007_child_login_links_and_digest_prefs",
+      "breakpoints": true
     }
   ]
 }

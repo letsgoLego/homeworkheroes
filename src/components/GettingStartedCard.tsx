@@ -8,6 +8,8 @@ import { CheckCircle2, Circle, ArrowRight, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useNotifications } from '@/hooks/useNotifications';
+import { ChildDeviceLinkDialog } from '@/components/ChildDeviceLinkDialog';
+import { IosInstallGuide, isIosBrowserTab } from '@/components/IosInstallGuide';
 
 interface ChildLike {
   id: string;
@@ -32,7 +34,11 @@ export function GettingStartedCard({ children, homeworkCount, onAddChild, onChil
 
   const { isSubscribed, loading: notificationsLoading, subscribe } = useNotifications();
 
+  const [linkChild, setLinkChild] = useState<ChildLike | null>(null);
+  const [showIosGuide, setShowIosGuide] = useState(false);
+
   const enableNotifications = async () => {
+    if (isIosBrowserTab()) { setShowIosGuide(true); return; }
     const ok = await subscribe();
     if (ok) toast.success('Påminnelser är påslagna! 🔔');
     else toast.error('Kunde inte slå på påminnelser. Tillåt notiser i webbläsaren eller lägg appen på hemskärmen.');
@@ -58,15 +64,15 @@ export function GettingStartedCard({ children, homeworkCount, onAddChild, onChil
       },
       {
         key: 'account',
-        label: 'Skapa inloggning till barnet',
-        hint: 'Då kan barnet bocka av själv – och du ser framstegen.',
+        label: 'Koppla barnets mobil eller iPad',
+        hint: 'Skanna en QR-kod – inget lösenord. Då bockar barnet av själv och du ser framstegen.',
         done: children.some((c) => !!c.has_account),
         action: () => {
           const c = children.find((x) => !x.has_account);
-          if (c) setLoginChild(c);
+          if (c) setLinkChild(c);
           else navigate('/family');
         },
-        cta: 'Skapa inloggning',
+        cta: 'Visa QR-kod för barnet',
       },
       {
         key: 'notifications',
@@ -137,6 +143,12 @@ export function GettingStartedCard({ children, homeworkCount, onAddChild, onChil
         {next.cta}
         <ArrowRight className="w-4 h-4 ml-2" />
       </Button>
+      <ChildDeviceLinkDialog
+        child={linkChild}
+        onClose={() => { setLinkChild(null); void onChildUpdated?.(); }}
+        onUsePassword={() => { const c = linkChild; setLinkChild(null); setLoginChild(c); }}
+      />
+      <IosInstallGuide open={showIosGuide} onClose={() => setShowIosGuide(false)} />
       {loginChild && (
         <ManageChildAccount
           child={loginChild as Tables<'children'>}

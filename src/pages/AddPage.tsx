@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { motion } from 'framer-motion';
 import { AppShell } from '@/components/AppShell';
@@ -41,6 +42,14 @@ export default function AddPage() {
   const [editingHomework, setEditingHomework] = useState<HomeworkWithTasks | null>(null);
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
   const [deletingActivityId, setDeletingActivityId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get('ny') === '1') {
+      setShowAddHomework(true);
+      searchParams.delete('ny');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
   const { homework, inboxHomework, userRole, children, activeChildId, setActiveChildId, deleteHomework, loading, activities, addActivity, updateActivity, deleteActivity, addAdhocTask } = useFamily();
 
   

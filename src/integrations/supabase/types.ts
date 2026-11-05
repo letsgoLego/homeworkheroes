@@ -123,6 +123,44 @@ export type Database = {
         }
         Relationships: []
       }
+      child_login_links: {
+        Row: {
+          child_id: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_login_links_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       children: {
         Row: {
           avatar_url: string | null
@@ -166,6 +204,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      digest_preferences: {
+        Row: {
+          created_at: string
+          last_sent_week: string | null
+          unsub_token: string
+          user_id: string
+          weekly_digest: boolean
+        }
+        Insert: {
+          created_at?: string
+          last_sent_week?: string | null
+          unsub_token?: string
+          user_id: string
+          weekly_digest?: boolean
+        }
+        Update: {
+          created_at?: string
+          last_sent_week?: string | null
+          unsub_token?: string
+          user_id?: string
+          weekly_digest?: boolean
+        }
+        Relationships: []
       }
       email_send_log: {
         Row: {
@@ -981,6 +1043,7 @@ export type Database = {
       }
       nudges_remaining_today: { Args: { _child_id: string }; Returns: number }
       unsubscribe_premium_offer: { Args: { _token: string }; Returns: boolean }
+      unsubscribe_weekly_digest: { Args: { _token: string }; Returns: boolean }
       update_child_last_seen: {
         Args: { _child_id: string }
         Returns: undefined

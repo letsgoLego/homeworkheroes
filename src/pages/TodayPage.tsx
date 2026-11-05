@@ -36,6 +36,7 @@ import { HolidayBanner } from '@/components/HolidayBanner';
 import { HomeworkInbox } from '@/components/HomeworkInbox';
 import { GettingStartedCard } from '@/components/GettingStartedCard';
 import { PremiumOfferCard } from '@/components/PremiumOfferCard';
+import { PluggcoachStartCard } from '@/components/PluggcoachStartCard';
 import { computeCurrentStreak } from '@/lib/streak';
 import { track } from '@/lib/analytics';
 import { scheduleInboxReminder } from '@/lib/nativeNotifications';
@@ -332,6 +333,10 @@ export default function TodayPage() {
                 onChildUpdated={refetch}
                 onAddChild={() => setShowAddChild(true)}
               />
+            )}
+
+            {userRole !== 'child' && children.length > 0 && homework.length === 0 && (
+              <PluggcoachStartCard childName={activeChild?.name} />
             )}
 
             {userRole !== 'child' && <PremiumOfferCard familyId={family?.id} />}
