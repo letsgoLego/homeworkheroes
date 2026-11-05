@@ -32,7 +32,7 @@ function html(kids: { name: string; items: Hw[] }[], unsub: string) {
   const any = kids.some((k) => k.items.length > 0)
   const blocks = kids.map((k) => {
     const rows = k.items.length
-      ? k.items.map((h) => `<li style="margin:0 0 6px">${h.homework_type === 'test' ? '📝 Prov' : '📚'} <strong>${esc(h.title)}</strong> – ${fmt(h.due_date)}</li>`).join('')
+      ? k.items.map((h) => `<li style="margin:0 0 6px">${h.homework_type === 'forhor' ? '📝 Förhör/prov:' : '📚'} <strong>${esc(h.title)}</strong> – ${fmt(h.due_date)}</li>`).join('')
       : '<li style="margin:0 0 6px;color:#6b7280">Inget inlagt ännu</li>'
     return `<p style="${p};margin-bottom:6px"><strong>${esc(k.name)}</strong></p><ul style="padding-left:20px;margin:0 0 16px;font-size:15px;color:#1f2937">${rows}</ul>`
   }).join('')
