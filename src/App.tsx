@@ -52,6 +52,8 @@ import SkolstartRutinerPage from "./pages/seo/SkolstartRutinerPage";
 import SkolmaterialPacklistaPage from "./pages/seo/SkolmaterialPacklistaPage";
 import PlaneraLaxorForaldrarPage from "./pages/seo/PlaneraLaxorForaldrarPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
+import ChildLinkRedeemPage from "./pages/ChildLinkRedeemPage";
+import DigestUnsubscribePage from "./pages/DigestUnsubscribePage";
 import PremiumOfferPage, { PremiumOfferUnsubscribePage } from "./pages/PremiumOfferPage";
 import AdminPage from "./pages/AdminPage";
 import AdminRouteGuard from "./components/AdminRouteGuard";
@@ -147,6 +149,8 @@ function AppRoutes() {
       <Route path="/tips/skolstart-rutiner" element={<SkolstartRutinerPage />} />
       <Route path="/tips/skolmaterial-packlista" element={<SkolmaterialPacklistaPage />} />
       <Route path="/unsubscribe" element={<UnsubscribePage />} />
+      <Route path="/koppla" element={<ChildLinkRedeemPage />} />
+      <Route path="/veckobrev/avregistrera" element={<DigestUnsubscribePage />} />
       <Route path="/erbjudande" element={<PremiumOfferPage />} />
       <Route path="/erbjudande/avregistrera" element={<PremiumOfferUnsubscribePage />} />
       <Route path="/join-family-start" element={<JoinFamilyStartPage />} />
