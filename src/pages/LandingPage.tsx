@@ -133,14 +133,14 @@ export default function LandingPage() {
                 alt="Läxhjälp dagvy med uppgifter"
                 width={320}
                 height={568}
-                className="w-64 sm:w-72 rounded-[2rem] shadow-elevated"
+                className="w-64 sm:w-72 rounded-[2rem] border-[6px] border-foreground shadow-elevated"
               />
               <img
                 src={screenshotCelebrate}
                 alt="Fira avklarade uppgifter"
                 width={200}
                 height={355}
-                className="absolute -right-2 sm:-right-8 bottom-0 w-44 sm:w-52 rounded-[2rem] shadow-elevated hidden sm:block"
+                className="absolute -right-2 sm:-right-8 bottom-0 w-44 sm:w-52 rounded-[2rem] border-[6px] border-foreground shadow-elevated hidden sm:block"
                 loading="lazy"
               />
             </motion.div>
@@ -360,7 +360,7 @@ export default function LandingPage() {
                 alt="Familjevy med medlemmar och statistik"
                 width={320}
                 height={568}
-                className="w-64 sm:w-72 rounded-[2rem] shadow-elevated"
+                className="w-64 sm:w-72 rounded-[2rem] border-[6px] border-foreground shadow-elevated"
                 loading="lazy"
               />
             </motion.div>
@@ -877,7 +877,7 @@ function HowToStep({ stepNumber, title, description, items, image, imageAlt, rev
             alt={imageAlt || title}
             width={320}
             height={568}
-            className="w-56 sm:w-64 rounded-[2rem] shadow-elevated"
+            className="w-56 sm:w-64 rounded-[2rem] border-[6px] border-foreground shadow-elevated"
             loading="lazy"
           />
         </motion.div>
